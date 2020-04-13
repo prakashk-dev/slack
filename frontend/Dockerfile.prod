@@ -1,0 +1,21 @@
+FROM node:lts-alpine3.9 AS builder
+
+WORKDIR /usr/app
+COPY package.json .
+RUN npm install -q
+
+# set path to run packages from node_modules
+ENV NODE_PATH=/usr/app/node_modules/.bin
+
+COPY . .
+
+RUN npm run build
+RUN ls -la
+
+FROM nginx:alpine
+COPY --from=builder /usr/app/public /usr/share/nginx/html
+
+# pre-compress everything
+RUN find /usr/share/nginx/html \! -name "*.png" \! -name "*.ico" -size +1k -type f -exec gzip -9k {} \;
+
+CMD nginx

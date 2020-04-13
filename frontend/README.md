@@ -2,7 +2,7 @@
 
 First Install docker and docker-compose in your machine.
 
-### For Development purpose
+### For Development purpose(This will also run npm install, which enables code intellisense for local development)
 
 ```
 ./docker.sh dev

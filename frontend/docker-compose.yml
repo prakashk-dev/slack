@@ -2,24 +2,23 @@ version: "3.4"
 
 services:
   dev:
-    build:
-      context: .
-      target: builder
+    build: .
     image: frontend_dev
     container_name: frontend_dev
     volumes:
       - .:/usr/app
     ports:
       - 3000:3000
-      - 3001:3001
     # this will copy node_modules to src folder, otherwise node_modules will be wipeed out as we don't
     # have the node_modules in the host machine
-    command: /usr/app/entrypoint.sh dev
+    command: /usr/app/entrypoint.sh
     environment:
       - NODE_ENV=development
 
   prod:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
     image: frontend_prod
     container_name: frontend_prod
     ports:

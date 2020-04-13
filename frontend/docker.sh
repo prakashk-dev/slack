@@ -6,11 +6,17 @@ shift
 case $CMD in
 
     dev)
-        docker-compose up -d --build dev
+        echo "Application is running in development mode"
+        echo "Installing node_modules in host machine for code intellisense in dev environment"
+        npm install
+        docker-compose build dev && \
+        docker-compose up -d dev && \
         docker-compose logs -f
         ;;
     prod)
-        docker-compose up -d --build prod
+        echo "Preparing for production build"
+        docker-compose build prod && \
+        docker-compose up -d prod
         ;;
 
     stop)
