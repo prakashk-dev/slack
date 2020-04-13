@@ -1,0 +1,15 @@
+#backend
+
+
+# frontend
+frontend/dist
+frontend/.cache
+frontend/.parcel/cache
+
+
+#root
+.env
+.env.test
+*.DS_Store
+*/node_modules
+*/.DS_Store
