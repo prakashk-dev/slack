@@ -1,9 +1,18 @@
 import express from "express";
+import bodyParser from "body-parser";
+import morgan from "morgan";
+import cors from "cors";
 
 const app = express();
 
-app.get("/", (req, res) => {
-  res.send("Welcome to the app");
+// Middleware setup
+app.use(morgan("dev"));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(cors());
+
+app.get("/api/ping", (req, res) => {
+  return res.json({ response: "OK" });
 });
 
 const port = process.env.PORT || "8080";
