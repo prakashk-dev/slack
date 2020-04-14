@@ -1,3 +1,9 @@
 node_modules/
 dist/
 build/
+Dockerfile*
+docker-compose*
+.DS_Store
+.vscode/
+.git/
+.dockerignore

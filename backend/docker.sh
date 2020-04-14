@@ -7,11 +7,11 @@ shift
 case $CMD in
 
     dev)
-        docker-compose up -d --build dev
-        docker-compose logs -f
+        docker-compose up -d --build development
+        docker-compose logs -f development
         ;;
     prod)
-        docker-compose up -d --build prod
+        docker-compose up -d --build production
         ;;
 
     stop)

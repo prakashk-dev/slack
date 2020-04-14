@@ -1,26 +1,27 @@
 version: "3.4"
 
 services:
-  prod:
-    build: .
-    image: backend_prod
-    container_name: backend_prod
+  production:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    image: backend_production
+    container_name: backend_production
     ports:
-      - 4001:5000 # modify the exported port as necessary
+      - 4001:5000
     environment:
-      - PORT=5000 # this port is used to run the express app
+      - PORT=5000
       - NODE_ENV=production
-    command: /usr/app/entrypoint.sh prod
 
-  dev:
+  development:
     build: .
-    image: backend_dev
-    container_name: backend_dev
-    command: /usr/app/entrypoint.sh dev
+    image: backend_development
+    container_name: backend_development
     volumes:
       - .:/usr/app
+      - /usr/app/node_modules
     ports:
-      - "3002:5000" # modify the exported port as necessary
+      - "3001:5000"
     environment:
+      - PORT=5000
       - NODE_ENV=development
-      - PORT=5000 # this port is used to run the express app
