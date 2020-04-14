@@ -7,8 +7,8 @@ case $CMD in
 
     dev)
         echo "Application is running in development mode"
-        docker-compose build && \
-        docker-compose up -d && \
+        docker-compose build --parallel
+        docker-compose up -d
         docker-compose logs -f
         ;;
 
