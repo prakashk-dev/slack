@@ -1,0 +1,30 @@
+version: "3.4"
+
+services:
+    frontend:
+        build:
+            context: ./frontend
+        image: frontend_dev
+        container_name: frontend_dev
+        volumes:
+          - ./frontend:/usr/app
+          - /usr/app/node_modules # Do not override node_modules folder in container 
+        ports:
+          - 3000:3000
+        environment:
+          - NODE_ENV=development
+        links:
+            - backend
+    backend:
+        build:
+            context:  ./backend
+        image: backend_dev
+        container_name: backend_dev
+        volumes:
+            - ./backend:/usr/app
+            - /usr/app/node_modules
+        ports:
+            - "3001:5000"
+        environment:
+            - NODE_ENV=development
+            - PORT=5000
