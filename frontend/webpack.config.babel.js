@@ -52,7 +52,8 @@ const dev = merge(config, {
   mode: "development",
   devServer: {
     proxy: {
-      "/api": "http://localhost:3002",
+      // backend port should be the one that is running inside the container, not the one that is exposed
+      "/api": "http://backend:5000",
     },
     contentBase: resolveRoot("public"),
     noInfo: true,
