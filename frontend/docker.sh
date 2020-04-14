@@ -7,16 +7,14 @@ case $CMD in
 
     dev)
         echo "Application is running in development mode"
-        echo "Installing node_modules in host machine for code intellisense in dev environment"
-        npm install
-        docker-compose build dev && \
-        docker-compose up -d dev && \
+        docker-compose build development && \
+        docker-compose up -d development && \
         docker-compose logs -f
         ;;
     prod)
         echo "Preparing for production build"
-        docker-compose build prod && \
-        docker-compose up -d prod
+        docker-compose build production && \
+        docker-compose up -d production
         ;;
 
     stop)

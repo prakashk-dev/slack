@@ -1,26 +1,24 @@
 version: "3.4"
 
 services:
-  dev:
+  development:
     build: .
-    image: frontend_dev
-    container_name: frontend_dev
+    image: frontend_development
+    container_name: frontend_development
     volumes:
       - .:/usr/app
+      - /usr/app/node_modules # do not override container node_modules by host node_modules
     ports:
       - 3000:3000
-    # this will copy node_modules to src folder, otherwise node_modules will be wipeed out as we don't
-    # have the node_modules in the host machine
-    command: /usr/app/entrypoint.sh
     environment:
       - NODE_ENV=development
 
-  prod:
+  production:
     build:
       context: .
       dockerfile: Dockerfile.prod
-    image: frontend_prod
-    container_name: frontend_prod
+    image: frontend_production
+    container_name: frontend_production
     ports:
       - 4000:80
     environment:

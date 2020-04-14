@@ -1,3 +1,8 @@
 node_modules/
 dist/
 .cache/
+Dockerfile*
+docker-compose*
+README.node_modules
+.git/
+.DS_Store
