@@ -5,6 +5,7 @@
 frontend/dist
 frontend/.cache
 frontend/.parcel/cache
+frontend/public/js
 
 
 #root
