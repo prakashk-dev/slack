@@ -18,4 +18,4 @@ COPY --from=builder /usr/app/public /usr/share/nginx/html
 # pre-compress everything
 RUN find /usr/share/nginx/html \! -name "*.png" \! -name "*.ico" -size +1k -type f -exec gzip -9k {} \;
 
-CMD nginx
+CMD ["nginx", "-g", "daemon off;"]
