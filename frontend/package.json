@@ -15,6 +15,7 @@
     "@babel/preset-react": "7.9.4",
     "@babel/register": "7.9.0",
     "@hot-loader/react-dom": "16.13.0",
+    "autoprefixer": "^9.7.6",
     "babel-eslint": "10.1.0",
     "babel-loader": "8.1.0",
     "css-loader": "3.5.2",
@@ -43,7 +44,7 @@
     "webpack-merge": "4.2.2"
   },
   "scripts": {
-    "dev": "NODE_ENV=development webpack-dev-server",
+    "dev": "NODE_ENV=development webpack-dev-server --color",
     "build": "NODE_ENV=production webpack -p",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
