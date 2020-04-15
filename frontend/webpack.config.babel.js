@@ -33,6 +33,7 @@ const config = {
   },
   plugins: [
     new HtmlWebpackPlugin({
+      filename: resolveRoot("public", "index.html"),
       template: resolveRoot("public", "index.html"),
       inject: "body",
     }),
