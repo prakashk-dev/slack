@@ -161,3 +161,47 @@ footer {
 main {
   background-color: #009688;
 }
+
+/* Media queries for small devices */
+
+@media only screen and (max-width: 812px) {
+  .app {
+    grid-template-areas:
+      "main"
+      "main"
+      "main";
+    main {
+      width: 100%;
+      margin: 0px;
+      grid-template-rows: 60px 1fr 60px;
+
+      .main-body {
+        .heading {
+          p {
+            margin-top: 10px;
+          }
+        }
+        .form {
+          grid-template-rows: 1fr 1.2fr 0.8fr 0.2fr 1fr;
+          grid-row-gap: 8px;
+
+          .form-footer {
+            .help-text {
+              width: 100%;
+            }
+            button {
+              padding: 12px;
+              font-size: 16px;
+            }
+          }
+        }
+      }
+    }
+    nav {
+      display: none;
+    }
+    footer {
+      display: none;
+    }
+  }
+}
