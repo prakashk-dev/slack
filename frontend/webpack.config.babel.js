@@ -45,6 +45,8 @@ const config = {
     new HtmlWebpackPlugin({
       inject: true,
       template: resolveRoot("public", "index.html"),
+      // this will make sure the original index.html file is updated
+      filename: resolveRoot("public", "index.html"),
     }),
   ],
 };
