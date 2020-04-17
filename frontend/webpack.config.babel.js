@@ -13,7 +13,8 @@ const config = {
   entry: resolveSrc(),
   output: {
     path: resolveRoot("public", "js"),
-    filename: "bundle.js",
+    publicPath: "/",
+    filename: "bundle-[hash].js",
   },
   module: {
     rules: [
@@ -31,13 +32,7 @@ const config = {
       },
     ],
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      filename: resolveRoot("public", "index.html"),
-      template: resolveRoot("public", "index.html"),
-      inject: "body",
-    }),
-  ],
+
   resolve: {
     modules: ["node_modules", resolveSrc()],
     extensions: [".js", ".jsx", ".json", ".css", "./scss"],
@@ -46,6 +41,12 @@ const config = {
       src: resolveSrc(),
     },
   },
+  plugins: [
+    new HtmlWebpackPlugin({
+      inject: true,
+      template: resolveRoot("public", "index.html"),
+    }),
+  ],
 };
 
 const dev = merge(config, {

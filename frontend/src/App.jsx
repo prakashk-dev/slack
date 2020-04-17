@@ -5,7 +5,7 @@ class App extends Component {
   render() {
     return (
       <div className="app">
-        <nav>Developed On: 16, Apri, 2020</nav>
+        <nav>Developed On: 18, Apri, 2020</nav>
         <main>
           <div className="main-nav">
             <div className="spinning-globe">
