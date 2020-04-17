@@ -12,9 +12,8 @@ const isDev = process.env.NODE_ENV || "development";
 const config = {
   entry: resolveSrc(),
   output: {
-    path: resolveRoot("public", "js"),
-    publicPath: "/",
-    filename: "bundle-[hash].js",
+    path: resolveRoot("public"),
+    filename: "js/bundle-[hash].js",
   },
   module: {
     rules: [
@@ -45,8 +44,6 @@ const config = {
     new HtmlWebpackPlugin({
       inject: true,
       template: resolveRoot("public", "index.html"),
-      // this will make sure the original index.html file is updated
-      filename: resolveRoot("public", "index.html"),
     }),
   ],
 };
