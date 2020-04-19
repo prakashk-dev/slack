@@ -1,14 +1,22 @@
 import { navigate } from "@reach/router";
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
+import { AppContext } from "src/context";
 import "./home.scss";
 
 const Home = () => {
-  const [gender, setGender] = useState("");
-  const [ageGroup, setAgeGroup] = useState("");
+  const [globalState, setGlobalState] = useContext(AppContext);
+  const [gender, setGender] = useState(globalState.user.gender);
+  const [ageGroup, setAgeGroup] = useState(globalState.user.ageGroup);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate(`/chat?gender=${gender}&ageGroup=${ageGroup}`);
+    setGlobalState({
+      user: {
+        gender,
+        ageGroup,
+      },
+    });
+    navigate(`/chat`);
   };
 
   const isDisable = !gender.length || !ageGroup.length;
@@ -35,7 +43,8 @@ const Home = () => {
                   name="gender"
                   id="gender"
                   value="female"
-                  onClick={() => setGender("female")}
+                  onChange={() => setGender("female")}
+                  checked={gender === "female"}
                 />
                 Female
               </div>
@@ -45,7 +54,8 @@ const Home = () => {
                   name="gender"
                   id="gender"
                   value="male"
-                  onClick={() => setGender("male")}
+                  onChange={() => setGender("male")}
+                  checked={gender === "male"}
                 />
                 Male
               </div>
@@ -55,7 +65,8 @@ const Home = () => {
                   name="gender"
                   id="gender"
                   value="na"
-                  onClick={() => setGender("na")}
+                  onChange={() => setGender("na")}
+                  checked={gender === "na"}
                 />
                 Don't want to tell
               </div>
@@ -69,7 +80,8 @@ const Home = () => {
                   type="radio"
                   name="ageGroup"
                   value="1"
-                  onClick={() => setAgeGroup("1")}
+                  onChange={() => setAgeGroup("1")}
+                  checked={ageGroup === "1"}
                 />{" "}
                 Below 20 Years
               </div>
@@ -78,7 +90,8 @@ const Home = () => {
                   type="radio"
                   name="ageGroup"
                   value="2"
-                  onClick={() => setAgeGroup("2")}
+                  onChange={() => setAgeGroup("2")}
+                  checked={ageGroup === "2"}
                 />{" "}
                 20 - 30 Years
               </div>
@@ -87,7 +100,8 @@ const Home = () => {
                   type="radio"
                   name="ageGroup"
                   value="3"
-                  onClick={() => setAgeGroup("3")}
+                  onChange={() => setAgeGroup("3")}
+                  checked={ageGroup === "3"}
                 />{" "}
                 30 - 40 Years
               </div>
@@ -96,7 +110,8 @@ const Home = () => {
                   type="radio"
                   name="ageGroup"
                   value="4"
-                  onClick={() => setAgeGroup("4")}
+                  onChange={() => setAgeGroup("4")}
+                  checked={ageGroup === "4"}
                 />{" "}
                 40+ Years
               </div>
@@ -125,4 +140,5 @@ const Home = () => {
     </div>
   );
 };
+
 export default Home;
