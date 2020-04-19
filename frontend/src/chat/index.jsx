@@ -1,4 +1,4 @@
-import React, { Component, useContext, useState } from "react";
+import React, { Component, useContext, useState, useEffect } from "react";
 import { AppContext } from "src/context";
 import "./chat.scss";
 
@@ -7,7 +7,18 @@ const Chat = () => {
   const [style, setStyle] = useState({ clockwise: {}, anticlockwise: {} });
   const [round, setRound] = useState(450 * 5);
   const [match, setMatch] = useState("Matched Group");
+  const [toggleClick, setToggleClick] = useState({ pointerEvents: "auto" });
+  const [border, setBorder] = useState("5px solid red");
+  const [innerBoarderColor, setInnerBoarderColor] = useState(
+    "0px 0px 0px 3px indianred"
+  );
+  const [innerBackgroundColor, setInnerBackgroundColor] = useState("red");
+  const [traingleColor, setTraingleColor] = useState("20px solid red");
+
   const handleSpinner = () => {
+    setToggleClick({ pointerEvents: "none" });
+    setRound(round + 360 * 5);
+
     setStyle({
       clockwise: {
         transform: `rotate(${round}deg)`,
@@ -16,12 +27,17 @@ const Chat = () => {
         transform: `rotate(-${round}deg)`,
       },
     });
-    setRound(round + 360 * 5);
     const changeGroup = setInterval(() => {
       setMatch(Math.random().toString(36).substring(2));
     }, 100);
+
     setTimeout(() => {
       clearInterval(changeGroup);
+      setToggleClick({ pointerEvents: "auto" });
+      setBorder("5px solid darkgreen");
+      setInnerBackgroundColor("green");
+      setInnerBoarderColor("0px 0px 0px 3px darkgreen");
+      setTraingleColor("20px solid darkgreen");
     }, 5000);
   };
 
@@ -120,14 +136,27 @@ const Chat = () => {
           </span>
           <div className="random-outlet-box">
             <p>Your username</p>
-            <div className="outlet-container">
+            <div className="outlet-container" style={{ border }}>
               <div
                 className="start"
                 onClick={handleSpinner}
-                style={style.clockwise}
+                style={{
+                  ...style.clockwise,
+                  ...toggleClick,
+                  backgroundColor: innerBackgroundColor,
+                  boxShadow: innerBoarderColor,
+                }}
               >
-                <div className="triangle-up"></div>
-                <div className="start-text" style={style.anticlockwise}>
+                <div
+                  className="triangle-up"
+                  style={{ borderBottom: traingleColor }}
+                ></div>
+                <div
+                  className="start-text"
+                  style={{
+                    ...style.anticlockwise,
+                  }}
+                >
                   Start
                 </div>
               </div>

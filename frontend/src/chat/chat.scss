@@ -45,9 +45,11 @@
                     background-color: #4a4a4a;
                     min-height: 40px;
                     cursor: pointer;
+                    transition: 500ms ease-in-out;
 
                     &:hover {
                         background-color: #2a2a2a;
+                        transform: scale(1.2);
                     }
 
                     .icon {
@@ -93,7 +95,6 @@
                 .outlet-container {
                     height: 120px;
                     width: 120px;
-                    border: 5px solid red;
                     border-radius: 50%;
                     display: grid;
                     justify-items: center;
@@ -106,7 +107,6 @@
                         height: 0;
                         border-left: 10px solid transparent;
                         border-right: 10px solid transparent;
-                        border-bottom: 20px solid red;
                         position: absolute;
                         top: -20px;
                         left: 15px;
@@ -117,13 +117,12 @@
                         width: 50px;
                         height: 50px;
                         border-radius: 50%;
-                        background-color: red;
-                        box-shadow: 0px 0px 0px 3px indianred;
                         display: grid;
                         justify-content: center;
                         align-items: center;
                         position: relative;
                         transition: transform 5s ease-out;
+                        cursor: pointer;
 
                         .start-text {
                             transition: 5s ease-out;
