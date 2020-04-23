@@ -14,6 +14,7 @@ const config = {
   output: {
     path: resolveRoot("public"),
     filename: "js/bundle-[hash].js",
+    publicPath: "/",
   },
   module: {
     rules: [
@@ -63,6 +64,7 @@ const dev = merge(config, {
     disableHostCheck: true,
     hot: true,
     compress: true,
+    overlay: true,
   },
   plugins: [new webpack.HotModuleReplacementPlugin()],
 });
