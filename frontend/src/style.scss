@@ -12,25 +12,9 @@ body {
 
 .app {
   display: grid;
-  grid-gap: 10px;
   min-height: 100%;
-  grid-template-columns: 1fr;
-  grid-template-areas:
-    "top-margin"
-    "main"
-    "bottom-margin";
-
-  grid-template-rows: 100px 1fr auto;
-
-  nav {
-    grid-area: top-margin;
-    display: grid;
-    justify-content: center;
-    align-items: center;
-  }
 
   main {
-    grid-area: main;
     display: grid;
     justify-items: center;
     grid-template-columns: 1fr;
@@ -39,9 +23,6 @@ body {
       "main-body";
 
     grid-template-rows: 60px 1fr;
-    width: 60%;
-    margin-left: auto;
-    margin-right: auto;
     color: white;
 
     .main-nav {
@@ -53,6 +34,7 @@ body {
       align-items: center;
       background-color: #00796b;
       box-shadow: 0px 0px 5px #00796b;
+      justify-items: center;
 
       img {
         height: 55px;
