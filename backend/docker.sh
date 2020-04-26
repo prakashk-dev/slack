@@ -7,10 +7,12 @@ shift
 case $CMD in
 
     dev)
+        docker-compose up -d  mongo
         docker-compose up -d --build development
         docker-compose logs -f development
         ;;
     prod)
+        docker-compose up -d --build mongo
         docker-compose up -d --build production
         ;;
 

@@ -4,17 +4,39 @@ import logger from "morgan";
 import cors from "cors";
 import mongoose from "mongoose";
 import config from "./config";
-
+import { UserModel, GroupModel } from "./models";
+import { users, cities } from "./test-data/data";
 const app = express();
 
 const mongoUri = config.mongo.host;
-mongoose.connect(mongoUri, { server: { socketOptions: { keepAlive: 1 } } });
-mongoose.connection.on("error", () => {
-  throw new Error(`unable to connect to database: ${mongoUri}`);
-});
+mongoose
+  .connect(mongoUri, {
+    useNewUrlParser: true,
+    server: { socketOptions: { keepAlive: 1 } },
+  })
+  .catch((err) => console.log(err.message));
 
+// import dummy data
+async function seedData() {
+  const data = await UserModel.find({ username: "user1" }).exec();
+  if (data.length) {
+    return;
+  }
+  try {
+    users.forEach((user) => {
+      const userModel = new UserModel(user);
+      userModel.save(user);
+    });
+    cities.forEach((city) => {
+      const groupModel = new GroupModel(city);
+      groupModel.save(cities);
+    });
+  } catch (err) {
+    console.error("Error inserting data into the database", err.message);
+  }
+}
+seedData();
 // Middleware setup
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
