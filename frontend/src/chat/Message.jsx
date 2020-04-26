@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import "./message.scss";
 import { navigate } from "@reach/router";
+const socket = new WebSocket("ws://localhost:3001");
+
+socket.addEventListener("open", (event) => {
+  console.log("connected");
+  socket.send("Hello Server!!!");
+});
+
+socket.addEventListener("message", (event) => {
+  console.log(event.data);
+});
 
 const Message = () => {
   const [activeTab, setActiveTab] = useState("users");

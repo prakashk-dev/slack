@@ -11,7 +11,9 @@ case $CMD in
         docker-compose up -d
         docker-compose logs -f
         ;;
-
+    build)
+        docker-compose build --no-cache
+        ;;
     build:prod)
         echo "Preparing for production build"
         exit 1
@@ -29,7 +31,7 @@ case $CMD in
         ;;
 
     *)
-        echo usage: "dev|build:prod|run:prod|push|stop"
+        echo usage: "dev|build|build:prod|run:prod|push|stop"
         exit 1
         ;;
 esac 

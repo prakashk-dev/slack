@@ -1,0 +1,13 @@
+import express from "express";
+import * as Group from "../controllers/group.controller";
+
+const router = express.Router();
+router.route("/").get(Group.list);
+// router.route('/save')
+//   .post(User.save);
+// router.route('/:id')
+//   .get(User.findOne);
+// router.route('/:id')
+//   .delete(User.remove);
+
+export default router;

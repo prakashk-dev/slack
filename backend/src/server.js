@@ -1,4 +1,5 @@
 import express from "express";
+import http from "http";
 import bodyParser from "body-parser";
 import logger from "morgan";
 import cors from "cors";
@@ -6,7 +7,11 @@ import mongoose from "mongoose";
 import config from "./config";
 import { UserModel, GroupModel } from "./models";
 import { users, cities } from "./test-data/data";
+import routes from "./routes";
+import WebSocket from "ws";
+
 const app = express();
+const server = http.createServer(app);
 
 const mongoUri = config.mongo.host;
 mongoose
@@ -36,6 +41,7 @@ async function seedData() {
   }
 }
 seedData();
+
 // Middleware setup
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -45,14 +51,21 @@ if (config.env === "development") {
   app.use(logger("dev"));
 }
 
-app.get("/api/ping", (req, res) => {
-  return res.json({ response: "OK" });
-});
+app.use("/api", routes);
 
 const port = process.env.PORT || "8080";
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(
     `Application is running on Env: ${process.env.NODE_ENV} in port ${port}`
   );
+});
+
+const wss = new WebSocket.Server({ server });
+wss.on("connection", (ws) => {
+  ws.on("message", (data) => {
+    console.log("Message from client", data);
+  });
+
+  ws.send("Message from server");
 });
