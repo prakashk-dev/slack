@@ -8,18 +8,19 @@ socket.addEventListener("open", (event) => {
   socket.send("Hello Server!!!");
 });
 
-socket.addEventListener("message", (event) => {
-  console.log(event.data);
-});
-
 const Message = () => {
   const [activeTab, setActiveTab] = useState("users");
+  const [message, setMessage] = useState("");
   const users = [
     {
       name: "user",
       image: "/assets/kathmandu.png",
     },
   ];
+  socket.addEventListener("message", (event) => {
+    console.log(event.data);
+  });
+
   const groups = [
     {
       name: "Kathmandu",
@@ -28,6 +29,10 @@ const Message = () => {
   ];
 
   const usersCount = Array.from({ length: 25 }, (v, k) => k + 1);
+
+  const sendMessage = () => {
+    socket.send(message);
+  };
 
   return (
     <div className="message">
@@ -82,7 +87,10 @@ const Message = () => {
           </div>
         </div>
         <div className="message-area">
-          <div className="message">Display Message here</div>
+          <div className="message">
+            <p>Some Cool Heading</p>
+            <div id="chat">{}</div>
+          </div>
           <div className="write-message">
             <div className="icons">
               <img src="/assets/gif" alt="" />
@@ -107,8 +115,13 @@ const Message = () => {
                 />
               </svg>
             </div>
-            <input type="text" />
-            <button>
+            <input
+              type="text"
+              value={message}
+              name="message"
+              onChange={(e) => setMessage(e.target.value)}
+            />
+            <button onClick={sendMessage}>
               <svg
                 className="bi bi-cursor-fill"
                 width="1.5em"

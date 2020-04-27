@@ -62,10 +62,16 @@ server.listen(port, () => {
 });
 
 const wss = new WebSocket.Server({ server });
-wss.on("connection", (ws) => {
+wss.on("connection", (ws, req, client) => {
   ws.on("message", (data) => {
     console.log("Message from client", data);
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(data);
+      }
+    });
   });
-
-  ws.send("Message from server");
+  // const ip = req.headers["x-forwarded-for"].split(/\s*,\s*/)[0];
+  // const ip = req.socket.remoteAddress;
+  // ws.send("Your ip address is", ip);
 });

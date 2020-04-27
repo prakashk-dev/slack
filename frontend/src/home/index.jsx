@@ -35,6 +35,15 @@ const Home = () => {
         </div>
         <form className="form" onSubmit={handleSubmit}>
           <div className="form-control">
+            <label htmlFor="username">Username</label>
+            <div className="form-group">
+              <input
+                type="text"
+                placeholder="Pick a username for this session"
+              />
+            </div>
+          </div>
+          <div className="form-control">
             <label htmlFor="gender">Gender</label>
             <div className="form-group">
               <div className="input-group">
