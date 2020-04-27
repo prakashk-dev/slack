@@ -7,6 +7,7 @@ const Home = () => {
   const [globalState, setGlobalState] = useContext(AppContext);
   const [gender, setGender] = useState(globalState.user.gender);
   const [ageGroup, setAgeGroup] = useState(globalState.user.ageGroup);
+  const [username, setUsername] = useState(globalState.user.username);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -14,12 +15,13 @@ const Home = () => {
       user: {
         gender,
         ageGroup,
+        username,
       },
     });
     navigate(`/chat`);
   };
 
-  const isDisable = !gender.length || !ageGroup.length;
+  const isDisable = !gender.length || !ageGroup.length || !username.length > 2;
   return (
     <div className="home">
       <div className="body">
@@ -40,6 +42,8 @@ const Home = () => {
               <input
                 type="text"
                 placeholder="Pick a username for this session"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
           </div>

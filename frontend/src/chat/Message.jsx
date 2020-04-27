@@ -1,34 +1,53 @@
-import React, { useState } from "react";
-import "./message.scss";
+import React, { useState, useContext, useEffect } from "react";
 import { navigate } from "@reach/router";
-const socket = new WebSocket("ws://localhost:3001");
+import { AppContext } from "src/context";
+import axios from "axios";
 
-socket.addEventListener("open", (event) => {
-  console.log("connected");
-  socket.send("Hello Server!!!");
-});
+const socket = new WebSocket("ws://localhost:3001");
+import "./message.scss";
 
 const Message = () => {
   const [activeTab, setActiveTab] = useState("users");
   const [message, setMessage] = useState("");
-  const users = [
-    {
-      name: "user",
-      image: "/assets/kathmandu.png",
-    },
-  ];
+  const [users, setUsers] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const state = useContext(AppContext);
+  // const users = [
+  //   {
+  //     name: "user",
+  //     image: "/assets/kathmandu.png",
+  //   },
+  // ];
+
+  useEffect(() => {
+    axios.get("/api/users").then((res) => {
+      const { data } = res.data;
+      console.log(data);
+      setUsers(data);
+    });
+    axios.get("/api/groups").then((res) => {
+      const { data } = res.data;
+      console.log(data);
+      setGroups(data);
+    });
+  }, state);
+
+  socket.addEventListener("open", (event) => {
+    socket.send(JSON.stringify(state[0].user));
+  });
+
   socket.addEventListener("message", (event) => {
     console.log(event.data);
   });
 
-  const groups = [
-    {
-      name: "Kathmandu",
-      image: "/assets/kathmandu.png",
-    },
-  ];
+  // const groups = [
+  //   {
+  //     name: "Kathmandu",
+  //     image: "/assets/kathmandu.png",
+  //   },
+  // ];
 
-  const usersCount = Array.from({ length: 25 }, (v, k) => k + 1);
+  // const usersCount = Array.from({ length: 25 }, (v, k) => k + 1);
 
   const sendMessage = () => {
     socket.send(message);
@@ -52,7 +71,7 @@ const Message = () => {
                 backgroundColor: activeTab === "users" ? "blue" : "blueviolet",
               }}
             >
-              Rooms
+              Personal Chat
             </div>
             <div className="divider"></div>
             <div
@@ -62,25 +81,27 @@ const Message = () => {
                 backgroundColor: activeTab === "groups" ? "blue" : "blueviolet",
               }}
             >
-              Personal Chat
+              Rooms
             </div>
           </div>
           <div className="overlay-body">
             {activeTab === "users" &&
-              usersCount.map((key) => {
+              users.length &&
+              users.map((user) => {
                 return (
-                  <li key={key}>
-                    <img src={users[0]["image"]} alt="" />
-                    {`${key}-${users[0]["name"]}`}
+                  <li key={user["username"]}>
+                    <img src="/assets/kathmandu.png" alt="" />
+                    {user["username"]}
                   </li>
                 );
               })}
             {activeTab === "groups" &&
-              usersCount.map((key) => {
+              groups.length &&
+              groups.map((group) => {
                 return (
-                  <li key={key}>
-                    <img src={groups[0]["image"]} alt="" />
-                    {`${key}-${groups[0]["name"]}`}
+                  <li key={group["name"]}>
+                    <img src="/assets/kathmandu.png" alt="" />
+                    {group["name"]}
                   </li>
                 );
               })}
