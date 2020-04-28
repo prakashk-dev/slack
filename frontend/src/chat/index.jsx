@@ -4,9 +4,10 @@ import axios from "axios";
 import "./chat.scss";
 
 const Chat = () => {
-  const [currentTab, setCurrentTab] = useState("room");
+  const [tab, setTab] = useState("room");
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [subTab, setSubTab] = useState("old");
 
   useEffect(() => {
     axios.get("/api/groups").then((res) => {
@@ -20,10 +21,22 @@ const Chat = () => {
   return (
     <div className="chat">
       <div className="chat-navigation">
-        <p>Select a {currentTab} to start your first chat</p>
+        <p>Select a {tab} to start your first chat</p>
+        {/* <div
+          className={subTab === "old" ? " subtabs active" : null}
+          onClick={() => setSubTab("old")}
+        >
+          Chat Again
+        </div>
+        <div
+          className={subTab === "new" ? "subtabs active" : null}
+          onClick={() => setSubTab("new")}
+        >
+          New {tab === "room" ? "Rooms" : "Users"}
+        </div> */}
       </div>
       <div className="chat-list">
-        {currentTab === "user"
+        {tab === "user"
           ? users.length
             ? users.map((user) => {
                 return (
@@ -51,14 +64,14 @@ const Chat = () => {
       </div>
       <div className="chat-footer">
         <div
-          className={currentTab === "room" ? "active" : null}
-          onClick={() => setCurrentTab("room")}
+          className={tab === "room" ? "active" : null}
+          onClick={() => setTab("room")}
         >
           Rooms (50)
         </div>
         <div
-          className={currentTab === "user" ? "active" : null}
-          onClick={() => setCurrentTab("user")}
+          className={tab === "user" ? "active" : null}
+          onClick={() => setTab("user")}
         >
           Users (50)
         </div>
