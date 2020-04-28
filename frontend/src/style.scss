@@ -72,11 +72,6 @@ main {
 
 @media only screen and (max-width: 812px) {
   .app {
-    grid-template-areas:
-      "main"
-      "main"
-      "main";
-
     main {
       width: 100%;
       margin: 0px;

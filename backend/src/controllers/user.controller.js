@@ -10,17 +10,15 @@ function list(req, res) {
       });
     }
     if (users.length === 0) {
-      return this.Success({
-        data: null,
-        message: "no user in database",
-        res,
-      });
+      return this.Success({ error: "No users found." });
     }
-    return res.json({
-      data: users,
-      message: "list of users",
-    });
+    return res.json(users);
   });
 }
 
-export { list };
+function uniqueUsername(req, res) {
+  const randomUsername = Math.random().toString(8).substr(2, 4);
+  return res.send(`User${randomUsername}`);
+}
+
+export { list, uniqueUsername };

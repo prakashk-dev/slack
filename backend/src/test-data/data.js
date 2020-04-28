@@ -1,16 +1,60 @@
 let users = [];
 const cities = [
-  { name: "Kathmandu" },
-  { name: "Chitwan" },
-  { name: "Pokhara" },
-  { name: "Lumbini" },
-  { name: "Hetauda" },
-  { name: "Baglung" },
-  { name: "Biratnagar" },
-  { name: "Janakpur" },
-  { name: "Mechi" },
-  { name: "Mahakali" },
-  { name: "Bhaktapur" },
+  {
+    name: "Kathmandu",
+    image: "/api/static/images/kathmandu.png",
+    timeStamp: new Date(),
+  },
+  {
+    name: "Chitwan",
+    image: "/api/static/images/kathmandu.png",
+    timeStamp: new Date(),
+  },
+  {
+    name: "Pokhara",
+    image: "/api/static/images/kathmandu.png",
+    timeStamp: new Date(),
+  },
+  {
+    name: "Lumbini",
+    image: "/api/static/images/kathmandu.png",
+    timeStamp: new Date(),
+  },
+  {
+    name: "Hetauda",
+    image: "/api/static/images/kathmandu.png",
+    timeStamp: new Date(),
+  },
+  {
+    name: "Baglung",
+    image: "/api/static/images/kathmandu.png",
+    timeStamp: new Date(),
+  },
+  {
+    name: "Biratnagar",
+    image: "/api/static/images/kathmandu.png",
+    timeStamp: new Date(),
+  },
+  {
+    name: "Janakpur",
+    image: "/api/static/images/kathmandu.png",
+    timeStamp: new Date(),
+  },
+  {
+    name: "Mechi",
+    image: "/api/static/images/kathmandu.png",
+    timeStamp: new Date(),
+  },
+  {
+    name: "Mahakali",
+    image: "/api/static/images/kathmandu.png",
+    timeStamp: new Date(),
+  },
+  {
+    name: "Bhaktapur",
+    image: "/api/static/images/kathmandu.png",
+    timeStamp: new Date(),
+  },
 ];
 
 for (let i = 0; i < 50; i++) {

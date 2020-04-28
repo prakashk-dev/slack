@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path";
 import http from "http";
 import bodyParser from "body-parser";
 import logger from "morgan";
@@ -8,7 +9,7 @@ import config from "./config";
 import { UserModel, GroupModel } from "./models";
 import { users, cities } from "./test-data/data";
 import routes from "./routes";
-import WebSocket from "ws";
+import io from "socket.io";
 
 const app = express();
 const server = http.createServer(app);
@@ -47,6 +48,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
 
+app.use("/api/static", express.static(path.join(__dirname, "../static")));
+
 if (config.env === "development") {
   app.use(logger("dev"));
 }
@@ -61,17 +64,27 @@ server.listen(port, () => {
   );
 });
 
-const wss = new WebSocket.Server({ server });
-wss.on("connection", (ws, req, client) => {
-  ws.on("message", (data) => {
-    console.log("Message from client", data);
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(data);
-      }
+const webSocket = io(server);
+
+webSocket.on("connect", (socket) => {
+  socket.on("join", (user) => {
+    console.log(`${user.username} has joined the room.`);
+    socket.join(user.group);
+    socket.emit("message", {
+      user: "admin",
+      text: `${user.username}, welcome to room ${user.group}.`,
     });
+    socket.broadcast
+      .to(user.group)
+      .emit("message", { user: "admin", text: `${user.username} has joined!` });
+    // also send all the user in that group
   });
-  // const ip = req.headers["x-forwarded-for"].split(/\s*,\s*/)[0];
-  // const ip = req.socket.remoteAddress;
-  // ws.send("Your ip address is", ip);
+
+  socket.on("sendMessage", (data) => {
+    socket.broadcast.emit("message", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User has disconnected");
+  });
 });

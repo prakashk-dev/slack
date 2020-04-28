@@ -25,6 +25,7 @@ const UserSchema = new Schema({
     country: String,
     city: String,
   },
+  image: "",
 });
 
 module.exports = mongoose.model("user", UserSchema);

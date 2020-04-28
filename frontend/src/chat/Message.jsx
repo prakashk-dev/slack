@@ -2,62 +2,50 @@ import React, { useState, useContext, useEffect } from "react";
 import { navigate } from "@reach/router";
 import { AppContext } from "src/context";
 import axios from "axios";
-
-const socket = new WebSocket("ws://localhost:3001");
+import io from "socket.io-client";
 import "./message.scss";
+let socket;
 
-const Message = () => {
+const Message = ({ location }) => {
   const [activeTab, setActiveTab] = useState("users");
   const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
-  const state = useContext(AppContext);
-  // const users = [
-  //   {
-  //     name: "user",
-  //     image: "/assets/kathmandu.png",
-  //   },
-  // ];
+  const [state] = useContext(AppContext);
 
   useEffect(() => {
     axios.get("/api/users").then((res) => {
-      const { data } = res.data;
-      console.log(data);
-      setUsers(data);
+      if (res.data.length) {
+        setUsers(res.data);
+      }
     });
     axios.get("/api/groups").then((res) => {
-      const { data } = res.data;
-      console.log(data);
-      setGroups(data);
+      if (res.data.length) {
+        setGroups(res.data);
+      }
     });
-  }, state);
+  }, [state]);
 
-  socket.addEventListener("open", (event) => {
-    socket.send(JSON.stringify(state[0].user));
-  });
+  useEffect(() => {
+    socket = io.connect("http://localhost:3001");
+    socket.emit("join", state.user);
 
-  socket.addEventListener("message", (event) => {
-    console.log(event.data);
-  });
-
-  // const groups = [
-  //   {
-  //     name: "Kathmandu",
-  //     image: "/assets/kathmandu.png",
-  //   },
-  // ];
-
-  // const usersCount = Array.from({ length: 25 }, (v, k) => k + 1);
+    socket.on("message", (data) => {
+      console.log("Something coming from server", data);
+      setMessages([...messages, data]);
+    });
+  }, []);
 
   const sendMessage = () => {
-    socket.send(message);
+    socket.emit("sendMessage", message);
   };
 
   return (
     <div className="message">
       <div className="message-navigation">
         <div className="back-button">
-          <button onClick={() => navigate("/chat")}>&lt; Back</button>
+          <button onClick={(e) => navigate("/chat")}>&lt; Back</button>
         </div>
         <div className="chat-title">Kathmandu - Chat Room</div>
       </div>

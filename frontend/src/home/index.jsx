@@ -1,6 +1,7 @@
 import { navigate } from "@reach/router";
 import React, { useState, useContext, useEffect } from "react";
 import { AppContext } from "src/context";
+import axios from "axios";
 import "./home.scss";
 
 const Home = () => {
@@ -8,6 +9,18 @@ const Home = () => {
   const [gender, setGender] = useState(globalState.user.gender);
   const [ageGroup, setAgeGroup] = useState(globalState.user.ageGroup);
   const [username, setUsername] = useState(globalState.user.username);
+  const [editable, setEditable] = useState(false);
+
+  useEffect(() => {
+    console.log("hello");
+    axios.get("/api/users/unique").then(
+      (res) => {
+        console.log("what is response", res);
+        setUsername(res.data);
+      },
+      (error) => console.log("Error: ", error)
+    );
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -38,18 +51,27 @@ const Home = () => {
         <form className="form" onSubmit={handleSubmit}>
           <div className="form-control">
             <label htmlFor="username">Username</label>
-            <div className="form-group">
-              <input
-                type="text"
-                placeholder="Pick a username for this session"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
+            <div className="form-group username">
+              {editable ? (
+                <input
+                  type="text"
+                  placeholder="Pick a username for this session"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              ) : (
+                <div className="username">{username || ""}</div>
+              )}
+              {!editable && (
+                <button type="button" onClick={() => setEditable(!editable)}>
+                  Change
+                </button>
+              )}
             </div>
           </div>
           <div className="form-control">
             <label htmlFor="gender">Gender</label>
-            <div className="form-group">
+            <div className="form-group gender">
               <div className="input-group">
                 <input
                   type="radio"
@@ -72,22 +94,11 @@ const Home = () => {
                 />
                 Male
               </div>
-              <div className="input-group">
-                <input
-                  type="radio"
-                  name="gender"
-                  id="gender"
-                  value="na"
-                  onChange={() => setGender("na")}
-                  checked={gender === "na"}
-                />
-                Don't want to tell
-              </div>
             </div>
           </div>
           <div className="form-control">
             <label htmlFor="ageGroup">Age Group</label>
-            <div className="form-group">
+            <div className="form-group age-group">
               <div className="input-group">
                 <input
                   type="radio"
@@ -135,20 +146,7 @@ const Home = () => {
               Let's Chat
             </button>
           </div>
-          <div className="form-footer or-divider">OR</div>
-          <div className="form-control form-footer">
-            <button className="create">Create Account</button>
-            <div className="help-text">
-              Your chats will be saved if you have an account.
-            </div>
-          </div>
         </form>
-      </div>
-      <div className="footer">
-        If you have an account
-        <div className="login">
-          <button>Log In</button>
-        </div>
       </div>
     </div>
   );

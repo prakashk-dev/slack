@@ -1,5 +1,4 @@
 import { createContext } from "react";
-
 const saveApplicationState = (value) => {
   sessionStorage.setItem("state", JSON.stringify(value));
 };
@@ -14,11 +13,16 @@ const INIT_STATE = getApplicationState("state") || {
     gender: "",
     ageGroup: "",
     username: "",
-    chatGroup: [],
+    group: "",
   },
 };
 
-const AppContext = createContext([INIT_STATE, () => {}]);
+const AppContext = createContext([
+  INIT_STATE,
+  (data) => {
+    console.log("Change data", data);
+  },
+]);
 
 // remove storage after saving to global state
 sessionStorage.removeItem("state");
