@@ -13,19 +13,7 @@ const Message = ({ location }) => {
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [state] = useContext(AppContext);
-
-  useEffect(() => {
-    axios.get("/api/users").then((res) => {
-      if (res.data.length) {
-        setUsers(res.data);
-      }
-    });
-    axios.get("/api/groups").then((res) => {
-      if (res.data.length) {
-        setGroups(res.data);
-      }
-    });
-  }, [state]);
+  const [joined, setJoined] = useState(false);
 
   useEffect(() => {
     socket = io.connect("http://localhost:3001");
@@ -45,62 +33,42 @@ const Message = ({ location }) => {
     <div className="message">
       <div className="message-navigation">
         <div className="back-button">
-          <button onClick={(e) => navigate("/chat")}>&lt; Back</button>
+          <button onClick={(e) => navigate("/chat")}> Back</button>
         </div>
         <div className="chat-title">Kathmandu - Chat Room</div>
       </div>
       <div className="message-body">
-        <div className="message-body-overlay">
-          <div className="tabs">
-            <div
-              className="rooms"
-              onClick={() => setActiveTab("users")}
-              style={{
-                backgroundColor: activeTab === "users" ? "blue" : "blueviolet",
-              }}
-            >
-              Personal Chat
-            </div>
-            <div className="divider"></div>
-            <div
-              className="personal-chat"
-              onClick={() => setActiveTab("groups")}
-              style={{
-                backgroundColor: activeTab === "groups" ? "blue" : "blueviolet",
-              }}
-            >
-              Rooms
-            </div>
-          </div>
-          <div className="overlay-body">
-            {activeTab === "users" &&
-              users.length &&
-              users.map((user) => {
-                return (
-                  <li key={user["username"]}>
-                    <img src="/assets/kathmandu.png" alt="" />
-                    {user["username"]}
-                  </li>
-                );
-              })}
-            {activeTab === "groups" &&
-              groups.length &&
-              groups.map((group) => {
-                return (
-                  <li key={group["name"]}>
-                    <img src="/assets/kathmandu.png" alt="" />
-                    {group["name"]}
-                  </li>
-                );
-              })}
-          </div>
-        </div>
         <div className="message-area">
           <div className="message">
             <p>Some Cool Heading</p>
-            <div id="chat">{}</div>
+            {!joined && (
+              <div id="chat">
+                <div>
+                  Lorem Ipsum is simply dummy text of the printing and
+                  typesetting industry. Lorem Ipsum has been the industry's
+                  standard dummy text ever since the 1500s, when an unknown
+                  printer took a galley of type and scrambled it to make a type
+                  specimen book. It has survived not only five centuries, but
+                  also the leap into electronic typesetting, remaining
+                  essentially unchanged. It was popularised in the 1960s with
+                  the release of Letraset sheets containing Lorem Ipsum
+                  passages, and more recently with desktop publishing software
+                  like Aldus PageMaker including versions of Lorem Ipsum.
+                </div>
+                <div className="confirm">
+                  Click Join button to join the room.
+                </div>
+                <div className="join-button" onClick={() => setJoined(true)}>
+                  Join
+                </div>
+              </div>
+            )}
+            {joined && <div id="chat"></div>}
           </div>
-          <div className="write-message">
+          <div
+            className="write-message"
+            style={{ visibility: joined ? "visible" : "hidden" }}
+          >
             <div className="icons">
               <img src="/assets/gif" alt="" />
               <svg

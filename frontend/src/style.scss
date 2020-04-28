@@ -92,3 +92,19 @@ button[disabled] {
   opacity: 0.6;
   cursor: not-allowed !important;
 }
+
+@media screen and (min-width: 800px) {
+  .app {
+    main {
+      .main-body {
+        .home {
+          width: 600px;
+          height: 800px;
+          border: 2px solid;
+          margin: auto;
+          margin-top: 10%;
+        }
+      }
+    }
+  }
+}

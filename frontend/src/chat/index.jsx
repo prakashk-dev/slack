@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { navigate } from "@reach/router";
 import axios from "axios";
 
 import "./chat.scss";
@@ -17,6 +18,10 @@ const Chat = () => {
       setUsers(res.data);
     });
   }, []);
+
+  const handleClick = (id) => {
+    navigate(`/chat/${id}`);
+  };
 
   return (
     <div className="chat">
@@ -40,7 +45,11 @@ const Chat = () => {
           ? users.length
             ? users.map((user) => {
                 return (
-                  <div key={user.username} className="groups list">
+                  <div
+                    key={user.username}
+                    className="groups list"
+                    onClick={() => handleClick(user._id)}
+                  >
                     <div className="image">
                       <img src={user.image} alt="" />
                     </div>
@@ -52,7 +61,11 @@ const Chat = () => {
           : groups.length
           ? groups.map((group) => {
               return (
-                <div key={group.name} className="groups list">
+                <div
+                  key={group.name}
+                  className="groups list"
+                  onClick={() => handleClick(group._id)}
+                >
                   <div className="image">
                     <img src={group.image} alt="" />
                   </div>
