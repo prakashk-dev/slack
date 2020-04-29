@@ -5,7 +5,7 @@ FROM node:lts-alpine3.9 AS builder
 WORKDIR /usr/app
 
 COPY package*.json ./
-RUN npm i -p -q
+RUN npm i -p
 COPY . .
 
 RUN npm run build
