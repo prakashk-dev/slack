@@ -36,4 +36,18 @@ function getPopular(req, res) {
     });
 }
 
-export { list, getRecent, getPopular };
+function findById(req, res) {
+  console.log(req.params.id);
+  if (!req.params.id) {
+    return res.json({ error: "Group id is required" });
+  }
+  Group.findById({ _id: req.params.id }, (err, group) => {
+    if (err)
+      return res.json({
+        error: `Group not found with id: ${req.params.id}`,
+      });
+    return res.json(group);
+  });
+}
+
+export { list, getRecent, getPopular, findById };

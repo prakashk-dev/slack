@@ -1,7 +1,7 @@
 import User from "../models/user.model";
 // get all users
 function list(req, res) {
-  User.find((err, users) => {
+  User.find(null, "username", (err, users) => {
     if (err) {
       return res.status(400).json({
         type: "error",
@@ -16,9 +16,26 @@ function list(req, res) {
   });
 }
 
+function findOne(req, res) {
+  if (!req.params.username) {
+    return res.json({ error: "Username is required" });
+  }
+  User.findOne(
+    { username: req.params.username },
+    "username gender ageGroup location",
+    (err, user) => {
+      if (err)
+        return res.json({
+          error: `User not found with username: ${req.params.username}`,
+        });
+      return res.json(user);
+    }
+  );
+}
+
 function uniqueUsername(req, res) {
   const randomUsername = Math.random().toString(8).substr(2, 4);
   return res.send(`User${randomUsername}`);
 }
 
-export { list, uniqueUsername };
+export { list, uniqueUsername, findOne };

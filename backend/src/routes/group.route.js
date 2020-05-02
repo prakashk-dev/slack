@@ -5,6 +5,7 @@ const router = express.Router();
 router.route("/").get(Group.list);
 router.route("/recent").get(Group.getRecent);
 router.route("/popular").get(Group.getPopular);
+router.route("/:id").get(Group.findById);
 // router.route('/save')
 //   .post(User.save);
 // router.route('/:id')
