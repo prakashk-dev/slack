@@ -1,0 +1,49 @@
+.sidebar {
+  display: grid;
+  grid-template-rows: 60px 1fr 1fr;
+
+  .app-logo {
+    background-color: blue;
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    color: white;
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+  .rooms,
+  .users {
+    display: grid;
+    grid-template-rows: 40px 1fr;
+    height: calc(50vh - 30px);
+  }
+
+  .rooms {
+    background-color: pink;
+  }
+
+  .users {
+    background-color: mediumorchid;
+  }
+
+  .rooms-heading,
+  .users-heading {
+    text-align: center;
+    background-color: #eee;
+    color: black;
+  }
+
+  .rooms-list,
+  .users-list {
+    overflow-y: auto;
+
+    li {
+      padding: 16px 24px;
+      list-style: none;
+
+      &:last-child {
+        padding-bottom: 32px;
+      }
+    }
+  }
+}

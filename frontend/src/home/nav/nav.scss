@@ -1,0 +1,17 @@
+.main-nav {
+  display: grid;
+  grid-template-columns: 60px 1fr 60px;
+  align-items: center;
+  justify-items: center;
+  background-color: #2a2a2a;
+  color: white;
+
+  img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .globe {
+    border-radius: 50%;
+  }
+}
