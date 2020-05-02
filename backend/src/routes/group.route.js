@@ -3,6 +3,7 @@ import * as Group from "../controllers/group.controller";
 
 const router = express.Router();
 router.route("/").get(Group.list);
+router.route("/name").get(Group.groupName);
 router.route("/recent").get(Group.getRecent);
 router.route("/popular").get(Group.getPopular);
 router.route("/:id").get(Group.findById);

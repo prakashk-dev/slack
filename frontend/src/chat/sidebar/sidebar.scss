@@ -28,9 +28,18 @@
 
   .rooms-heading,
   .users-heading {
-    text-align: center;
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    justify-items: center;
+    align-items: center;
     background-color: #eee;
     color: black;
+
+    .caret {
+      font-size: 1.5em;
+      transition: 0.3s ease-in-out;
+      cursor: pointer;
+    }
   }
 
   .rooms-list,
@@ -40,10 +49,17 @@
     li {
       padding: 16px 24px;
       list-style: none;
+      cursor: pointer;
+      &:hover {
+        background-color: goldenrod;
+      }
 
       &:last-child {
         padding-bottom: 32px;
       }
+    }
+    li.active {
+      background: darkseagreen;
     }
   }
 }

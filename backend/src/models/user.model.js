@@ -26,6 +26,14 @@ const UserSchema = new Schema({
     city: String,
   },
   image: "",
+  friends: [{ type: Schema.Types.ObjectId, ref: "user" }],
+  messages: [
+    {
+      user: { type: Schema.Types.ObjectId, ref: "user" },
+      text: String,
+      timeStamp: Date,
+    },
+  ],
 });
 
 module.exports = mongoose.model("user", UserSchema);

@@ -2,19 +2,25 @@ import React, { useState, useContext, useEffect } from "react";
 import { AppContext } from "src/context";
 import useFetch from "src/utils/axios";
 import io from "socket.io-client";
+import axios from "axios";
 import "./message.scss";
 let socket;
 
 const Message = ({ location, username, id }) => {
   const [showSidebar, setShowSidebar] = useState(false);
-  const [activeTab, setActiveTab] = useState("users");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [groups, setGroups] = useState([]);
   const [state, setState] = useContext(AppContext);
-  const [joined, setJoined] = useState("loading");
-  let user, group;
+  const [debug, setDebug] = useState(null);
+  const [group, setGroup] = useState(null);
+
+  useEffect(() => {
+    async function getGroupById() {
+      const res = await axios.get(`/api/groups/${id}`);
+      !res.error && setGroup(res.data);
+    }
+    getGroupById();
+  }, [id]);
 
   // if (id) {
   //   group = useFetch(`groups/${id}`);
@@ -54,7 +60,7 @@ const Message = ({ location, username, id }) => {
   return (
     <div className={showSidebar ? "message sidebar-open" : "message"}>
       <div className="message-nav">
-        <p>Chat Room</p>
+        <p>Chat Room - {group && group.name}</p>
         <div className="settings">
           <div className="gear" onClick={() => setShowSidebar(!showSidebar)}>
             &#9881;
@@ -107,118 +113,36 @@ const Message = ({ location, username, id }) => {
           </button>
         </div>
       </div>
-
       {showSidebar && (
         <div className="right-sidebar">
           <div className="profile">
             <img src="/assets/kathmandu.png" alt="" />
-            Group Name
+            {group && group.name}
           </div>
           <div className="users">
             <div className="heading">Users</div>
             <div className="users-list">
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
-              <div className="user">
-                <div className="img">
-                  <img src="/assets/kathmandu.png" alt="" />
-                </div>
-                <li>user</li>
-              </div>
+              {group ? (
+                group.users.length ? (
+                  group.users.map((user) => {
+                    return (
+                      <div className="user">
+                        <div className="img">
+                          <img src="/assets/kathmandu.png" alt="" />
+                        </div>
+                        <li>{user.username}</li>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="no-user">
+                    There is no one in this room yet. Let invite your friends
+                    :).
+                  </div>
+                )
+              ) : (
+                <div className="loading"> Loading... </div>
+              )}
             </div>
           </div>
           <div className="activity"></div>

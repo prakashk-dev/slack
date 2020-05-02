@@ -4,13 +4,13 @@ const Schema = mongoose.Schema;
 
 const GroupSchema = new Schema({
   name: String,
-  users: [{ type: Schema.Types.ObjectId, ref: "user" }],
   description: String,
   image: String,
+  users: [{ type: Schema.Types.ObjectId, ref: "user" }],
   messages: [
     {
       user: { type: Schema.Types.ObjectId, ref: "user" },
-      group: { type: Schema.Types.ObjectId, ref: "group" },
+      text: String,
       timeStamp: Date,
     },
   ],
