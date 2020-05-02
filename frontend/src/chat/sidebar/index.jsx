@@ -9,7 +9,9 @@ const Sidebar = ({ groupId }) => {
 
   return (
     <div className="sidebar">
-      <div className="app-logo"> BHET-GHAT CHAT</div>
+      <div className="app-logo" onClick={() => navigate("/")}>
+        BHET-GHAT CHAT
+      </div>
       <div className="rooms">
         <div className="rooms-heading">
           <div className="caret"> - </div>

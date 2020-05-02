@@ -33,9 +33,28 @@ function findOne(req, res) {
   );
 }
 
+async function saveUser(req, res) {
+  const { gender, ageGroup, username } = req.body;
+  try {
+    const user = await User.findOne({ username }).exec();
+    if (user) {
+      await await User.findOneAndUpdate(
+        { username },
+        { gender, ageGroup, username }
+      );
+      return res.json({ msg: "Successfully updated user information." });
+    } else {
+      await User.create({ gender, ageGroup, username });
+      return res.json({ msg: "Successfully added new user." });
+    }
+  } catch (e) {
+    return res.json({ error: e.message });
+  }
+}
+
 function uniqueUsername(req, res) {
   const randomUsername = Math.random().toString(8).substr(2, 4);
   return res.send(`User${randomUsername}`);
 }
 
-export { list, uniqueUsername, findOne };
+export { list, uniqueUsername, findOne, saveUser };

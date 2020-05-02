@@ -22,8 +22,9 @@ const HomeForm = () => {
     !user.username && fetchUsername();
   }, [user.username]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    // change it using reducer
     setState({
       user: {
         gender,
@@ -31,9 +32,11 @@ const HomeForm = () => {
         username,
       },
     });
-    navigate(`/chat`);
+    isInvalid = true;
+    await axios.post("/api/users", { gender, ageGroup, username });
+    navigate(`/chat/g/new_user`);
   };
-  const isInvalid = (field) => !field || !field.length;
+  let isInvalid = (field) => !field || !field.length;
   const isDisable =
     isInvalid(gender) || isInvalid(ageGroup) || isInvalid(username);
   return (

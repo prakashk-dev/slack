@@ -17,7 +17,8 @@ const Message = ({ location, username, id }) => {
   useEffect(() => {
     async function getGroupById() {
       const res = await axios.get(`/api/groups/${id}`);
-      !res.error && setGroup(res.data);
+      console.log(res);
+      !res.data.error && setGroup(res.data);
     }
     getGroupById();
   }, [id]);
@@ -60,7 +61,7 @@ const Message = ({ location, username, id }) => {
   return (
     <div className={showSidebar ? "message sidebar-open" : "message"}>
       <div className="message-nav">
-        <p>Chat Room - {group && group.name}</p>
+        <p>Chat Room - {group ? group.name : "Bhet-Ghat"}</p>
         <div className="settings">
           <div className="gear" onClick={() => setShowSidebar(!showSidebar)}>
             &#9881;
@@ -117,7 +118,7 @@ const Message = ({ location, username, id }) => {
         <div className="right-sidebar">
           <div className="profile">
             <img src="/assets/kathmandu.png" alt="" />
-            {group && group.name}
+            {group ? group.name : "Bhet-Ghat"}
           </div>
           <div className="users">
             <div className="heading">Users</div>
@@ -126,7 +127,7 @@ const Message = ({ location, username, id }) => {
                 group.users.length ? (
                   group.users.map((user) => {
                     return (
-                      <div className="user">
+                      <div className="user" key={user._id}>
                         <div className="img">
                           <img src="/assets/kathmandu.png" alt="" />
                         </div>

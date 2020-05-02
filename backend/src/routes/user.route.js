@@ -5,8 +5,7 @@ const router = express.Router();
 router.route("/").get(User.list);
 router.route("/unique").get(User.uniqueUsername);
 router.route("/:username").get(User.findOne);
-// router.route('/save')
-//   .post(User.save);
+router.route("/").post(User.saveUser);
 // router.route('/:id')
 //   .get(User.findOne);
 // router.route('/:id')

@@ -7,15 +7,10 @@ const UserSchema = new Schema({
     unique: true,
     index: true,
   },
-  email: {
-    type: String,
-    unique: true,
-    index: true,
-  },
   password: String,
   gender: {
     type: String,
-    enum: ["m", "f", "na"], // m => male, f => female, na => not applicable
+    enum: ["male", "female", "na"], // m => male, f => female, na => not applicable
   },
   ageGroup: {
     type: String,
@@ -26,7 +21,6 @@ const UserSchema = new Schema({
     city: String,
   },
   image: "",
-  friends: [{ type: Schema.Types.ObjectId, ref: "user" }],
   messages: [
     {
       user: { type: Schema.Types.ObjectId, ref: "user" },
@@ -34,6 +28,8 @@ const UserSchema = new Schema({
       timeStamp: Date,
     },
   ],
+  friends: [{ type: Schema.Types.ObjectId, ref: "user" }],
+  groups: [{ type: Schema.Types.ObjectId, ref: "group" }],
 });
 
 module.exports = mongoose.model("user", UserSchema);
