@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { AppContext } from "src/context";
-import useFetch from "src/utils/axios";
+import { useFetch } from "src/utils/axios";
 import io from "socket.io-client";
 import axios from "axios";
 import "./message.scss";
@@ -10,18 +10,8 @@ const Message = ({ location, username, id }) => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [state, setState] = useContext(AppContext);
-  const [debug, setDebug] = useState(null);
-  const [group, setGroup] = useState(null);
-
-  useEffect(() => {
-    async function getGroupById() {
-      const res = await axios.get(`/api/groups/${id}`);
-      console.log(res);
-      !res.data.error && setGroup(res.data);
-    }
-    getGroupById();
-  }, [id]);
+  const { state } = useContext(AppContext);
+  const [group, gLoading, gError] = useFetch(`groups/${id}`, id);
 
   // if (id) {
   //   group = useFetch(`groups/${id}`);
@@ -68,52 +58,64 @@ const Message = ({ location, username, id }) => {
           </div>
         </div>
       </div>
-      <div className="messages">
-        {messages.length &&
-          messages.map((message, index) => {
-            return (
-              <div
-                key={index}
-                className={
-                  message.type === "admin"
-                    ? "chat-item admin"
-                    : message.username === state.user.username
-                    ? "chat-item chat-self"
-                    : "chat-item chat-other"
-                }
-              >
-                <div className="username">
-                  {message.username != state.user.username && message.username}
-                </div>
+      {id === "welcome" ? (
+        <div style={{ color: "white", justifySelf: "center" }}>
+          <h1>
+            Connect Users to the some random/general room and show some
+            instruction on how to use application{" "}
+          </h1>{" "}
+        </div>
+      ) : (
+        <div className="messages">
+          {messages.length &&
+            messages.map((message, index) => {
+              return (
                 <div
+                  key={index}
                   className={
                     message.type === "admin"
-                      ? "chat-message center"
+                      ? "chat-item admin"
                       : message.username === state.user.username
-                      ? "chat-message right"
-                      : "chat-message left"
+                      ? "chat-item chat-self"
+                      : "chat-item chat-other"
                   }
                 >
-                  {message.type === "admin" ? message.message : message.message}
+                  <div className="username">
+                    {message.username != state.user.username &&
+                      message.username}
+                  </div>
+                  <div
+                    className={
+                      message.type === "admin"
+                        ? "chat-message center"
+                        : message.username === state.user.username
+                        ? "chat-message right"
+                        : "chat-message left"
+                    }
+                  >
+                    {message.type === "admin"
+                      ? message.message
+                      : message.message}
+                  </div>
+                  <div className="time">{message.time}</div>
                 </div>
-                <div className="time">{message.time}</div>
-              </div>
-            );
-          })}
-        <div className="message-footer">
-          <div className="icons"></div>
-          <input
-            type="text"
-            value={message}
-            name="message"
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={(e) => (e.key === "Enter" ? sendMessage() : null)}
-          />
-          <button disabled={!message.length} onClick={sendMessage}>
-            send
-          </button>
+              );
+            })}
+          <div className="message-footer">
+            <div className="icons"></div>
+            <input
+              type="text"
+              value={message}
+              name="message"
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={(e) => (e.key === "Enter" ? sendMessage() : null)}
+            />
+            <button disabled={!message.length} onClick={sendMessage}>
+              send
+            </button>
+          </div>
         </div>
-      </div>
+      )}
       {showSidebar && (
         <div className="right-sidebar">
           <div className="profile">
@@ -123,26 +125,25 @@ const Message = ({ location, username, id }) => {
           <div className="users">
             <div className="heading">Users</div>
             <div className="users-list">
-              {group ? (
-                group.users.length ? (
-                  group.users.map((user) => {
-                    return (
-                      <div className="user" key={user._id}>
-                        <div className="img">
-                          <img src="/assets/kathmandu.png" alt="" />
-                        </div>
-                        <li>{user.username}</li>
+              {gLoading ? (
+                <div> Loading ... </div>
+              ) : gError ? (
+                <div className="error"> {gError} </div>
+              ) : group.users.length ? (
+                group.users.map((user) => {
+                  return (
+                    <div className="user" key={user._id}>
+                      <div className="img">
+                        <img src="/assets/kathmandu.png" alt="" />
                       </div>
-                    );
-                  })
-                ) : (
-                  <div className="no-user">
-                    There is no one in this room yet. Let invite your friends
-                    :).
-                  </div>
-                )
+                      <li>{user.username}</li>
+                    </div>
+                  );
+                })
               ) : (
-                <div className="loading"> Loading... </div>
+                <div className="no-user">
+                  There is no one in this room yet. Let invite your friends :).
+                </div>
               )}
             </div>
           </div>

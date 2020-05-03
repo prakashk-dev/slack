@@ -18,7 +18,7 @@
       line-height: 1.5;
     }
 
-    .username {
+    .username-unique {
       display: grid;
       grid-template-columns: 120px 120px;
       height: 35px;
@@ -55,6 +55,7 @@
         padding: 0px 4px;
         outline: none;
         transition: 300ms ease-in-out;
+        width: 70%;
 
         &:focus {
           border-color: rgba(126, 239, 104, 0.8);

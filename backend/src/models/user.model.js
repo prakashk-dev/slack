@@ -10,7 +10,7 @@ const UserSchema = new Schema({
   password: String,
   gender: {
     type: String,
-    enum: ["male", "female", "na"], // m => male, f => female, na => not applicable
+    enum: ["male", "female", "na"],
   },
   ageGroup: {
     type: String,
@@ -29,7 +29,6 @@ const UserSchema = new Schema({
     },
   ],
   friends: [{ type: Schema.Types.ObjectId, ref: "user" }],
-  groups: [{ type: Schema.Types.ObjectId, ref: "group" }],
 });
 
 module.exports = mongoose.model("user", UserSchema);

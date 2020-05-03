@@ -4,7 +4,6 @@
     "chat-navigation chat-navigation"
     "chat-room chat-room";
   grid-template-rows: 60px 1fr;
-  grid-template-columns: 3fr 1fr;
   height: 100%;
   background-color: green;
   .message-nav {
@@ -131,6 +130,7 @@
   grid-template-areas:
     "chat-navigation chat-navigation"
     "chat-room chat-sidebar";
+  grid-template-columns: 3fr 1fr;
 
   .right-sidebar {
     display: grid;

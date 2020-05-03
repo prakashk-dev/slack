@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { navigate } from "@reach/router";
-import useFetch from "src/utils/axios";
+import { useFetch } from "src/utils/axios";
+import { AppContext } from "src/context";
 import axios from "axios";
 import "./sidebar.scss";
 
 const Sidebar = ({ groupId }) => {
-  const group = useFetch("groups/name");
+  const [rooms, rLoading, rError] = useFetch("groups");
+  const { state } = useContext(AppContext);
+  const [user, uLoading, uError] = useFetch(`users/${state.user.username}`);
 
   return (
     <div className="sidebar">
@@ -18,12 +21,13 @@ const Sidebar = ({ groupId }) => {
           Rooms
         </div>
         <div className="rooms-list">
-          {group.loading ? (
+          {rLoading ? (
             <div className="loading">Loading ... </div>
-          ) : group.data.error ? (
-            <div className="error"> {group.data.error} </div>
+          ) : rError ? (
+            <div className="error"> {rError} </div>
           ) : (
-            group.data.map((g) => (
+            rooms &&
+            rooms.map((g) => (
               <li
                 onClick={() => navigate(`/chat/g/${g._id}`)}
                 key={g._id}
@@ -41,24 +45,15 @@ const Sidebar = ({ groupId }) => {
           Direct Messages
         </div>
         <div className="users-list">
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
-          <li>Users</li>
+          {uLoading && <li>Loading ... </li>}
+          {uError && <div className="error">{error}</div>}
+          {user && user.friends.length ? (
+            user.friends.map((friend) => {
+              return <li key={friend._id}>{friend.username}</li>;
+            })
+          ) : (
+            <div> No friends.</div>
+          )}
         </div>
       </div>
     </div>

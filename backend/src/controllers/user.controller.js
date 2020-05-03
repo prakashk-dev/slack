@@ -1,7 +1,7 @@
 import User from "../models/user.model";
 // get all users
 function list(req, res) {
-  User.find(null, "username", (err, users) => {
+  User.find(null, "username messages friends gender ageGroup", (err, users) => {
     if (err) {
       return res.status(400).json({
         type: "error",
@@ -16,37 +16,35 @@ function list(req, res) {
   });
 }
 
-function findOne(req, res) {
+async function findOne(req, res) {
   if (!req.params.username) {
     return res.json({ error: "Username is required" });
   }
-  User.findOne(
-    { username: req.params.username },
-    "username gender ageGroup location",
-    (err, user) => {
-      if (err)
-        return res.json({
-          error: `User not found with username: ${req.params.username}`,
-        });
-      return res.json(user);
-    }
-  );
+  try {
+    const user = await User.findOne(
+      { username: req.params.username },
+      "username gender ageGroup location friends"
+    )
+      .populate("friends", "username")
+      .exec();
+    return res.json(user);
+  } catch (error) {
+    return res.json({
+      error: `User not found with username: ${req.params.username}`,
+    });
+  }
 }
 
 async function saveUser(req, res) {
   const { gender, ageGroup, username } = req.body;
   try {
-    const user = await User.findOne({ username }).exec();
-    if (user) {
-      await await User.findOneAndUpdate(
-        { username },
-        { gender, ageGroup, username }
-      );
-      return res.json({ msg: "Successfully updated user information." });
-    } else {
-      await User.create({ gender, ageGroup, username });
-      return res.json({ msg: "Successfully added new user." });
-    }
+    // try to find and update record, if not found create a new one (upsert does this )
+    await User.findOneAndUpdate(
+      { username },
+      { gender, ageGroup, username },
+      { upsert: true }
+    ).exec();
+    return res.json({ msg: "Successfully added/updated user information." });
   } catch (e) {
     return res.json({ error: e.message });
   }

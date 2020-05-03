@@ -28,6 +28,7 @@ mongoose
   .connect(mongoUri, {
     useNewUrlParser: true,
     useCreateIndex: true,
+    useFindAndModify: false,
     server: { socketOptions: { keepAlive: 1 } },
   })
   .catch((err) => console.log(err.message));

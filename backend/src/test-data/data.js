@@ -72,8 +72,7 @@ const rooms = [
 ];
 
 for (let i = 0; i < 50; i++) {
-  let j =
-    i > 40 ? i - 41 : i > 30 ? i - 31 : i > 20 ? i - 21 : i > 10 ? i - 11 : i;
+  let j = Math.floor(Math.random() * 10 + 1);
   users.push({
     username: `user${i + 1}`,
     password: "bhetghat",
@@ -83,7 +82,40 @@ for (let i = 0; i < 50; i++) {
       country: "Nepal",
       city: rooms[j].name,
     },
+    friends: [],
   });
+}
+
+const fiveRandomUser = (users, index) => {
+  const top = users.length - 2 - index;
+  const startIndex = top > 4 ? top : users.length - 1;
+  const lastIndex = startIndex > 9 ? startIndex - 5 : startIndex + 5;
+  let friends = [];
+
+  for (let i = startIndex; i > lastIndex; i--) {
+    friends.push(users[i]._id);
+  }
+  return friends;
+};
+
+async function addFriends(query) {
+  const users = await query.exec();
+  let msg = "";
+  try {
+    for (let i = 0; i < users.length; i++) {
+      const friends = fiveRandomUser(users, i);
+      await UserModel.findByIdAndUpdate(
+        users[i]["_id"],
+        { friends },
+        { multi: true }
+      ).exec();
+    }
+    msg = "Successfully inserted friends in users.";
+  } catch (e) {
+    msg = e.message;
+  }
+
+  return { msg };
 }
 
 async function seedData() {
@@ -92,14 +124,15 @@ async function seedData() {
   const room = await GroupModel.findOne({ name: rooms[0].name }).exec();
 
   const insertUserData = async () => {
-    let msg;
+    let msg, friends;
     if (user.length) {
       msg = "User data already inserted.";
     } else {
       await UserModel.insertMany(users);
+      friends = await addFriends(userQuery);
       msg = "User data successfully inserted.";
     }
-    return { msg };
+    return { msg, friends };
   };
 
   const insertRoomData = async () => {

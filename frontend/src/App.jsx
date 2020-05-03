@@ -1,22 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { Router, navigate } from "@reach/router";
-import { INIT_STATE, AppContext, saveApplicationState } from "src/context";
+import { AppProvider } from "src/context";
 import Chat from "src/chat";
 import GroupMessage from "src/chat/message";
 import Home from "src/home";
 import "./style.scss";
 
 const App = () => {
-  const state = useState(INIT_STATE);
-
-  // If user refresh the page save it to the localStorage
-  window.onbeforeunload = (_e) => {
-    saveApplicationState(state[0]);
-  };
-
   return (
     <React.StrictMode>
-      <AppContext.Provider value={state}>
+      <AppProvider>
         <div className="app">
           <Router>
             <Home path="/" />
@@ -26,7 +19,7 @@ const App = () => {
             </Chat>
           </Router>
         </div>
-      </AppContext.Provider>
+      </AppProvider>
     </React.StrictMode>
   );
 };

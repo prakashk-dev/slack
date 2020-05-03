@@ -6,41 +6,48 @@ import { AppContext } from "src/context";
 import "./form.scss";
 
 const HomeForm = () => {
-  const [state, setState] = useContext(AppContext);
-  const { user } = state;
-
-  const [gender, setGender] = useState(user.gender);
-  const [ageGroup, setAgeGroup] = useState(user.ageGroup);
-  const [username, setUsername] = useState(user.username);
+  const { state, saveUser } = useContext(AppContext);
+  const [valid, setValid] = useState(false);
   const [editable, setEditable] = useState(false);
+  const [user, setUser] = useState(state.user);
+  const [error, setError] = useState(null);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUser((user) => ({ ...user, [name]: value }));
+  };
+
+  // If username is persited, do not ask backend for unique username
   useEffect(() => {
     async function fetchUsername() {
       const res = await axios("/api/users/unique");
-      setUsername(res.data);
+      setUser((user) => ({ ...user, username: res.data }));
     }
-    !user.username && fetchUsername();
-  }, [user.username]);
+    if (!user.username || !user.username.length) {
+      fetchUsername();
+    }
+  }, [user]);
+
+  // validatoin for submit button
+  useEffect(() => {
+    const { gender, ageGroup, username } = user;
+    const isValid = (field) => field && field.length;
+    setValid(isValid(gender) && isValid(ageGroup) && isValid(username));
+  }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // change it using reducer
-    setState({
-      user: {
-        gender,
-        ageGroup,
-        username,
-      },
-    });
-    isInvalid = true;
-    await axios.post("/api/users", { gender, ageGroup, username });
-    navigate(`/chat/g/new_user`);
+    const error = await saveUser(user);
+    if (error) {
+      setError(error);
+    } else {
+      navigate(`/chat/g/welcome`);
+    }
   };
-  let isInvalid = (field) => !field || !field.length;
-  const isDisable =
-    isInvalid(gender) || isInvalid(ageGroup) || isInvalid(username);
+
   return (
     <form className="form" onSubmit={handleSubmit}>
+      <p className="error">{error && error}</p>
       <div className="form-control">
         <label htmlFor="username">Username</label>
         <div className="form-group username">
@@ -48,16 +55,17 @@ const HomeForm = () => {
             <input
               type="text"
               placeholder="Pick a username for this session"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={user.username}
+              name="username"
+              onChange={handleChange}
             />
           ) : (
-            <div className="username">{username || ""}</div>
-          )}
-          {!editable && (
-            <button type="button" onClick={() => setEditable(!editable)}>
-              Change
-            </button>
+            <div className="username-unique">
+              <div className="username">{user.username}</div>
+              <button type="button" onClick={() => setEditable(!editable)}>
+                Change
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -70,8 +78,8 @@ const HomeForm = () => {
               name="gender"
               id="gender"
               value="female"
-              onChange={() => setGender("female")}
-              checked={gender === "female"}
+              onChange={handleChange}
+              checked={user.gender === "female"}
             />
             Female
           </div>
@@ -81,8 +89,8 @@ const HomeForm = () => {
               name="gender"
               id="gender"
               value="male"
-              onChange={() => setGender("male")}
-              checked={gender === "male"}
+              onChange={handleChange}
+              checked={user.gender === "male"}
             />
             Male
           </div>
@@ -96,9 +104,9 @@ const HomeForm = () => {
               type="radio"
               name="ageGroup"
               value="1"
-              onChange={() => setAgeGroup("1")}
-              checked={ageGroup === "1"}
-            />{" "}
+              onChange={handleChange}
+              checked={user.ageGroup === "1"}
+            />
             Below 20 Years
           </div>
           <div className="input-group">
@@ -106,9 +114,9 @@ const HomeForm = () => {
               type="radio"
               name="ageGroup"
               value="2"
-              onChange={() => setAgeGroup("2")}
-              checked={ageGroup === "2"}
-            />{" "}
+              onChange={handleChange}
+              checked={user.ageGroup === "2"}
+            />
             20 - 30 Years
           </div>
           <div className="input-group">
@@ -116,9 +124,9 @@ const HomeForm = () => {
               type="radio"
               name="ageGroup"
               value="3"
-              onChange={() => setAgeGroup("3")}
-              checked={ageGroup === "3"}
-            />{" "}
+              onChange={handleChange}
+              checked={user.ageGroup === "3"}
+            />
             30 - 40 Years
           </div>
           <div className="input-group">
@@ -126,15 +134,15 @@ const HomeForm = () => {
               type="radio"
               name="ageGroup"
               value="4"
-              onChange={() => setAgeGroup("4")}
-              checked={ageGroup === "4"}
-            />{" "}
+              onChange={handleChange}
+              checked={user.ageGroup === "4"}
+            />
             40+ Years
           </div>
         </div>
       </div>
       <div className="form-control form-footer">
-        <button className="chat" disabled={isDisable}>
+        <button className="chat" disabled={!valid}>
           Let's Chat
         </button>
       </div>
