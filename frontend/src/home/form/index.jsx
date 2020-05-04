@@ -26,7 +26,7 @@ const HomeForm = () => {
     if (!user.username || !user.username.length) {
       fetchUsername();
     }
-  }, [user]);
+  }, []);
 
   // validatoin for submit button
   useEffect(() => {

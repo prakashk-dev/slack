@@ -75,6 +75,7 @@ for (let i = 0; i < 50; i++) {
   let j = Math.floor(Math.random() * 10 + 1);
   users.push({
     username: `user${i + 1}`,
+    email: `user${i + 1}@bhetghat.com`,
     password: "bhetghat",
     gender: i % 2 === 0 ? "male" : i % 3 === 0 ? "female" : "na",
     ageGroup: i % 4 === 0 ? "4" : i % 3 === 0 ? "3" : i % 2 === 0 ? "2" : "1",

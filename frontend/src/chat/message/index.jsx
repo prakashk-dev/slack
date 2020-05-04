@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { AppContext } from "src/context";
 import { useFetch } from "src/utils/axios";
 import io from "socket.io-client";
@@ -7,46 +7,41 @@ import "./message.scss";
 let socket;
 
 const Message = ({ location, username, id }) => {
-  const [showSidebar, setShowSidebar] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const { state } = useContext(AppContext);
   const [group, gLoading, gError] = useFetch(`groups/${id}`, id);
+  const divRef = useRef(null);
 
-  // if (id) {
-  //   group = useFetch(`groups/${id}`);
-  // } else {
-  //   user = useFetch(`groups/${username}`);
-  // }
+  useEffect(() => {
+    socket = io.connect("http://localhost:4001");
+    socket.on("connect", () => console.log("Connected"));
+    socket.on("disconnect", () => console.log("Disconnected"));
+    socket.emit("join", state.user.username, (msg) => console.log(msg));
 
-  // useEffect(() => {
-  //   // socket = io.connect("http://localhost:3001");
-  //   // socket.on("message", (message) => {
-  //   //   setMessages((messages) => [...messages, message]);
-  //   // });
-  //   // socket.on("messages", (msgs) => {
-  //   //   console.log("Fetch all the messages", msgs);
-  //   //   setMessages((messages) => [...messages, ...msgs]);
-  //   // });
-  //   // socket.on("roomUsers", (data) => {
-  //   //   console.log("All the users in this room", data);
-  //   // });
-  // }, []);
+    return () => socket.disconnect();
+  }, []);
 
-  // useEffect(() => {
-  //   // check if user has already joined this room
-  //   // if (!group.loading) {
-  //   //   socket.emit("userStatus", { ...state.user, room: group.data.name });
-  //   //   socket.on("joined", (data) => {
-  //   //     data.length && setMessages((messages) => [...messages, ...data]);
-  //   //     setJoined(data.length > 0);
-  //   //   });
-  //   // }
-  // }, [group.loading]);
+  useEffect(() => {
+    socket.on("messages", (msg) => {
+      setMessages([...messages, msg]);
+    });
+  }, [messages]);
 
-  const sendMessage = () => {};
+  const formatMessage = () => {
+    return {
+      username: state.user.username,
+      message,
+    };
+  };
 
-  const handleJoin = () => {};
+  const sendMessage = () => {
+    console.log(formatMessage());
+    socket.emit("message", formatMessage());
+    divRef.current.scrollIntoView({ behavior: "smooth" });
+    setMessage("");
+  };
 
   return (
     <div className={showSidebar ? "message sidebar-open" : "message"}>
@@ -67,40 +62,44 @@ const Message = ({ location, username, id }) => {
         </div>
       ) : (
         <div className="messages">
-          {messages.length &&
-            messages.map((message, index) => {
-              return (
-                <div
-                  key={index}
-                  className={
-                    message.type === "admin"
-                      ? "chat-item admin"
-                      : message.username === state.user.username
-                      ? "chat-item chat-self"
-                      : "chat-item chat-other"
-                  }
-                >
-                  <div className="username">
-                    {message.username != state.user.username &&
-                      message.username}
-                  </div>
+          <div className="message-container">
+            {messages.length &&
+              messages.map((message, index) => {
+                return (
                   <div
+                    key={index}
                     className={
                       message.type === "admin"
-                        ? "chat-message center"
+                        ? "chat-item admin"
                         : message.username === state.user.username
-                        ? "chat-message right"
-                        : "chat-message left"
+                        ? "chat-item chat-self"
+                        : "chat-item chat-other"
                     }
                   >
-                    {message.type === "admin"
-                      ? message.message
-                      : message.message}
+                    <div className="username">
+                      {message.username != state.user.username &&
+                        message.type != "admin" &&
+                        message.username}
+                    </div>
+                    <div
+                      className={
+                        message.type === "admin"
+                          ? "chat-message center"
+                          : message.username === state.user.username
+                          ? "chat-message right"
+                          : "chat-message left"
+                      }
+                    >
+                      {message.type === "admin"
+                        ? message.message
+                        : message.message}
+                    </div>
+                    <div className="time">{message.time}</div>
                   </div>
-                  <div className="time">{message.time}</div>
-                </div>
-              );
-            })}
+                );
+              })}
+            <div ref={divRef} id="recentMessage"></div>
+          </div>
           <div className="message-footer">
             <div className="icons"></div>
             <input

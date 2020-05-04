@@ -9,7 +9,6 @@ import config from "./config";
 import routes from "./routes";
 import socketio from "socket.io";
 import { seedData, unSeedData } from "./test-data/data";
-
 import {
   roomJoin,
   getCurrentRoom,
@@ -24,6 +23,9 @@ const app = express();
 const server = http.createServer(app);
 
 const mongoUri = config.mongo.host;
+console.log("************************************");
+console.log("mongoose", mongoose.connection.readyState);
+console.log("************************************");
 mongoose
   .connect(mongoUri, {
     useNewUrlParser: true,
@@ -32,7 +34,9 @@ mongoose
     server: { socketOptions: { keepAlive: 1 } },
   })
   .catch((err) => console.log(err.message));
-
+console.log("************************************");
+console.log("mongoose", mongoose.connection.readyState);
+console.log("************************************");
 // import dummy data
 
 // Middleware setup
@@ -65,61 +69,28 @@ server.listen(port, () => {
   );
 });
 
+function handleIO(socket) {
+  socket.on("join", (username, callback) => {
+    callback({ username, socketId: socket.id });
+    socket.emit(
+      "messages",
+      formatMessage({ username, message: "Welcome to the Bhet Ghat" }, "admin")
+    );
+    socket.broadcast.emit(
+      "messages",
+      formatMessage(
+        { username, message: `${username} has joined the chat.` },
+        "admin"
+      )
+    );
+  });
+
+  console.log("Connected");
+  socket.on("disconnect", console.log);
+
+  socket.on("message", (msg) => {
+    io.emit("messages", formatMessage(msg));
+  });
+}
 const io = socketio(server);
-
-// Run when client connects
-// io.on("connection", (socket) => {
-// socket.on("userStatus", (user) => {
-//   // let frontend know if user has already joined the room
-//   const room = getCurrentRoom(user.room);
-//   const messages = room ? room.messages : [];
-//   socket.emit("joined", messages);
-// });
-// socket.on("joinRoom", (user, callback) => {
-//   if (!userAlreadyJoined(user)) {
-//     roomJoin({ id: socket.id, ...user });
-//     socket.join(user.room);
-//     // Welcome current user
-//     socket.emit("message", formatMessage(`Welcome to ${user.room}`, "admin"));
-//     // Broadcast when a user connects
-//     socket.broadcast
-//       .to(user.room)
-//       .emit(
-//         "message",
-//         formatMessage(`${user.username} has joined the chat`, "admin")
-//       );
-
-//     // Send users and room info
-//     io.to(user.room).emit("roomUsers", {
-//       room: user.room,
-//       users: getRoomUsers(user.room),
-//     });
-//   }
-//   callback();
-// });
-
-// // // Listen for chatMessage
-// socket.on("chatMessage", (msg, callback) => {
-//   const room = getCurrentRoom(msg.room);
-//   io.to(room.name).emit("message", formatMessage(msg));
-//   callback();
-// });
-
-// // Runs when client disconnects
-// socket.on("disconnect", () => {
-//   const user = userLeave(socket.id);
-
-//   if (user) {
-//     io.to(user.room).emit(
-//       "message",
-//       formatMessage(`${user.username} has left the chat`)
-//     );
-
-//     // Send users and room info
-//     io.to(user.room).emit("roomUsers", {
-//       room: user.room,
-//       users: getRoomUsers(user.room),
-//     });
-//   }
-// });
-// });
+io.on("connection", handleIO);
