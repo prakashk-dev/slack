@@ -6,7 +6,7 @@ import { AppContext } from "src/context";
 import "./form.scss";
 
 const HomeForm = () => {
-  const { state, saveUser } = useContext(AppContext);
+  const { state, saveUser, fetchConfig } = useContext(AppContext);
   const [valid, setValid] = useState(false);
   const [editable, setEditable] = useState(false);
   const [user, setUser] = useState(state.user);
@@ -19,6 +19,7 @@ const HomeForm = () => {
 
   // If username is persited, do not ask backend for unique username
   useEffect(() => {
+    fetchConfig();
     async function fetchUsername() {
       const res = await axios("/api/users/unique");
       setUser((user) => ({ ...user, username: res.data }));

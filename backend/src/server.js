@@ -23,9 +23,6 @@ const app = express();
 const server = http.createServer(app);
 
 const mongoUri = config.mongo.host;
-console.log("************************************");
-console.log("mongoose", mongoose.connection.readyState);
-console.log("************************************");
 mongoose
   .connect(mongoUri, {
     useNewUrlParser: true,
@@ -34,9 +31,6 @@ mongoose
     server: { socketOptions: { keepAlive: 1 } },
   })
   .catch((err) => console.log(err.message));
-console.log("************************************");
-console.log("mongoose", mongoose.connection.readyState);
-console.log("************************************");
 // import dummy data
 
 // Middleware setup
@@ -51,6 +45,14 @@ if (config.env === "development") {
 }
 
 app.use("/api", routes);
+app.use("/api/config", (req, res) => {
+  return res.json({
+    SOCKET_URL:
+      process.env.NODE_ENV === "production"
+        ? "https://socket.bhet-ghat.com"
+        : `http://localhost:3001`,
+  });
+});
 
 app.get("/api/seed", async (req, res) => {
   const result = await seedData();
@@ -67,6 +69,10 @@ server.listen(port, () => {
   console.log(
     `Application is running on Env: ${process.env.NODE_ENV} in port ${port}`
   );
+});
+
+app.get("/", (req, res) => {
+  return res.json({ msg: "Socket is up and running" });
 });
 
 function handleIO(socket) {

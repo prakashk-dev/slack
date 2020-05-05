@@ -1,10 +1,11 @@
 import React, { createContext, useReducer } from "react";
 import { retrieveState, preserveState } from "src/utils";
-import { usePost } from "src/utils/axios";
+import { useFetch } from "src/utils/axios";
 import axios from "axios";
 
 // Define constacts action verbs
 const SAVE_USER = "SAVE_USER";
+const SAVE_CONFIG = "SAVE_CONFIG";
 
 // Initial state of the application
 export const initialStaate = retrieveState() || {
@@ -13,6 +14,7 @@ export const initialStaate = retrieveState() || {
     gender: "",
     ageGroup: "",
   },
+  config: {},
 };
 
 // Reducer
@@ -20,6 +22,8 @@ export const appReducer = (state, { type, payload }) => {
   switch (type) {
     case SAVE_USER:
       return { ...state, user: payload };
+    case SAVE_CONFIG:
+      return { ...state, config: payload };
     default:
       return initialStaate;
   }
@@ -38,10 +42,25 @@ export const AppProvider = ({ children }) => {
         payload: user,
       });
     } catch (error) {
-      console.log("Error");
       return error.message;
     }
   };
-  const value = { state, saveUser };
+
+  const fetchConfig = async () => {
+    try {
+      const res = await axios.get("/api/config");
+      preserveState("config", res.data);
+      return dispatch({
+        type: SAVE_CONFIG,
+        payload: res.data,
+      });
+    } catch (error) {
+      return dispatch({
+        type: SAVE_CONFIG,
+        payload: null,
+      });
+    }
+  };
+  const value = { state, saveUser, fetchConfig };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

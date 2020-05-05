@@ -15,13 +15,15 @@ const Message = ({ location, username, id }) => {
   const divRef = useRef(null);
 
   useEffect(() => {
-    socket = io.connect("http://localhost:4001");
-    socket.on("connect", () => console.log("Connected"));
-    socket.on("disconnect", () => console.log("Disconnected"));
-    socket.emit("join", state.user.username, (msg) => console.log(msg));
+    if (state.config.SOCKET_URL) {
+      socket = io.connect(state.config.SOCKET_URL);
+      socket.on("connect", () => console.log("Connected"));
+      socket.on("disconnect", () => console.log("Disconnected"));
+      socket.emit("join", state.user.username, (msg) => console.log(msg));
 
-    return () => socket.disconnect();
-  }, []);
+      return () => socket.disconnect();
+    }
+  }, [state.config.SOCKET_URL]);
 
   useEffect(() => {
     socket.on("messages", (msg) => {
