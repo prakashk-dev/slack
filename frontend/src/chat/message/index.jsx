@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { AppContext } from "src/context";
 import { useFetch } from "src/utils/axios";
+import moment from "moment";
 import io from "socket.io-client";
 import axios from "axios";
 import "./message.scss";
@@ -127,7 +128,11 @@ const Message = ({ location, username, id }) => {
                         ? message.message
                         : message.message}
                     </div>
-                    <div className="time">{message.time}</div>
+                    <div className="time">
+                      {moment(moment.utc(message.time).toDate())
+                        .local()
+                        .format("h:m a")}
+                    </div>
                   </div>
                 ) : null;
               })}
