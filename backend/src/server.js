@@ -76,19 +76,32 @@ app.get("/", (req, res) => {
 });
 
 function handleIO(socket) {
-  socket.on("join", (username, callback) => {
-    callback({ username, socketId: socket.id });
-    socket.emit(
-      "messages",
-      formatMessage({ username, message: "Welcome to the Bhet Ghat" }, "admin")
-    );
-    socket.broadcast.emit(
-      "messages",
-      formatMessage(
-        { username, message: `${username} has joined the chat.` },
-        "admin"
-      )
-    );
+  socket.on("join", (data, callback) => {
+    const { room, username } = data;
+    const rooms = Object.keys(socket.rooms);
+    if (!rooms.includes(room)) {
+      socket.join(room, () => {
+        socket.emit(
+          "messages",
+          formatMessage(
+            { username, room, message: `Welcome to the ${room} room.` },
+            "admin"
+          )
+        );
+        socket
+          .to(room)
+          .emit(
+            "messages",
+            formatMessage(
+              { username, room, message: `${username} has joined.` },
+              "admin"
+            )
+          );
+      });
+      callback(Object.keys(socket.rooms));
+    } else {
+      callback("User has aleady joined the chat room");
+    }
   });
 
   console.log("Connected");

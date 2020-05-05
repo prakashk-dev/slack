@@ -19,11 +19,19 @@ const Message = ({ location, username, id }) => {
       socket = io.connect(state.config.SOCKET_URL);
       socket.on("connect", () => console.log("Connected"));
       socket.on("disconnect", () => console.log("Disconnected"));
-      socket.emit("join", state.user.username, (msg) => console.log(msg));
 
       return () => socket.disconnect();
     }
   }, [state.config.SOCKET_URL]);
+
+  useEffect(() => {
+    if (group) {
+      const room = group.name;
+      socket.emit("join", { room, username: state.user.username }, (msg) =>
+        console.log(msg)
+      );
+    }
+  }, [id, group]);
 
   useEffect(() => {
     socket.on("messages", (msg) => {
@@ -35,11 +43,11 @@ const Message = ({ location, username, id }) => {
     return {
       username: state.user.username,
       message,
+      room: group.name,
     };
   };
 
   const sendMessage = () => {
-    console.log(formatMessage());
     socket.emit("message", formatMessage());
     divRef.current.scrollIntoView({ behavior: "smooth" });
     setMessage("");
@@ -67,7 +75,7 @@ const Message = ({ location, username, id }) => {
           <div className="message-container">
             {messages.length &&
               messages.map((message, index) => {
-                return (
+                return message.room === group.name ? (
                   <div
                     key={index}
                     className={
@@ -98,7 +106,7 @@ const Message = ({ location, username, id }) => {
                     </div>
                     <div className="time">{message.time}</div>
                   </div>
-                );
+                ) : null;
               })}
             <div ref={divRef} id="recentMessage"></div>
           </div>
