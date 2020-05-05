@@ -110,6 +110,11 @@ function handleIO(socket) {
   socket.on("message", (msg) => {
     io.emit("messages", formatMessage(msg));
   });
+
+  socket.on("typing", (data) => {
+    const message = data.active ? `${data.username} is typing ...` : null;
+    socket.to(data.room).emit("typing", { ...data, message });
+  });
 }
 const io = socketio(server);
 io.on("connection", handleIO);

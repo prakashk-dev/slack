@@ -13,6 +13,7 @@ const Message = ({ location, username, id }) => {
   const { state } = useContext(AppContext);
   const [group, gLoading, gError] = useFetch(`groups/${id}`, id);
   const divRef = useRef(null);
+  const [typing, setTyping] = useState(null);
 
   useEffect(() => {
     if (state.config.SOCKET_URL) {
@@ -39,10 +40,10 @@ const Message = ({ location, username, id }) => {
     });
   }, [messages]);
 
-  const formatMessage = () => {
+  const formatMessage = (msg = message) => {
     return {
       username: state.user.username,
-      message,
+      message: msg,
       room: group.name,
     };
   };
@@ -51,6 +52,28 @@ const Message = ({ location, username, id }) => {
     socket.emit("message", formatMessage());
     divRef.current.scrollIntoView({ behavior: "smooth" });
     setMessage("");
+  };
+
+  useEffect(() => {
+    socket.on("typing", (data) => {
+      setTyping(data);
+    });
+  }, [typing]);
+
+  const handleKeyDown = () => {
+    socket.emit("typing", {
+      username: state.user.username,
+      room: group.name,
+      active: true,
+    });
+  };
+
+  const handleBlur = () => {
+    socket.emit("typing", {
+      username: state.user.username,
+      room: group.name,
+      active: false,
+    });
   };
 
   return (
@@ -111,12 +134,16 @@ const Message = ({ location, username, id }) => {
             <div ref={divRef} id="recentMessage"></div>
           </div>
           <div className="message-footer">
-            <div className="icons"></div>
+            <div className="icons">
+              {typing && typing.room === group.name && typing.message}
+            </div>
             <input
               type="text"
               value={message}
               name="message"
               onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onBlur={handleBlur}
               onKeyPress={(e) => (e.key === "Enter" ? sendMessage() : null)}
             />
             <button disabled={!message.length} onClick={sendMessage}>
