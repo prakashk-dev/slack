@@ -3,9 +3,19 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background: #eee;
+  background: #fff;
 }
 
 #root {
   height: 100%;
 }
+
+$background_color: #1e88e5;
+$button_primary: #1e88e5;
+$color: #fff;
+$box_shadow: #aaa;
+$hover_color: #1565c0;
+
+$black: #000;
+$active_tab: #ddd;
+$active_link: #aaa;

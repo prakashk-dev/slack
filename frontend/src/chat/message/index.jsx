@@ -1,8 +1,13 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { AppContext } from "src/context";
 import { useFetch } from "src/utils/axios";
-import moment from "moment";
 import io from "socket.io-client";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faThumbsUp,
+  faArrowAltCircleRight,
+} from "@fortawesome/free-solid-svg-icons";
+import moment from "moment";
 import axios from "axios";
 import "./message.scss";
 let socket;
@@ -29,8 +34,10 @@ const Message = ({ location, username, id }) => {
   useEffect(() => {
     if (group) {
       const room = group.name;
-      socket.emit("join", { room, username: state.user.username }, (msg) =>
-        console.log(msg)
+      socket.emit(
+        "join",
+        { room, username: state.user.username, type: "admin" },
+        (msg) => console.log(msg)
       );
     }
   }, [id, group]);
@@ -49,8 +56,8 @@ const Message = ({ location, username, id }) => {
     };
   };
 
-  const sendMessage = () => {
-    socket.emit("message", formatMessage());
+  const sendMessage = (msg = undefined) => {
+    socket.emit("message", msg || formatMessage());
     divRef.current.scrollIntoView({ behavior: "smooth" });
     setMessage("");
   };
@@ -77,6 +84,27 @@ const Message = ({ location, username, id }) => {
     });
   };
 
+  const handleSendLike = () => {
+    setMessage("faThumbsUp");
+    const msg = {
+      ...formatMessage(),
+      message: "faThumbsUp",
+      type: "faIcon",
+    };
+    sendMessage(msg);
+  };
+
+  const sendButton = () => {
+    return message.length ? (
+      <FontAwesomeIcon onClick={sendMessage} icon={faArrowAltCircleRight} />
+    ) : (
+      <FontAwesomeIcon onClick={handleSendLike} icon={faThumbsUp} />
+    );
+  };
+
+  const convertToLocalTime = (time) => {
+    return moment(moment.utc(time).toDate()).local().format("h:m a");
+  };
   return (
     <div className={showSidebar ? "message sidebar-open" : "message"}>
       <div className="message-nav">
@@ -97,45 +125,46 @@ const Message = ({ location, username, id }) => {
       ) : (
         <div className="messages">
           <div className="message-container">
-            {messages.length &&
-              messages.map((message, index) => {
-                return message.room === group.name ? (
-                  <div
-                    key={index}
-                    className={
-                      message.type === "admin"
-                        ? "chat-item admin"
-                        : message.username === state.user.username
-                        ? "chat-item chat-self"
-                        : "chat-item chat-other"
-                    }
-                  >
-                    <div className="username">
-                      {message.username != state.user.username &&
-                        message.type != "admin" &&
-                        message.username}
-                    </div>
+            {messages.length
+              ? messages.map((msg, index) => {
+                  return msg.room === group.name ? (
                     <div
+                      key={index}
                       className={
-                        message.type === "admin"
-                          ? "chat-message center"
-                          : message.username === state.user.username
-                          ? "chat-message right"
-                          : "chat-message left"
+                        msg.type === "admin"
+                          ? "chat-item admin"
+                          : msg.username === state.user.username
+                          ? "chat-item chat-self"
+                          : "chat-item chat-other"
                       }
                     >
-                      {message.type === "admin"
-                        ? message.message
-                        : message.message}
+                      <div className="username">
+                        {msg.username != state.user.username &&
+                          msg.type != "admin" &&
+                          msg.username}
+                      </div>
+                      <div
+                        className={
+                          msg.type === "admin"
+                            ? "chat-message center"
+                            : msg.username === state.user.username
+                            ? msg.type === "faIcon"
+                              ? "chat-message chat-right chat-emoji"
+                              : "chat-message right"
+                            : "chat-message left"
+                        }
+                      >
+                        {msg.type == "faIcon" ? (
+                          <FontAwesomeIcon icon={faThumbsUp} />
+                        ) : (
+                          msg.message
+                        )}
+                      </div>
+                      <div className="time">{convertToLocalTime(msg.time)}</div>
                     </div>
-                    <div className="time">
-                      {moment(moment.utc(message.time).toDate())
-                        .local()
-                        .format("h:m a")}
-                    </div>
-                  </div>
-                ) : null;
-              })}
+                  ) : null;
+                })
+              : null}
             <div ref={divRef} id="recentMessage"></div>
           </div>
           <div className="message-footer">
@@ -151,9 +180,7 @@ const Message = ({ location, username, id }) => {
               onBlur={handleBlur}
               onKeyPress={(e) => (e.key === "Enter" ? sendMessage() : null)}
             />
-            <button disabled={!message.length} onClick={sendMessage}>
-              send
-            </button>
+            <button>{sendButton()}</button>
           </div>
         </div>
       )}

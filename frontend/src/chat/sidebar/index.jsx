@@ -46,7 +46,7 @@ const Sidebar = ({ groupId }) => {
         </div>
         <div className="users-list">
           {uLoading && <li>Loading ... </li>}
-          {uError && <div className="error">{error}</div>}
+          {uError && <div className="error">{uError}</div>}
           {user && user.friends.length ? (
             user.friends.map((friend) => {
               return <li key={friend._id}>{friend.username}</li>;

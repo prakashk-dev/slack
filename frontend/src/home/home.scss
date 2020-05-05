@@ -1,3 +1,5 @@
+@import "src/style.scss";
+
 .home {
   display: grid;
   grid-template-rows: 80px 1fr;
@@ -5,10 +7,12 @@
   .body {
     justify-self: center;
     display: grid;
-    border: 2px solid #2a2a2a;
+    box-shadow: 0px 4px 12px 4px $box_shadow;
+    border-radius: 12px;
     width: 450px;
     height: 550px;
     margin-top: 50px;
+    padding-bottom: 12px;
 
     .heading {
       text-align: center;

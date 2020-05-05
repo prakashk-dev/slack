@@ -79,23 +79,19 @@ function handleIO(socket) {
   socket.on("join", (data, callback) => {
     const { room, username } = data;
     const rooms = Object.keys(socket.rooms);
+
     if (!rooms.includes(room)) {
       socket.join(room, () => {
-        socket.emit(
-          "messages",
-          formatMessage(
-            { username, room, message: `Welcome to the ${room} room.` },
-            "admin"
-          )
-        );
+        const message = formatMessage({
+          ...data,
+          message: `Welcome to the ${room} room.`,
+        });
+        socket.emit("messages", message);
         socket
           .to(room)
           .emit(
             "messages",
-            formatMessage(
-              { username, room, message: `${username} has joined.` },
-              "admin"
-            )
+            formatMessage({ ...data, message: `${username} has joined.` })
           );
       });
       callback(Object.keys(socket.rooms));

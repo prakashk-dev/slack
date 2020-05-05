@@ -1,10 +1,11 @@
 const moment = require("moment");
 
-function formatMessage(message, type = undefined) {
+function formatMessage(message) {
+  const time = moment.utc().format();
   return {
     ...message,
-    type,
-    time: moment.utc().format(),
+    type: message.type,
+    time,
   };
 }
 

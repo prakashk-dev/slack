@@ -53,6 +53,9 @@ async function findById(req, res) {
   if (!req.params.id) {
     return res.json({ error: "Group id is required" });
   }
+  if (req.params.id === "welcome") {
+    return res.json({ name: "Bhet Ghat", users: [] });
+  }
   try {
     const group = await Group.findById({ _id: req.params.id })
       .populate("users", "username")

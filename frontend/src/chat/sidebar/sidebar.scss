@@ -1,15 +1,18 @@
+@import "src/style.scss";
+
 .sidebar {
   display: grid;
   grid-template-rows: 60px 1fr 1fr;
+  box-shadow: 0px 0px 1px 1px $box_shadow inset;
 
   .app-logo {
-    background-color: blue;
     display: grid;
     justify-items: center;
     align-items: center;
-    color: white;
     font-size: 1.2em;
     font-weight: bold;
+    color: $color;
+    background-color: $background_color;
   }
   .rooms,
   .users {
@@ -18,24 +21,17 @@
     height: calc(50vh - 30px);
   }
 
-  .rooms {
-    background-color: pink;
-  }
-
-  .users {
-    background-color: mediumorchid;
-  }
-
   .rooms-heading,
   .users-heading {
     display: grid;
     grid-template-columns: 40px 1fr;
-    justify-items: center;
     align-items: center;
-    background-color: #eee;
-    color: black;
+    box-shadow: 0px 1px 2px $box_shadow;
+    background-color: $active_tab;
+    font-weight: 600;
 
     .caret {
+      justify-self: center;
       font-size: 1.5em;
       transition: 0.3s ease-in-out;
       cursor: pointer;
@@ -50,8 +46,10 @@
       padding: 16px 24px;
       list-style: none;
       cursor: pointer;
+      transition: 0.2s ease-in-out;
       &:hover {
-        background-color: goldenrod;
+        background-color: $background_color;
+        color: $color;
       }
 
       &:last-child {
@@ -59,7 +57,8 @@
       }
     }
     li.active {
-      background: darkseagreen;
+      background-color: $hover_color;
+      color: $color;
     }
   }
 }
