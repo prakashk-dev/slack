@@ -79,7 +79,7 @@ function handleIO(socket) {
   socket.on("join", (data, callback) => {
     const { room, username } = data;
     const rooms = Object.keys(socket.rooms);
-
+    console.log("Your rooms: ", rooms);
     if (!rooms.includes(room)) {
       socket.join(room, () => {
         const message = formatMessage({
@@ -94,17 +94,19 @@ function handleIO(socket) {
             formatMessage({ ...data, message: `${username} has joined.` })
           );
       });
-      callback(Object.keys(socket.rooms));
+      callback(`Users rooms: ${Object.keys(socket.rooms)}`);
     } else {
-      callback("User has aleady joined the chat room");
+      callback(`User has aleady joined the chat room ${room}`);
     }
   });
 
   console.log("Connected");
+  socket.on("disconnecting", console.log);
+  socket.on("error", console.log);
   socket.on("disconnect", console.log);
 
   socket.on("message", (msg) => {
-    io.emit("messages", formatMessage(msg));
+    socket.broadcast.emit("messages", formatMessage(msg));
   });
 
   socket.on("typing", (data) => {

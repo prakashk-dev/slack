@@ -11,7 +11,6 @@ import moment from "moment";
 import axios from "axios";
 import "./message.scss";
 let socket;
-
 const Message = ({ location, username, id }) => {
   const [showSidebar, setShowSidebar] = useState(true);
   const [message, setMessage] = useState("");
@@ -25,7 +24,13 @@ const Message = ({ location, username, id }) => {
     if (state.config.SOCKET_URL) {
       socket = io.connect(state.config.SOCKET_URL);
       socket.on("connect", () => console.log("Connected"));
-      socket.on("disconnect", () => console.log("Disconnected"));
+      socket.on("disconnect", (reason) =>
+        console.log("Disconnected: ", reason)
+      );
+      socket.on("error", (error) => console.log("Errors:", error));
+      socket.on("reconnect_attempt", () => {
+        console.log("Reconnecting");
+      });
 
       return () => socket.disconnect();
     }
@@ -37,16 +42,20 @@ const Message = ({ location, username, id }) => {
       socket.emit(
         "join",
         { room, username: state.user.username, type: "admin" },
-        (msg) => console.log(msg)
+        (msg) => {}
       );
     }
-  }, [id, group]);
+  }, [group]);
 
   useEffect(() => {
     socket.on("messages", (msg) => {
-      setMessages([...messages, msg]);
+      setMessages((message) => [...message, msg]);
+      messages.length && divRef.current.scrollIntoView({ behavior: "smooth" });
     });
-  }, [messages]);
+    socket.on("typing", (data) => {
+      setTyping(data);
+    });
+  }, []);
 
   const formatMessage = (msg = message) => {
     return {
@@ -57,49 +66,43 @@ const Message = ({ location, username, id }) => {
   };
 
   const sendMessage = (msg = undefined) => {
-    socket.emit("message", msg || formatMessage());
-    divRef.current.scrollIntoView({ behavior: "smooth" });
+    const message = msg || formatMessage();
+    socket.emit("message", message);
+    setMessages([...messages, message]);
     setMessage("");
+    divRef.current.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Refactor this
   useEffect(() => {
-    socket.on("typing", (data) => {
-      setTyping(data);
-    });
-  }, [typing]);
-
-  const handleKeyDown = () => {
-    socket.emit("typing", {
-      username: state.user.username,
-      room: group.name,
-      active: true,
-    });
-  };
-
-  const handleBlur = () => {
-    socket.emit("typing", {
-      username: state.user.username,
-      room: group.name,
-      active: false,
-    });
-  };
+    if (message.length) {
+      if (!typing) {
+        socket.emit("typing", {
+          username: state.user.username,
+          room: group.name,
+          active: true,
+        });
+        setTyping(true);
+      }
+    } else {
+      if (typing) {
+        socket.emit("typing", {
+          username: state.user.username,
+          room: group.name,
+          active: false,
+        });
+        setTyping(false);
+      }
+    }
+  }, [message]);
 
   const handleSendLike = () => {
-    setMessage("faThumbsUp");
     const msg = {
       ...formatMessage(),
       message: "faThumbsUp",
       type: "faIcon",
     };
     sendMessage(msg);
-  };
-
-  const sendButton = () => {
-    return message.length ? (
-      <FontAwesomeIcon onClick={sendMessage} icon={faArrowAltCircleRight} />
-    ) : (
-      <FontAwesomeIcon onClick={handleSendLike} icon={faThumbsUp} />
-    );
   };
 
   const convertToLocalTime = (time) => {
@@ -176,11 +179,17 @@ const Message = ({ location, username, id }) => {
               value={message}
               name="message"
               onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onBlur={handleBlur}
               onKeyPress={(e) => (e.key === "Enter" ? sendMessage() : null)}
             />
-            <button>{sendButton()}</button>
+            <button
+              onClick={() =>
+                message.length ? sendMessage() : handleSendLike()
+              }
+            >
+              <FontAwesomeIcon
+                icon={message.length ? faArrowAltCircleRight : faThumbsUp}
+              />
+            </button>
           </div>
         </div>
       )}

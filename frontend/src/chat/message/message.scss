@@ -126,6 +126,7 @@
         color: #ddd;
         font-style: italic;
         font-size: 0.9em;
+        padding-left: 10px;
       }
 
       input {
@@ -137,6 +138,7 @@
         line-height: 1.5;
         outline: none;
         transition: 300ms ease-in-out;
+        font-size: 14px;
         &:focus {
           outline: 0;
           box-shadow: 0 0 1px 1px $box_shadow;
@@ -150,6 +152,7 @@
         border: none;
         color: $background_color;
         justify-self: center;
+        background-color: $color;
         svg.fa-thumbs-up {
           margin-bottom: 2px;
         }

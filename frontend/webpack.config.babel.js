@@ -56,10 +56,6 @@ const dev = merge(config, {
     proxy: {
       // backend port should be the one that is running inside the container, not the one that is exposed
       "/api": "http://backend:5000",
-      "/socket.io": {
-        target: "http://backend:5000",
-        pathRewrite: { "^/socket.io": "" },
-      },
     },
     contentBase: resolveRoot("public"),
     host: "0.0.0.0",
