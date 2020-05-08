@@ -41,8 +41,14 @@
     .message-container {
       padding: 0px 8px;
       height: calc(100vh - 110px);
-      overflow-y: auto;
+      overflow-y: scroll;
       grid-gap: 10px;
+     
+      #recentMessage {
+        float: left;
+        clear: both;
+      }
+
     }
 
     .chat-other {
