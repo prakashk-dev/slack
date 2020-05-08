@@ -31,11 +31,10 @@ const Message = ({ location, username, id }) => {
       socket.on("reconnect_attempt", () => {
         console.log("Reconnecting");
       });
-
       return () => socket.disconnect();
     }
-  }, [state.config.SOCKET_URL]);
-
+  }, []);
+  
   useEffect(() => {
     if (group) {
       const room = group.name;
@@ -43,14 +42,14 @@ const Message = ({ location, username, id }) => {
         "join",
         { room, username: state.user.username, type: "admin" },
         (msg) => {}
-      );
+        );
+        divRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [group]);
 
   useEffect(() => {
     socket.on("messages", (msg) => {
       setMessages((message) => [...message, msg]);
-      messages.length && divRef.current.scrollIntoView({ behavior: "smooth" });
     });
     socket.on("typing", (data) => {
       setTyping(data);
@@ -64,6 +63,10 @@ const Message = ({ location, username, id }) => {
       room: group.name,
     };
   };
+
+  useEffect(() => {
+    divRef.current.scrollIntoView({ behavior: "smooth" });
+  }, [messages])
 
   const sendMessage = (msg = undefined) => {
     const message = msg || formatMessage();
@@ -168,7 +171,7 @@ const Message = ({ location, username, id }) => {
                   ) : null;
                 })
               : null}
-            <div ref={divRef} id="recentMessage"></div>
+          <div ref={divRef} id="recentMessage"></div>
           </div>
           <div className="message-footer">
             <div className="icons">
