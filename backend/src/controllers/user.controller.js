@@ -10,7 +10,7 @@ function list(req, res) {
       });
     }
     if (users.length === 0) {
-      return this.Success({ error: "No users found." });
+      return res.json({ error: "No users found." });
     }
     return res.json(users);
   });
