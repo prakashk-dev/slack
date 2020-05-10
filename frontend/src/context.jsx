@@ -8,13 +8,18 @@ const SAVE_USER = "SAVE_USER";
 const SAVE_CONFIG = "SAVE_CONFIG";
 
 // Initial state of the application
-export const initialStaate = retrieveState() || {
-  user: {
-    username: "",
-    gender: "",
-    ageGroup: "",
-  },
-  config: {},
+const state = retrieveState() || {};
+const user = state.user || {
+  username: "",
+  gender: "",
+  ageGroup: "",
+  friends: [],
+};
+const config = state.config || {};
+
+export const initialStaate = {
+  user,
+  config,
 };
 
 // Reducer

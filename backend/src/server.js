@@ -8,6 +8,8 @@ import mongoose from "mongoose";
 import config from "./config";
 import routes from "./routes";
 import socketio from "socket.io";
+import multer from "multer";
+import fs from "fs";
 import { seedData, unSeedData } from "./test-data/data";
 import {
   roomJoin,
@@ -61,6 +63,39 @@ app.get("/api/seed", async (req, res) => {
 app.get("/api/unseed", async (req, res) => {
   const result = await unSeedData();
   return res.json(result);
+});
+
+const imageDir = () => path.join(__dirname, `../static/images`);
+
+let storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dest = req.body.room
+      ? `${imageDir()}/${req.body.room}`
+      : `${imageDir()}/undefined-room`;
+
+    !fs.existsSync(dest) && fs.mkdirSync(dest);
+    cb(null, dest);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+const upload = multer({ storage }).single("file");
+
+app.post("/api/upload", (req, res, next) => {
+  upload(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      return res.json({
+        message: "Somethign went wrong from multer",
+        error: err,
+      });
+    } else if (err) {
+      return res.json({ message: "Somethign went wrong", error: err });
+    }
+    // /use/app comes from docker
+    const image = req.file.path.replace("/usr/app", "/api");
+    return res.json({ image: image });
+  });
 });
 
 const port = process.env.PORT || "8080";
