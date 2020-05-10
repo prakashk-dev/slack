@@ -83,7 +83,7 @@ const Message = ({ location, username, id }) => {
         { room, username: state.user.username, type: "admin" },
         (msg) => {}
       );
-      divRef.current.scrollIntoView({ behavior: "smooth" });
+      divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [group]);
 
@@ -96,7 +96,7 @@ const Message = ({ location, username, id }) => {
   };
 
   useEffect(() => {
-    divRef.current.scrollIntoView({ behavior: "smooth" });
+    divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const sendMessage = (msg = undefined) => {
@@ -104,7 +104,6 @@ const Message = ({ location, username, id }) => {
     socket.emit("message", message);
     setMessages((prevMessages) => [...prevMessages, message]);
     setMessage("");
-    divRef.current.scrollIntoView({ behavior: "smooth" });
   };
 
   // Refactor this
