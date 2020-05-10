@@ -147,7 +147,7 @@ const Message = ({ location, username, id }) => {
         <p>Chat Room - {group ? group.name : "Bhet-Ghat"}</p>
         <div className="settings">
           <div className="gear" onClick={() => setShowSidebar(!showSidebar)}>
-            &#9881;
+            <div className={showSidebar ? "info" : "info-hidden"}>i</div>
           </div>
         </div>
       </div>
