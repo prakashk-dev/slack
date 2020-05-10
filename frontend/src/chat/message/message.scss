@@ -44,9 +44,8 @@
       overflow-y: auto;
       grid-gap: 10px;
     }
-    .image-container {
-      width: 400px;
-      height: 400px;
+    .chat-image {
+      width: 100%;
     }
 
     .chat-other {
@@ -88,7 +87,6 @@
       grid-template-rows: 18px auto 12px;
 
       .username {
-        justify-self: end;
         font-size: 0.8em;
         color: gray;
       }

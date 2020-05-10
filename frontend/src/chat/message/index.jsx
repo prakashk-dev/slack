@@ -38,7 +38,13 @@ const Message = ({ location, username, id }) => {
       formData.append("file", files[0]);
       Axios.post("/api/upload", formData)
         .then((res) => {
-          sendMessage();
+          sendMessage({
+            file: {
+              image: res.data.image,
+            },
+            username: state.user.username,
+            room: group.name,
+          });
         })
         .catch((err) => console.error(err));
     },
@@ -58,7 +64,7 @@ const Message = ({ location, username, id }) => {
       });
 
       socket.on("messages", (msg) => {
-        setMessages((message) => [...message, msg]);
+        setMessages((prevMessages) => [...prevMessages, msg]);
         messages.length &&
           divRef.current.scrollIntoView({ behavior: "smooth" });
       });
@@ -91,7 +97,7 @@ const Message = ({ location, username, id }) => {
   const sendMessage = (msg = undefined) => {
     const message = msg || formatMessage();
     socket.emit("message", message);
-    setMessages([...messages, message]);
+    setMessages((prevMessages) => [...prevMessages, message]);
     setMessage("");
     divRef.current.scrollIntoView({ behavior: "smooth" });
   };
@@ -182,6 +188,12 @@ const Message = ({ location, username, id }) => {
                       >
                         {msg.type == "faIcon" ? (
                           <FontAwesomeIcon icon={faThumbsUp} />
+                        ) : msg.file && msg.file.image ? (
+                          <img
+                            className="chat-image"
+                            src={msg.file.image}
+                            alt="Image not found"
+                          ></img>
                         ) : (
                           msg.message
                         )}
