@@ -41,6 +41,7 @@
   .rooms-list,
   .users-list {
     overflow-y: auto;
+    padding-bottom: 16px;
 
     li {
       padding: 16px 24px;
@@ -50,10 +51,6 @@
       &:hover {
         background-color: $background_color;
         color: $color;
-      }
-
-      &:last-child {
-        padding-bottom: 32px;
       }
     }
     li.active {

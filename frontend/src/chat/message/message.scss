@@ -294,6 +294,7 @@
 
       .users-list {
         overflow-y: auto;
+        padding-bottom: 16px;
 
         .user {
           display: grid;
@@ -315,10 +316,6 @@
             padding: 16px 24px;
             list-style: none;
             align-self: center;
-
-            &:last-child {
-              padding-bottom: 32px;
-            }
           }
         }
       }
