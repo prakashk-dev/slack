@@ -28,11 +28,11 @@
         cursor: pointer;
         transition: 1s linear;
         .info {
-          width: 25px;
-          height: 25px;
+          width: 16px;
+          height: 16px;
           border: 3px solid #2a2a2a;
           border-radius: 50%;
-          font-size: 1.5em;
+          font-size: 1em;
           display: grid;
           justify-items: center;
           align-items: center;
@@ -60,6 +60,7 @@
       height: calc(100vh - 135px);
       overflow-y: auto;
       grid-gap: 10px;
+      position: relative;
 
       #recentMessage {
         float: left;
@@ -140,12 +141,11 @@
 
     .message-footer {
       display: grid;
-      grid-template-columns: 50px 1fr 35px;
+      grid-template-columns: 50px 1fr 50px;
       grid-template-rows: auto 20px;
       grid-template-areas:
         "icon input send"
         ". typing .";
-      grid-column-gap: 10px;
       align-items: center;
       width: 100%;
       margin: auto;
@@ -198,7 +198,7 @@
         border: none;
         color: $background_color;
         justify-self: center;
-        background-color: $color;
+        background-color: none;
         svg.fa-thumbs-up {
           margin-bottom: 2px;
         }
@@ -209,6 +209,43 @@
         &:disabled {
           opacity: 0.6;
           cursor: not-allowed;
+        }
+      }
+    }
+  }
+  .messages-file-preview {
+    @extend .messages;
+    grid-template-rows: 1fr 100px 65px;
+    grid-row-gap: 0px;
+    .message-container {
+      height: calc(100vh - 235px);
+    }
+    .file_preview {
+      position: relative;
+      height: 100px;
+      z-index: 1;
+      background: white;
+      box-shadow: 0px -1px 2px 0px #eee;
+      img {
+        height: 100px;
+        width: 100px;
+      }
+      .removeImage {
+        position: absolute;
+        left: 75px;
+        top: 2px;
+        border: 1px solid white;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        display: grid;
+        justify-items: center;
+        align-items: center;
+        font-size: 0.6em;
+        cursor: pointer;
+        color: white;
+        &:hover {
+          background: #aaa;
         }
       }
     }

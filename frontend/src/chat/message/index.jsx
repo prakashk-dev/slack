@@ -30,26 +30,42 @@ const Message = ({ location, username, id }) => {
   const divRef = useRef(null);
   const [typing, setTyping] = useState(null);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const [file, setFile] = useState(null);
 
   const onDrop = useCallback(
     (files) => {
-      const formData = new FormData();
-      formData.append("room", group.name);
-      formData.append("file", files[0]);
-      Axios.post("/api/upload", formData)
-        .then((res) => {
-          sendMessage({
-            file: {
-              image: res.data.image,
-            },
-            username: state.user.username,
-            room: group.name,
-          });
-        })
-        .catch((err) => console.error(err));
+      setFile(files[0]);
     },
     [group]
   );
+
+  const sendMessageWithFile = () => {
+    const formData = new FormData();
+    formData.append("room", group.name);
+    formData.append("file", file);
+    Axios.post("/api/upload", formData)
+      .then((res) => {
+        setFile(null);
+        setMessage("");
+        sendMessage({
+          file: {
+            image: res.data.image,
+          },
+          message: message,
+          username: state.user.username,
+          room: group.name,
+        });
+      })
+      .catch((err) => console.error(err));
+  };
+
+  useEffect(() => {
+    if (file) {
+      document.getElementById("previewImage").src = window.URL.createObjectURL(
+        file
+      );
+    }
+  }, [file]);
 
   useEffect(() => {
     if (state.config.SOCKET_URL) {
@@ -97,7 +113,7 @@ const Message = ({ location, username, id }) => {
 
   useEffect(() => {
     divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, file]);
 
   const sendMessage = (msg = undefined) => {
     if (msg || message.length) {
@@ -140,6 +156,10 @@ const Message = ({ location, username, id }) => {
     sendMessage(msg);
   };
 
+  const removeImage = () => {
+    setFile(null);
+  };
+
   const convertToLocalTime = (time) => {
     return moment(moment.utc(time).toDate()).local().format("h:m a");
   };
@@ -161,7 +181,7 @@ const Message = ({ location, username, id }) => {
           </h1>{" "}
         </div>
       ) : (
-        <div className="messages">
+        <div className={file ? "messages-file-preview" : "messages"}>
           <div className="message-container">
             {messages.length
               ? messages.map((msg, index) => {
@@ -192,14 +212,15 @@ const Message = ({ location, username, id }) => {
                             : "chat-message left"
                         }
                       >
-                        {msg.type == "faIcon" ? (
-                          <FontAwesomeIcon icon={faThumbsUp} />
-                        ) : msg.file && msg.file.image ? (
+                        {msg.file && msg.file.image && (
                           <img
                             className="chat-image"
                             src={msg.file.image}
                             alt="Image not found"
                           ></img>
+                        )}
+                        {msg.type == "faIcon" ? (
+                          <FontAwesomeIcon icon={faThumbsUp} />
                         ) : (
                           msg.message
                         )}
@@ -211,6 +232,19 @@ const Message = ({ location, username, id }) => {
               : null}
             <div ref={divRef} id="recentMessage"></div>
           </div>
+          {file && (
+            <div className="file_preview">
+              <img
+                src="#"
+                alt="Invalid Image"
+                id="previewImage"
+                title="Remove Attachment"
+              />
+              <div className="removeImage" onClick={removeImage}>
+                X
+              </div>
+            </div>
+          )}
           <div className="message-footer">
             <div className="icons">
               <Dropzone onDrop={onDrop}>
@@ -229,19 +263,30 @@ const Message = ({ location, username, id }) => {
               value={message}
               name="message"
               onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={(e) => (e.key === "Enter" ? sendMessage() : null)}
+              onKeyPress={(e) =>
+                e.key === "Enter"
+                  ? file
+                    ? sendMessageWithFile()
+                    : sendMessage()
+                  : null
+              }
             />
             <button
               onClick={() =>
-                message.length ? sendMessage() : handleSendLike()
+                file
+                  ? sendMessageWithFile()
+                  : message.length
+                  ? sendMessage()
+                  : handleSendLike()
               }
             >
               <FontAwesomeIcon
-                icon={message.length ? faArrowAltCircleRight : faThumbsUp}
+                icon={
+                  message.length || file ? faArrowAltCircleRight : faThumbsUp
+                }
               />
             </button>
             <div className="typing">
-              {" "}
               {typing && typing.room === group.name && typing.message}
             </div>
           </div>
