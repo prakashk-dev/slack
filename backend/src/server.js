@@ -142,7 +142,7 @@ function handleIO(socket) {
 
   // for react native
   socket.on("chat", (msg) => {
-    socket.broadcast.emit("chat", formatMessage(msg));
+    io.emit("chat", formatMessage(msg));
   });
 
   socket.on("message", (msg) => {
