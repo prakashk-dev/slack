@@ -100,10 +100,12 @@ const Message = ({ location, username, id }) => {
   }, [messages]);
 
   const sendMessage = (msg = undefined) => {
-    const message = msg || formatMessage();
-    socket.emit("message", message);
-    setMessages((prevMessages) => [...prevMessages, message]);
-    setMessage("");
+    if (msg || message.length) {
+      const message = msg || formatMessage();
+      socket.emit("message", message);
+      setMessages((prevMessages) => [...prevMessages, message]);
+      setMessage("");
+    }
   };
 
   // Refactor this
