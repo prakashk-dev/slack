@@ -45,9 +45,9 @@ const Sidebar = ({ groupId }) => {
           Direct Messages
         </div>
         <div className="users-list">
-          {uLoading && <li>Loading ... </li>}
-          {uError && <div className="error">{uError}</div>}
-          {user && user.friends.length ? (
+          {uLoading ? <li>Loading ... </li>
+          : uError ? <div className="error">{uError}</div>
+          : user && user.friends.length ? (
             user.friends.map((friend) => {
               return <li key={friend._id}>{friend.username}</li>;
             })

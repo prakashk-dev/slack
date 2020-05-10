@@ -2,10 +2,10 @@ const KEY = "state";
 // helper function
 export const retrieveState = () => {
   try {
-    const context = localStorage.getItem(KEY);
+    const context = sessionStorage.getItem(KEY);
     return context ? JSON.parse(context) : null;
   } catch (e) {
-    console.error("Can not use localStorage", e.message);
+    console.error("Can not use sessionStorage", e.message);
     return null;
   }
 };
@@ -16,10 +16,10 @@ export const preserveState = (key, state) => {
     if (state) {
       const newData = data ? { ...data, [key]: state } : { [key]: state };
       console.log(newData);
-      localStorage.setItem(KEY, JSON.stringify(newData));
+      sessionStorage.setItem(KEY, JSON.stringify(newData));
     }
   } catch (error) {
-    console.error("Can not save to localStorage", error.message);
+    console.error("Can not save to sessionStorage", error.message);
     return null;
   }
 };
