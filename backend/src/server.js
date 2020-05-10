@@ -140,6 +140,11 @@ function handleIO(socket) {
   socket.on("error", console.log);
   socket.on("disconnect", console.log);
 
+  // for react native
+  socket.on("chat", (msg) => {
+    socket.broadcast.emit("chat", formatMessage(msg));
+  });
+
   socket.on("message", (msg) => {
     socket.broadcast.emit("messages", formatMessage(msg));
   });
