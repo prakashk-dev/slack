@@ -1,6 +1,14 @@
 import User from "../models/user.model";
+import jwt from "jsonwebtoken";
+import config from "../config";
+
 // get all users
 function list(req, res) {
+  if (!req.user) {
+    return res
+      .status(401)
+      .json({ error: "You don't have an access to this information." });
+  }
   User.find(null, "username messages friends gender ageGroup", (err, users) => {
     if (err) {
       return res.status(400).json({
@@ -17,6 +25,11 @@ function list(req, res) {
 }
 
 async function findOne(req, res) {
+  if (!req.user) {
+    return res
+      .status(401)
+      .json({ error: "You don't have an access to this information." });
+  }
   if (!req.params.username) {
     return res.json({ error: "Username is required" });
   }
@@ -35,24 +48,48 @@ async function findOne(req, res) {
   }
 }
 
-async function saveUser(req, res) {
-  const { gender, ageGroup, username } = req.body;
+async function loginOrRegisterUser(req, res) {
+  if (!req.body.username || !req.body.password) {
+    return res.status(401).json({
+      error: "username or password missing",
+    });
+  }
+  const { username, password } = req.body;
   try {
-    // try to find and update record, if not found create a new one (upsert does this )
-    await User.findOneAndUpdate(
-      { username },
-      { gender, ageGroup, username },
-      { upsert: true }
-    ).exec();
-    return res.json({ msg: "Successfully added/updated user information." });
+    const user = await User.findOne({ username }).exec();
+    // check pin if user exists
+    if (user) {
+      user.comparePassword(req.body.password, function (err, isMatch) {
+        if (isMatch && !err) {
+          user.password = undefined;
+          const token = jwt.sign(user, config.jwt_secret, {
+            expiresIn: 1440, //24 hours
+          });
+          return res.status(200).json({
+            token: token,
+          });
+        } else {
+          return res.status(401).json({
+            error: "Authentication failed, password not match",
+          });
+        }
+      });
+      // if user not exists register
+    } else {
+      User({ username, password }).save((err) => {
+        if (err) throw err;
+        user.password = undefined;
+        const token = jwt.sign(user, config.jwt_secret, {
+          expiresIn: 1440, //24 hours
+        });
+        return res.status(200).json({
+          token: token,
+        });
+      });
+    }
   } catch (e) {
     return res.json({ error: e.message });
   }
 }
 
-function uniqueUsername(req, res) {
-  const randomUsername = Math.random().toString(8).substr(2, 4);
-  return res.send(`User${randomUsername}`);
-}
-
-export { list, uniqueUsername, findOne, saveUser };
+export { list, findOne, loginOrRegisterUser };
