@@ -1,6 +1,5 @@
 import React, { createContext, useReducer } from "react";
 import { retrieveState, preserveState } from "src/utils";
-import { useFetch } from "src/utils/axios";
 import axios from "axios";
 
 // Define constacts action verbs
@@ -11,9 +10,6 @@ const SAVE_CONFIG = "SAVE_CONFIG";
 const state = retrieveState() || {};
 const user = state.user || {
   username: "",
-  gender: "",
-  ageGroup: "",
-  friends: [],
 };
 const config = state.config || {};
 

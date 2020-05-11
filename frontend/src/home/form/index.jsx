@@ -4,41 +4,29 @@ import axios from "axios";
 import { AppContext } from "src/context";
 
 import "./form.scss";
+const PIN = /^\d{4}$/;
 
 const HomeForm = () => {
-  const { state, saveUser, fetchConfig } = useContext(AppContext);
-  const [valid, setValid] = useState(false);
-  const [editable, setEditable] = useState(false);
-  const [user, setUser] = useState(state.user);
+  const { saveUser, fetchConfig } = useContext(AppContext);
+  const [username, setUsername] = useState("");
+  const [pin, setPin] = useState("");
+  const [retypePin, setRetypePin] = useState("");
   const [error, setError] = useState(null);
+  const [valid, setValid] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setUser((user) => ({ ...user, [name]: value }));
-  };
-
-  // If username is persited, do not ask backend for unique username
   useEffect(() => {
     fetchConfig();
-    async function fetchUsername() {
-      const res = await axios("/api/users/unique");
-      setUser((user) => ({ ...user, username: res.data }));
-    }
-    if (!user.username || !user.username.length) {
-      fetchUsername();
-    }
   }, []);
 
   // validatoin for submit button
   useEffect(() => {
-    const { gender, ageGroup, username } = user;
-    const isValid = (field) => field && field.length;
-    setValid(isValid(gender) && isValid(ageGroup) && isValid(username));
-  }, [user]);
+    const isValid = username.length && pin === retypePin;
+    setValid(isValid);
+  }, [username, pin, retypePin]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const error = await saveUser(user);
+    const error = await saveUser({ username, pin });
     if (error) {
       setError(error);
     } else {
@@ -46,102 +34,66 @@ const HomeForm = () => {
     }
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (!isNaN(value)) {
+      name === "pin" ? setPin(value) : setRetypePin(value);
+    }
+  };
+
+  const PinError = () => {
+    if (retypePin.length && retypePin !== pin) {
+      return (
+        <div className="pin-error">Your PIN and Retype PIN does not match.</div>
+      );
+    }
+    return null;
+  };
+
   return (
     <form className="form" onSubmit={handleSubmit}>
-      <p className="error">{error && error}</p>
-      <div className="form-control">
+      <div className={error ? "error" : ""}>{error && error}</div>
+      <div className="form-group">
         <label htmlFor="username">Username</label>
-        <div className="form-group username">
-          {editable ? (
-            <input
-              type="text"
-              placeholder="Pick a username for this session"
-              value={user.username}
-              name="username"
-              onChange={handleChange}
-            />
-          ) : (
-            <div className="username-unique">
-              <div className="username">{user.username}</div>
-              <button type="button" onClick={() => setEditable(!editable)}>
-                Change
-              </button>
-            </div>
-          )}
-        </div>
+        <input
+          type="text"
+          name="username"
+          id="username"
+          className="form-control"
+          onChange={(e) => setUsername(e.target.value)}
+        />
       </div>
-      <div className="form-control">
-        <label htmlFor="gender">Gender</label>
-        <div className="form-group gender">
-          <div className="input-group">
-            <input
-              type="radio"
-              name="gender"
-              id="gender"
-              value="female"
-              onChange={handleChange}
-              checked={user.gender === "female"}
-            />
-            Female
-          </div>
-          <div className="input-group">
-            <input
-              type="radio"
-              name="gender"
-              id="gender"
-              value="male"
-              onChange={handleChange}
-              checked={user.gender === "male"}
-            />
-            Male
-          </div>
-        </div>
+
+      <div className="form-group">
+        <label htmlFor="pin">PIN</label>
+        <input
+          type="password"
+          name="pin"
+          maxLength="4"
+          id="pin"
+          className="form-control"
+          value={pin}
+          onChange={handleChange}
+          placeholder="Choose your 4 digits pin"
+        />
       </div>
-      <div className="form-control">
-        <label htmlFor="ageGroup">Age Group</label>
-        <div className="form-group age-group">
-          <div className="input-group">
-            <input
-              type="radio"
-              name="ageGroup"
-              value="1"
-              onChange={handleChange}
-              checked={user.ageGroup === "1"}
-            />
-            Below 20 Years
-          </div>
-          <div className="input-group">
-            <input
-              type="radio"
-              name="ageGroup"
-              value="2"
-              onChange={handleChange}
-              checked={user.ageGroup === "2"}
-            />
-            20 - 30 Years
-          </div>
-          <div className="input-group">
-            <input
-              type="radio"
-              name="ageGroup"
-              value="3"
-              onChange={handleChange}
-              checked={user.ageGroup === "3"}
-            />
-            30 - 40 Years
-          </div>
-          <div className="input-group">
-            <input
-              type="radio"
-              name="ageGroup"
-              value="4"
-              onChange={handleChange}
-              checked={user.ageGroup === "4"}
-            />
-            40+ Years
-          </div>
-        </div>
+
+      <div className="form-group">
+        <label htmlFor="retypePin">Retype PIN</label>
+        <input
+          type="password"
+          name="retype_pin"
+          id="retypePin"
+          inputmode="numeric" // for ios and andriod
+          maxLength="4"
+          value={retypePin}
+          className="form-control"
+          onChange={handleChange}
+          placeholder="Retype your pin"
+        />
+        <PinError />
       </div>
+
       <div className="form-control form-footer">
         <button className="chat" disabled={!valid}>
           Let's Chat
