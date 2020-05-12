@@ -22,7 +22,7 @@ export const initialStaate = {
 export const appReducer = (state, { type, payload }) => {
   switch (type) {
     case SAVE_USER:
-      return { ...state, user: payload };
+      return { ...state, user: user };
     case SAVE_CONFIG:
       return { ...state, config: payload };
     default:
@@ -34,13 +34,13 @@ export const AppContext = createContext(initialStaate);
 export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialStaate);
   // Actions
-  const saveUser = async (user) => {
+  const saveOrAuthenticateUser = async (user) => {
     try {
-      await axios.post("/api/users", user);
+      await axios.post("/api/auth", user);
       preserveState("user", user);
       return dispatch({
         type: SAVE_USER,
-        payload: user,
+        payload: { username: user.username },
       });
     } catch (error) {
       return error.message;
@@ -62,6 +62,6 @@ export const AppProvider = ({ children }) => {
       });
     }
   };
-  const value = { state, saveUser, fetchConfig };
+  const value = { state, saveOrAuthenticateUser, fetchConfig };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

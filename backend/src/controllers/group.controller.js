@@ -2,11 +2,6 @@ import Group from "../models/group.model";
 
 // get all groups
 function list(req, res) {
-  if (!req.user) {
-    return res
-      .status(401)
-      .json({ error: "You don't have an access to this information." });
-  }
   Group.find((err, groups) => {
     if (err) {
       return res.status(400).json({ error: "Error Fetching Groups" });
@@ -19,11 +14,6 @@ function list(req, res) {
 }
 
 function groupName(req, res) {
-  if (!req.user) {
-    return res
-      .status(401)
-      .json({ error: "You don't have an access to this information." });
-  }
   Group.find(null, "name", (err, names) => {
     if (err) {
       return res.status(400).json({ error: "Error Fetching grops name" });
@@ -36,11 +26,6 @@ function groupName(req, res) {
 }
 
 function getRecent(req, res) {
-  if (!req.user) {
-    return res
-      .status(401)
-      .json({ error: "You don't have an access to this information." });
-  }
   Group.find()
     .limit(4)
     .sort({ name: 1 }) // replace with proper logic after
@@ -53,11 +38,6 @@ function getRecent(req, res) {
 }
 
 function getPopular(req, res) {
-  if (!req.user) {
-    return res
-      .status(401)
-      .json({ error: "You don't have an access to this information." });
-  }
   Group.find()
     .limit(4)
     .sort({ name: -1 }) // replace with proper logic afterwards
@@ -70,11 +50,6 @@ function getPopular(req, res) {
 }
 
 async function findById(req, res) {
-  if (!req.user) {
-    return res
-      .status(401)
-      .json({ error: "You don't have an access to this information." });
-  }
   if (!req.params.id) {
     return res.json({ error: "Group id is required" });
   }

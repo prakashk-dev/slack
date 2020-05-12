@@ -1,7 +1,8 @@
 import express from "express";
 import userRoutes from "./user.route";
 import groupRoutes from "./group.route";
-import authenticate from "../middleware/auth";
+import authMiddleware from "../middleware/auth";
+import authenticate from "./auth.route";
 
 const app = express();
 const router = express.Router();
@@ -23,13 +24,12 @@ router.get("/version", (req, res) => {
     },
   });
 });
+router.use("/auth", authenticate);
 
-router.use(authenticate);
+router.use(authMiddleware);
 
-//mount user routes at /users
+// Any route placed after this point should be authenticated
 router.use("/users", userRoutes);
 router.use("/groups", groupRoutes);
-
-//mount auth routes at /auth
 
 export default router;

@@ -1,31 +1,23 @@
 import User from "../models/user.model";
-import jwt from "jsonwebtoken";
-import config from "../config";
+import { createCookie, createToken } from "../helpers";
 
-//autheticate the user and if they are authenticated then provide the token
-function setup(req, res) {
-  //if no user name or password provided
+async function loginOrRegisterUser(req, res) {
   if (!req.body.username || !req.body.password) {
     return res.status(401).json({
-      error: "username or pin missing",
+      error: "username or password missing",
     });
   }
-  User.findOne({ username: req.body.username }, (err, user) => {
-    if (err) throw err;
-    if (!user) {
-      return res.status(401).json({
-        error: "Authentication failed, user not found",
-      });
-    } else if (user) {
-      //check if password match
+  const { username, password } = req.body;
+  try {
+    const user = await User.findOne({ username }).exec();
+    if (user) {
       user.comparePassword(req.body.password, function (err, isMatch) {
         if (isMatch && !err) {
-          user.password = undefined;
-          const token = jwt.sign(user, config.jwt_secret, {
-            expiresIn: 1440, //24 hours
-          });
+          // set cookie to the frontend
+          let token = createToken(user);
+          res.cookie(createCookie(token));
           return res.status(200).json({
-            token: token,
+            token,
           });
         } else {
           return res.status(401).json({
@@ -33,8 +25,28 @@ function setup(req, res) {
           });
         }
       });
+      // if user not exists register
+    } else {
+      User({ username, password }).save((err, user) => {
+        if (err) throw err;
+        // set cookie to the frontend
+        // also include username and hashed password so that when we decode the token
+        // we can verify that the username and password match to our database
+        const token = createToken(user);
+        res.cookie(createCookie(token));
+        return res.status(200).json({
+          token,
+        });
+      });
     }
-  });
+  } catch (e) {
+    return res.json({ error: e.message });
+  }
 }
 
-export { setup };
+export { loginOrRegisterUser };
+
+/**
+ * See what information should be Included in the json web token
+ * What information should be return back to the frontend
+ */

@@ -4,13 +4,12 @@ import axios from "axios";
 import { AppContext } from "src/context";
 
 import "./form.scss";
-const PIN = /^\d{4}$/;
 
 const HomeForm = () => {
-  const { saveUser, fetchConfig } = useContext(AppContext);
+  const { saveOrAuthenticateUser, fetchConfig } = useContext(AppContext);
   const [username, setUsername] = useState("");
-  const [pin, setPin] = useState("");
-  const [retypePin, setRetypePin] = useState("");
+  const [password, setPassword] = useState("");
+  const [rePassword, setRePassword] = useState("");
   const [error, setError] = useState(null);
   const [valid, setValid] = useState(false);
 
@@ -20,13 +19,13 @@ const HomeForm = () => {
 
   // validatoin for submit button
   useEffect(() => {
-    const isValid = username.length && pin === retypePin;
+    const isValid = username.length && password === rePassword;
     setValid(isValid);
-  }, [username, pin, retypePin]);
+  }, [username, password, rePassword]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const error = await saveUser({ username, pin });
+    const error = await saveOrAuthenticateUser({ username, password });
     if (error) {
       setError(error);
     } else {
@@ -37,14 +36,16 @@ const HomeForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (!isNaN(value)) {
-      name === "pin" ? setPin(value) : setRetypePin(value);
+      name === "password" ? setPassword(value) : setRePassword(value);
     }
   };
 
   const PinError = () => {
-    if (retypePin.length && retypePin !== pin) {
+    if (rePassword.length && rePassword !== password) {
       return (
-        <div className="pin-error">Your PIN and Retype PIN does not match.</div>
+        <div className="password-error">
+          Your PIN and Retype PIN does not match.
+        </div>
       );
     }
     return null;
@@ -65,31 +66,32 @@ const HomeForm = () => {
       </div>
 
       <div className="form-group">
-        <label htmlFor="pin">PIN</label>
+        <label htmlFor="password">PIN</label>
         <input
           type="password"
-          name="pin"
+          name="password"
           maxLength="4"
-          id="pin"
+          inputMode="numeric"
+          id="password"
           className="form-control"
-          value={pin}
+          value={password}
           onChange={handleChange}
-          placeholder="Choose your 4 digits pin"
+          placeholder="Choose your 4 digits password"
         />
       </div>
 
       <div className="form-group">
-        <label htmlFor="retypePin">Retype PIN</label>
+        <label htmlFor="rePassword">Retype PIN</label>
         <input
           type="password"
-          name="retype_pin"
-          id="retypePin"
-          inputmode="numeric" // for ios and andriod
+          name="retype_password"
+          id="rePassword"
+          inputMode="numeric" // for ios and andriod
           maxLength="4"
-          value={retypePin}
+          value={rePassword}
           className="form-control"
           onChange={handleChange}
-          placeholder="Retype your pin"
+          placeholder="Retype your password"
         />
         <PinError />
       </div>

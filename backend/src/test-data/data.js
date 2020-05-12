@@ -1,5 +1,4 @@
 import { UserModel, GroupModel } from "../models";
-const chalk = require("chalk");
 
 let users = [];
 const rooms = [

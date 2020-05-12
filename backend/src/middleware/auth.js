@@ -6,25 +6,28 @@ const router = express.Router();
 
 //adding middleware for unauthorised access
 router.use((req, res, next) => {
-  //checking token from header
-  const token = req.headers["token"];
+  //checking token from cookie or header
+  const token = req.cookies.token || req.headers.token;
   if (token) {
     //verify secret and check access level
-    jwt.verify(token, config.jwt_secret, (err, user) => {
+    jwt.verify(token, config.jwt_secret, (err, decoded) => {
       if (err) {
         return res.status(401).json({
           error: "failed to authenticate token",
         });
       } else {
-        //check access level
-        req.user = user;
+        // const { username, password } = decoded;
+        // check if that username and password is valid
+        //check access level - token is authenticated but might not be authorized
+        req.decoded = decoded;
         next();
       }
     });
   } else {
     //if no header send to the end points and this will handle the error
-    req.user = undefined;
-    next();
+    return res.status(401).json({
+      error: "You are not authorized",
+    });
   }
 });
 
