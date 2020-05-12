@@ -85,11 +85,9 @@ async function seedData() {
     return { msg };
   };
 
-  let result;
-
   try {
-    result = await insertRoomData();
-    return msg;
+    const result = await insertRoomData();
+    return result;
   } catch (err) {
     console.error("Error inserting data into the database", err.message);
     return { error: err.message };

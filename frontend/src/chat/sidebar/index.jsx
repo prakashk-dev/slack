@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useReducer,
+  useRef,
+} from "react";
 import { navigate } from "@reach/router";
 import { useFetch } from "src/utils/axios";
 import { AppContext } from "src/context";
@@ -7,22 +13,74 @@ import "./sidebar.scss";
 
 const Sidebar = ({ groupId }) => {
   const [rooms, rLoading, rError] = useFetch("groups");
-  const { state } = useContext(AppContext);
+  const { state, logout } = useContext(AppContext);
   const [user, uLoading, uError] = useFetch(`users/${state.user.username}`);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
+  useEffect(() => {
+    const removeListener = () =>
+      document.removeEventListener("mousedown", handleClick);
+    const handleClick = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setProfileOpen(false);
+        removeListener();
+      }
+    };
+    if (profileOpen) {
+      document.addEventListener("mousedown", handleClick);
+    } else {
+      removeListener();
+    }
+    return removeListener;
+  }, [profileOpen]);
+
+  const Profile = () => {
+    let text = uLoading ? "..." : uError ? uError.error : user.username;
+    return (
+      <div className="user-profile">
+        <div className="profile-picture">
+          <img src="/assets/kathmandu.png" alt="" />
+        </div>
+        {text}
+        <div className="gear-icon">
+          <i
+            className={profileOpen ? "las la-cog active" : "las la-cog"}
+            onClick={() => setProfileOpen(!profileOpen)}
+          ></i>
+        </div>
+        {profileOpen && (
+          <div className="profile-popup" ref={dropdownRef}>
+            <i className="las la-caret-up"></i>
+            <div className="profile-status">
+              <div className="status">
+                <div className="status-bar">40%</div>
+              </div>
+              <div className="profile-status-text">Profile status</div>
+            </div>
+            <li>Profile</li>
+            <li onClick={handleLogout}>Logout</li>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
   return (
     <div className="sidebar">
-      <div className="app-logo" onClick={() => navigate("/")}>
-        BHET-GHAT CHAT
-      </div>
+      <Profile />
       <div className="rooms">
         <div className="rooms-heading">
-          <div className="caret"> - </div>
+          <i className="las la-angle-right"></i>
           Rooms
         </div>
         <div className="rooms-list">
           {rLoading ? (
-            <div className="loading">Loading ... </div>
+            <div className="loading">... </div>
           ) : rError ? (
             <div className="error"> {rError} </div>
           ) : (
@@ -41,18 +99,20 @@ const Sidebar = ({ groupId }) => {
       </div>
       <div className="users">
         <div className="users-heading">
-          <div className="caret">-</div>
+          <i className="las la-angle-right"></i>
           Direct Messages
         </div>
         <div className="users-list">
-          {uLoading ? <li>Loading ... </li>
-          : uError ? <div className="error">{uError}</div>
-          : user && user.friends.length ? (
+          {uLoading ? (
+            <li className="loading"> ... </li>
+          ) : uError ? (
+            <div className="error">{uError}</div>
+          ) : user && user.friends.length ? (
             user.friends.map((friend) => {
               return <li key={friend._id}>{friend.username}</li>;
             })
           ) : (
-            <div> No friends.</div>
+            <div className="no-friends">No Friends</div>
           )}
         </div>
       </div>

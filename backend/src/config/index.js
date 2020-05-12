@@ -5,6 +5,10 @@ const config = {
     port: process.env.MONGO_PORT || "3005",
   },
   jwt_secret: process.env.JWT_SECRET || "supersecret",
+  socket_url:
+    process.env.NODE_ENV === "production"
+      ? "https://socket.bhetghat.com"
+      : "http://localhost:3001",
 };
 
 export default config;

@@ -12,6 +12,7 @@ export const createToken = (user) => {
   const payload = {
     sub: user._id,
     username: user.username,
+    socket: config.socket_url,
   };
   try {
     return jwt.sign(payload, config.jwt_secret, { expiresIn: "375d" });

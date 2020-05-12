@@ -68,6 +68,7 @@ const Message = ({ location, username, id }) => {
   }, [file]);
 
   useEffect(() => {
+    console.log(state);
     if (state.config.SOCKET_URL) {
       socket = io.connect(state.config.SOCKET_URL);
       socket.on("connect", () => console.log("Connected"));
@@ -89,7 +90,7 @@ const Message = ({ location, username, id }) => {
       });
       return () => socket.disconnect();
     }
-  }, []);
+  }, [state.config.SOCKET_URL]);
 
   useEffect(() => {
     if (group) {
@@ -167,10 +168,12 @@ const Message = ({ location, username, id }) => {
     <div className={showSidebar ? "message sidebar-open" : "message"}>
       <div className="message-nav">
         <p>Chat Room - {group ? group.name : "Bhet-Ghat"}</p>
-        <div className="settings">
-          <div className="gear" onClick={() => setShowSidebar(!showSidebar)}>
-            <div className={showSidebar ? "info" : "info-hidden"}>i</div>
-          </div>
+        <div className="gear" onClick={() => setShowSidebar(!showSidebar)}>
+          <i
+            className={
+              showSidebar ? "las la-info-circle" : "las la-info-circle active"
+            }
+          ></i>
         </div>
       </div>
       {id === "welcome" ? (
@@ -299,10 +302,13 @@ const Message = ({ location, username, id }) => {
             {group ? group.name : "Bhet-Ghat"}
           </div>
           <div className="users">
-            <div className="heading">Users</div>
+            <div className="heading">
+              <i className="las la-angle-right"></i>
+              Users
+            </div>
             <div className="users-list">
               {gLoading ? (
-                <div> Loading ... </div>
+                <div className="loading">... </div>
               ) : gError ? (
                 <div className="error"> {gError} </div>
               ) : group.users.length ? (
@@ -317,9 +323,7 @@ const Message = ({ location, username, id }) => {
                   );
                 })
               ) : (
-                <div className="no-user">
-                  There is no one in this room yet. Let invite your friends :).
-                </div>
+                <div className="no-user">No Users</div>
               )}
             </div>
           </div>

@@ -1,67 +1,85 @@
 import React, { createContext, useReducer } from "react";
 import { retrieveState, preserveState } from "src/utils";
+import Cookies from "js-cookie";
+import jwt from "jsonwebtoken";
+
 import axios from "axios";
 
 // Define constacts action verbs
-const SAVE_USER = "SAVE_USER";
+const DECODE_TOKEN = "DECODE_TOKEN";
 const SAVE_CONFIG = "SAVE_CONFIG";
 
 // Initial state of the application
-const state = retrieveState() || {};
-const user = state.user || {
-  username: "",
+export const initialState = () => {
+  const token = Cookies.get("token");
+  if (token) {
+    const decoded = jwt.decode(token);
+    return {
+      user: { username: decoded.username },
+      config: { SOCKET_URL: decoded.socket },
+    };
+  }
+  return { user: { username: "" }, config: { SOCKET_URL: "" } };
 };
-const config = state.config || {};
 
-export const initialStaate = {
-  user,
-  config,
-};
+const INIT_STATE = initialState();
 
+console.log(initialState());
 // Reducer
 export const appReducer = (state, { type, payload }) => {
   switch (type) {
-    case SAVE_USER:
-      return { ...state, user: user };
-    case SAVE_CONFIG:
-      return { ...state, config: payload };
+    case DECODE_TOKEN:
+      return {
+        user: { username: payload.username },
+        config: { SOCKET_URL: payload.socket },
+      };
     default:
-      return initialStaate;
+      return INIT_STATE;
   }
 };
 
-export const AppContext = createContext(initialStaate);
 export const AppProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(appReducer, initialStaate);
+  const [state, dispatch] = useReducer(appReducer, INIT_STATE);
   // Actions
   const saveOrAuthenticateUser = async (user) => {
     try {
-      await axios.post("/api/auth", user);
-      preserveState("user", user);
+      const res = await axios.post("/api/auth", user);
+      if (res.data.error) return res.data.error;
+      const token = res.data.token;
+
       return dispatch({
-        type: SAVE_USER,
-        payload: { username: user.username },
+        type: DECODE_TOKEN,
+        payload: jwt.decode(token),
       });
     } catch (error) {
       return error.message;
     }
   };
 
-  const fetchConfig = async () => {
-    try {
-      const res = await axios.get("/api/config");
-      preserveState("config", res.data);
-      return dispatch({
-        type: SAVE_CONFIG,
-        payload: res.data,
-      });
-    } catch (error) {
-      return dispatch({
-        type: SAVE_CONFIG,
-        payload: null,
-      });
-    }
+  const isAuthenticated = () => {
+    return Cookies.get("token");
   };
-  const value = { state, saveOrAuthenticateUser, fetchConfig };
+  const isAuthorised = (role) => {
+    const token = isAuthenticated();
+    if (token) {
+      const decoded = jwt.decode(token);
+      return decoded.roles.includes(role);
+    }
+    return false;
+  };
+
+  const logout = () => {
+    const token = isAuthenticated();
+    if (token) Cookies.remove("token");
+  };
+
+  const value = {
+    state,
+    saveOrAuthenticateUser,
+    isAuthenticated,
+    isAuthorised,
+    logout,
+  };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
+export const AppContext = createContext(INIT_STATE);

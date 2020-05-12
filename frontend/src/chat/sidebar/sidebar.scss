@@ -5,7 +5,7 @@
   grid-template-rows: 60px 1fr 1fr;
   box-shadow: 0px 0px 1px 1px $box_shadow inset;
 
-  .app-logo {
+  .user-profile {
     display: grid;
     justify-items: center;
     align-items: center;
@@ -13,6 +13,82 @@
     font-weight: bold;
     color: $color;
     background-color: $background_color;
+    grid-template-columns: 60px auto 40px;
+    position: relative;
+    .profile-picture {
+      img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+      }
+    }
+    .gear-icon {
+      i.active {
+        color: black;
+        background-color: #ddd;
+        border-radius: 50%;
+      }
+    }
+    .profile-popup {
+      background-color: white;
+      color: black;
+      font-weight: normal;
+      font-size: 1em;
+      width: 150px;
+      height: 225px;
+      position: absolute;
+      top: 100%;
+      right: -50px;
+      z-index: 4;
+      box-shadow: 0px 2px 2px 1px $box-shadow;
+      display: grid;
+      align-items: center;
+      grid-template-rows: 150px 1fr 1fr;
+      i {
+        position: absolute;
+        top: -23px;
+        left: 40%;
+        color: white;
+        font-size: 2em;
+      }
+      .profile-status {
+        display: grid;
+        justify-items: center;
+        align-items: center;
+        font-size: 0.8em;
+        grid-template-rows: auto 30px;
+        .profile-status-text {
+          align-self: end;
+        }
+        .status {
+          .status-bar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border-top: 8px solid green;
+            border-right: 8px solid green;
+            display: grid;
+            text-align: center;
+            align-items: center;
+          }
+        }
+      }
+      li {
+        list-style: none;
+        padding: 6px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.2s ease-in-out;
+        box-shadow: 0px -1px 1px 0px $box-shadow;
+        &:last-child {
+          box-shadow: 0px 0px 1px 1px $box-shadow;
+        }
+        &:hover {
+          background-color: $background_color;
+          color: $color;
+        }
+      }
+    }
   }
   .rooms,
   .users {
@@ -42,6 +118,10 @@
   .users-list {
     overflow-y: auto;
     padding-bottom: 16px;
+
+    .no-friends {
+      text-align: center;
+    }
 
     li {
       padding: 16px 24px;

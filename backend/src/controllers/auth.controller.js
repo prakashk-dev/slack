@@ -22,7 +22,7 @@ async function loginOrRegisterUser(req, res) {
             token,
           });
         } else {
-          return res.status(401).json({
+          return res.json({
             error: "Authentication failed, password not match",
           });
         }

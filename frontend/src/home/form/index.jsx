@@ -1,22 +1,20 @@
 import React, { useState, useContext, useEffect } from "react";
-import { navigate } from "@reach/router";
+import { navigate, Redirect } from "@reach/router";
 import axios from "axios";
 import { AppContext } from "src/context";
 
 import "./form.scss";
 const PIN = /^\d{4}/;
 const HomeForm = () => {
-  const { saveOrAuthenticateUser, fetchConfig } = useContext(AppContext);
+  const { saveOrAuthenticateUser, fetchConfig, isAuthenticated } = useContext(
+    AppContext
+  );
   const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState(null);
   const [valid, setValid] = useState(false);
   const [message, setMessage] = useState(null);
   const [pinError, setPinError] = useState(null);
-
-  useEffect(() => {
-    fetchConfig();
-  }, []);
 
   // validatoin for submit button
   useEffect(() => {
@@ -45,7 +43,7 @@ const HomeForm = () => {
   };
 
   const checkUsername = () => {
-    setMessage(`Welcome Back, ${username}`);
+    username.length && setMessage(`Welcome Back, ${username}`);
   };
   const InfoBar = () => {
     return (
@@ -55,7 +53,9 @@ const HomeForm = () => {
     );
   };
 
-  return (
+  return isAuthenticated() ? (
+    <Redirect to="/chat/g/welcome" noThrow />
+  ) : (
     <form className="form" onSubmit={handleSubmit}>
       <InfoBar />
       <div className="form-group">

@@ -22,28 +22,13 @@
       font-size: 1.2em;
       font-weight: bold;
     }
-
-    .settings {
-      .gear {
-        cursor: pointer;
-        transition: 1s linear;
-        .info {
-          width: 16px;
-          height: 16px;
-          border: 3px solid #2a2a2a;
-          border-radius: 50%;
-          font-size: 1em;
-          display: grid;
-          justify-items: center;
-          align-items: center;
-          font-weight: bold;
-          color: #2a2a2a;
-        }
-        .info-hidden {
-          @extend .info;
-          color: white;
-          background-color: #2a2a2a;
-        }
+    .gear {
+      i {
+        font-size: 2em;
+      }
+      i.active {
+        background-color: #ddd;
+        border-radius: 50%;
       }
     }
   }
@@ -286,10 +271,18 @@
       display: grid;
       grid-template-rows: 40px 1fr;
       height: calc(100vh - 230px);
+      .no-user {
+        text-align: center;
+      }
 
       .heading {
-        justify-self: center;
-        align-self: center;
+        display: grid;
+        grid-template-columns: 40px 1fr;
+        align-items: center;
+        justify-items: center;
+        box-shadow: 0px 1px 2px #aaa;
+        background-color: #ddd;
+        font-weight: 600;
       }
 
       .users-list {

@@ -1,4 +1,5 @@
 const KEY = "state";
+
 // helper function
 export const retrieveState = () => {
   try {
