@@ -3,7 +3,7 @@
 .form {
   display: grid;
   grid-row-gap: 10px;
-  grid-template-rows: 1em 1fr 1fr 1fr 1.5fr;
+  grid-template-rows: 2em 1fr 1fr 2fr;
   width: 80%;
   margin: auto;
 
@@ -13,6 +13,13 @@
     font-weight: 300;
     text-align: center;
     box-shadow: 0px -1px 2px 2px firebrick;
+  }
+  .info {
+    background-color: $button-primary;
+    color: $color;
+    display: grid;
+    justify-items: center;
+    align-items: center;
   }
 
   .form-group {
@@ -99,7 +106,6 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-
     }
   }
 }

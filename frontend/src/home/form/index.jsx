@@ -4,14 +4,15 @@ import axios from "axios";
 import { AppContext } from "src/context";
 
 import "./form.scss";
-
+const PIN = /^\d{4}/;
 const HomeForm = () => {
   const { saveOrAuthenticateUser, fetchConfig } = useContext(AppContext);
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [rePassword, setRePassword] = useState("");
+  const [pin, setPin] = useState("");
   const [error, setError] = useState(null);
   const [valid, setValid] = useState(false);
+  const [message, setMessage] = useState(null);
+  const [pinError, setPinError] = useState(null);
 
   useEffect(() => {
     fetchConfig();
@@ -19,41 +20,44 @@ const HomeForm = () => {
 
   // validatoin for submit button
   useEffect(() => {
-    const isValid = username.length && password === rePassword;
-    setValid(isValid);
-  }, [username, password, rePassword]);
+    setValid(username.length && PIN.test(pin));
+    setError(null);
+  }, [username, pin]);
+
+  useEffect(() => {
+    setMessage(null);
+  }, [username]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const error = await saveOrAuthenticateUser({ username, password });
-    if (error) {
-      setError(error);
-    } else {
-      navigate(`/chat/g/welcome`);
-    }
+    const error = await saveOrAuthenticateUser({ username, pin });
+    error ? setError(error) : navigate(`/chat/g/welcome`);
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { value } = e.target;
     if (!isNaN(value)) {
-      name === "password" ? setPassword(value) : setRePassword(value);
+      setPin(value);
+      setPinError(null);
+    } else {
+      setPinError("Only digits are allowed for PIN");
     }
   };
 
-  const PinError = () => {
-    if (rePassword.length && rePassword !== password) {
-      return (
-        <div className="password-error">
-          Your PIN and Retype PIN does not match.
-        </div>
-      );
-    }
-    return null;
+  const checkUsername = () => {
+    setMessage(`Welcome Back, ${username}`);
+  };
+  const InfoBar = () => {
+    return (
+      <div className={error ? "error" : message ? "info" : ""}>
+        {error || message}
+      </div>
+    );
   };
 
   return (
     <form className="form" onSubmit={handleSubmit}>
-      <div className={error ? "error" : ""}>{error && error}</div>
+      <InfoBar />
       <div className="form-group">
         <label htmlFor="username">Username</label>
         <input
@@ -61,39 +65,27 @@ const HomeForm = () => {
           name="username"
           id="username"
           className="form-control"
+          required
           onChange={(e) => setUsername(e.target.value)}
+          onBlur={checkUsername}
         />
       </div>
 
       <div className="form-group">
-        <label htmlFor="password">PIN</label>
+        <label htmlFor="pin">PIN</label>
         <input
           type="password"
-          name="password"
+          name="pin"
           maxLength="4"
           inputMode="numeric"
-          id="password"
+          id="pin"
           className="form-control"
-          value={password}
+          value={pin}
           onChange={handleChange}
-          placeholder="Choose your 4 digits password"
+          placeholder="Choose your 4 digits pin"
+          required
         />
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="rePassword">Retype PIN</label>
-        <input
-          type="password"
-          name="retype_password"
-          id="rePassword"
-          inputMode="numeric" // for ios and andriod
-          maxLength="4"
-          value={rePassword}
-          className="form-control"
-          onChange={handleChange}
-          placeholder="Retype your password"
-        />
-        <PinError />
+        <div className="pin-error">{pinError}</div>
       </div>
 
       <div className="form-control form-footer">

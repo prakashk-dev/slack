@@ -10,10 +10,10 @@
     box-shadow: 0px 4px 12px 4px $box_shadow;
     border-radius: 12px;
     width: 450px;
-    height: 550px;
+    height: 475px;
     margin-top: 50px;
     padding-bottom: 12px;
-    grid-template-rows: 120px auto;
+    grid-template-rows: 150px auto;
 
     .heading {
       text-align: center;
@@ -32,7 +32,6 @@
     }
   }
 }
-
 
 @media only screen and (max-width: 500px) {
   .home {
