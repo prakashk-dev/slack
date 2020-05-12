@@ -2,16 +2,18 @@ import User from "../models/user.model";
 import { createCookie, createToken } from "../helpers";
 
 async function loginOrRegisterUser(req, res) {
-  if (!req.body.username || !req.body.password) {
-    return res.status(401).json({
-      error: "username or password missing",
+  if (!req.body.username || !req.body.pin) {
+    return res.status(422).json({
+      error: "username or pin missing",
     });
   }
-  const { username, password } = req.body;
+  const username = new RegExp("^" + req.body.username + "$", "i");
+  // change it to string so that pin can be hashed using salt
+
   try {
-    const user = await User.findOne({ username }).exec();
+    const user = await User.findOne({ username: { $regex: username } }).exec();
     if (user) {
-      user.comparePassword(req.body.password, function (err, isMatch) {
+      user.comparePassword(req.body.pin, function (err, isMatch) {
         if (isMatch && !err) {
           // set cookie to the frontend
           let token = createToken(user);
@@ -27,7 +29,8 @@ async function loginOrRegisterUser(req, res) {
       });
       // if user not exists register
     } else {
-      User({ username, password }).save((err, user) => {
+      const { username, pin } = req.body;
+      User({ username, pin }).save((err, user) => {
         if (err) throw err;
         // set cookie to the frontend
         // also include username and hashed password so that when we decode the token
