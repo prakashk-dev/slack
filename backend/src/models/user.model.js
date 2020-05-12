@@ -8,7 +8,11 @@ const UserSchema = new Schema({
     unique: true,
     index: true,
   },
-  password: String,
+  pin: {
+    type: Number,
+    maxlength: 4,
+  },
+  roles: [],
   gender: {
     type: String,
     enum: ["male", "female", "na"],

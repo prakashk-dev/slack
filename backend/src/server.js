@@ -49,7 +49,6 @@ if (config.env === "development") {
   app.use(logger("dev"));
 }
 
-app.use("/api", routes);
 app.use("/api/config", (req, res) => {
   return res.json({
     SOCKET_URL:
@@ -59,6 +58,8 @@ app.use("/api/config", (req, res) => {
   });
 });
 
+app.use("/api", routes);
+// create a route with only admin access, for now this will work
 app.get("/api/seed", async (req, res) => {
   const result = await seedData();
   return res.json(result);

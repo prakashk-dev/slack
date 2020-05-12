@@ -1,6 +1,4 @@
-import { UserModel, GroupModel } from "../models";
-
-let users = [];
+import { GroupModel } from "../models";
 const rooms = [
   {
     name: "Kathmandu",
@@ -70,70 +68,8 @@ const rooms = [
   },
 ];
 
-for (let i = 0; i < 50; i++) {
-  let j = Math.floor(Math.random() * 10 + 1);
-  users.push({
-    username: `user${i + 1}`,
-    email: `user${i + 1}@bhetghat.com`,
-    password: "bhetghat",
-    gender: i % 2 === 0 ? "male" : i % 3 === 0 ? "female" : "na",
-    ageGroup: i % 4 === 0 ? "4" : i % 3 === 0 ? "3" : i % 2 === 0 ? "2" : "1",
-    location: {
-      country: "Nepal",
-      city: rooms[j].name,
-    },
-    friends: [],
-  });
-}
-
-const fiveRandomUser = (users, index) => {
-  const top = users.length - 2 - index;
-  const startIndex = top > 4 ? top : users.length - 1;
-  const lastIndex = startIndex > 9 ? startIndex - 5 : startIndex + 5;
-  let friends = [];
-
-  for (let i = startIndex; i > lastIndex; i--) {
-    friends.push(users[i]._id);
-  }
-  return friends;
-};
-
-async function addFriends(query) {
-  const users = await query.exec();
-  let msg = "";
-  try {
-    for (let i = 0; i < users.length; i++) {
-      const friends = fiveRandomUser(users, i);
-      await UserModel.findByIdAndUpdate(
-        users[i]["_id"],
-        { friends },
-        { multi: true }
-      ).exec();
-    }
-    msg = "Successfully inserted friends in users.";
-  } catch (e) {
-    msg = e.message;
-  }
-
-  return { msg };
-}
-
 async function seedData() {
-  const userQuery = UserModel.find({}, "username");
-  const user = await userQuery.exec();
   const room = await GroupModel.findOne({ name: rooms[0].name }).exec();
-
-  const insertUserData = async () => {
-    let msg, friends;
-    if (user.length) {
-      msg = "User data already inserted.";
-    } else {
-      await UserModel.insertMany(users);
-      friends = await addFriends(userQuery);
-      msg = "User data successfully inserted.";
-    }
-    return { msg, friends };
-  };
 
   const insertRoomData = async () => {
     let msg;
@@ -141,31 +77,18 @@ async function seedData() {
       msg = "Room data already exists.";
     } else {
       // push some user ids to the dummy rooms data
-      const user = await userQuery.exec();
-      rooms.forEach((room, index) => {
-        for (let i = 0; i < user.length; i++) {
-          if (i % index === 0) {
-            room.users.push(user[i]._id);
-          }
-        }
+      GroupModel.insertMany(rooms, (err, rooms) => {
+        if (err) msg = err.message;
+        msg = "Room data successfully inserted.";
       });
-      rooms.forEach((group) => {
-        const groupModel = new GroupModel(group);
-        groupModel.save(group);
-      });
-
-      msg = "Room data successfully inserted.";
     }
     return { msg };
   };
 
-  let msg = [];
+  let result;
 
   try {
-    let result = await insertUserData();
-    msg.push(result);
     result = await insertRoomData();
-    msg.push(result);
     return msg;
   } catch (err) {
     console.error("Error inserting data into the database", err.message);
@@ -175,7 +98,6 @@ async function seedData() {
 
 async function unSeedData() {
   try {
-    await UserModel.deleteMany({});
     await GroupModel.deleteMany({});
     return { msg: "Successfully deleted all the documents." };
   } catch (e) {
