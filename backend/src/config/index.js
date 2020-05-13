@@ -7,7 +7,7 @@ const config = {
   jwt_secret: process.env.JWT_SECRET || "supersecret",
   socket_url:
     process.env.NODE_ENV === "production"
-      ? "https://socket.bhetghat.com"
+      ? "https://socket.bhet-ghat.com"
       : "http://localhost:3001",
 };
 

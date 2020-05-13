@@ -1,4 +1,6 @@
-import "source-map-support/register";
+if (process.env.NODE_ENV !== "production") {
+  require("source-map-support/register");
+}
 
 import express from "express";
 import path from "path";
