@@ -13,10 +13,15 @@ import "./sidebar.scss";
 
 const Sidebar = ({ groupId }) => {
   const [rooms, rLoading, rError] = useFetch("groups");
-  const { state, logout } = useContext(AppContext);
+  const { state, logout, fetchAuthUser, fetchRooms } = useContext(AppContext);
   const [user, uLoading, uError] = useFetch(`users/${state.user.username}`);
   const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    fetchAuthUser();
+    fetchRooms();
+  }, []);
 
   useEffect(() => {
     const removeListener = () =>
@@ -65,6 +70,14 @@ const Sidebar = ({ groupId }) => {
       </div>
     );
   };
+  useEffect(() => {
+    if (groupId) {
+      axios
+        .post(`/api/groups/${groupId}/users`, { userId: state.user.id })
+        .then((res) => console.log(res.data))
+        .catch(console.log);
+    }
+  }, [groupId]);
 
   const handleLogout = () => {
     logout();

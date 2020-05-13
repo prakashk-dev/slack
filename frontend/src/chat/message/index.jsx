@@ -25,23 +25,28 @@ const Message = ({ location, username, id }) => {
   const [showSidebar, setShowSidebar] = useState(true);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const { state } = useContext(AppContext);
-  const [group, gLoading, gError] = useFetch(`groups/${id}`, id);
+  const { state, fetchGroup } = useContext(AppContext);
+  // const [room, gLoading, gError] = useFetch(`rooms/${id}`, id);
   const divRef = useRef(null);
   const [typing, setTyping] = useState(null);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
   const [file, setFile] = useState(null);
+  const { room } = state;
 
   const onDrop = useCallback(
     (files) => {
       setFile(files[0]);
     },
-    [group]
+    [room]
   );
+
+  useEffect(() => {
+    id && fetchGroup(id);
+  }, [id]);
 
   const sendMessageWithFile = () => {
     const formData = new FormData();
-    formData.append("room", group.name);
+    formData.append("room", room.data.name);
     formData.append("file", file);
     Axios.post("/api/upload", formData)
       .then((res) => {
@@ -53,7 +58,7 @@ const Message = ({ location, username, id }) => {
           },
           message: message,
           username: state.user.username,
-          room: group.name,
+          room: room.data.name,
         });
       })
       .catch((err) => console.error(err));
@@ -68,7 +73,6 @@ const Message = ({ location, username, id }) => {
   }, [file]);
 
   useEffect(() => {
-    console.log(state);
     if (state.config.SOCKET_URL) {
       socket = io.connect(state.config.SOCKET_URL);
       socket.on("connect", () => console.log("Connected"));
@@ -93,22 +97,21 @@ const Message = ({ location, username, id }) => {
   }, [state.config.SOCKET_URL]);
 
   useEffect(() => {
-    if (group) {
-      const room = group.name;
+    if (Object.keys(room.data).length) {
       socket.emit(
         "join",
-        { room, username: state.user.username, type: "admin" },
+        { room: room.data.name, username: state.user.username, type: "admin" },
         (msg) => {}
       );
       divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [group]);
+  }, [state]);
 
   const formatMessage = (msg = message) => {
     return {
       username: state.user.username,
       message: msg,
-      room: group.name,
+      room: room.data.name,
     };
   };
 
@@ -131,7 +134,7 @@ const Message = ({ location, username, id }) => {
       if (!typing) {
         socket.emit("typing", {
           username: state.user.username,
-          room: group.name,
+          room: room.data.name,
           active: true,
         });
         setTyping(true);
@@ -140,7 +143,7 @@ const Message = ({ location, username, id }) => {
       if (typing) {
         socket.emit("typing", {
           username: state.user.username,
-          room: group.name,
+          room: room.data.name,
           active: false,
         });
         setTyping(false);
@@ -167,7 +170,7 @@ const Message = ({ location, username, id }) => {
   return (
     <div className={showSidebar ? "message sidebar-open" : "message"}>
       <div className="message-nav">
-        <p>Chat Room - {group ? group.name : "Bhet-Ghat"}</p>
+        <p>Chat Room - {room ? room.data.name : "Bhet-Ghat"}</p>
         <div className="gear" onClick={() => setShowSidebar(!showSidebar)}>
           <i
             className={
@@ -188,7 +191,7 @@ const Message = ({ location, username, id }) => {
           <div className="message-container">
             {messages.length
               ? messages.map((msg, index) => {
-                  return msg.room === group.name ? (
+                  return msg.room === room.data.name ? (
                     <div
                       key={index}
                       className={
@@ -290,7 +293,7 @@ const Message = ({ location, username, id }) => {
               />
             </button>
             <div className="typing">
-              {typing && typing.room === group.name && typing.message}
+              {typing && typing.room === room.data.name && typing.message}
             </div>
           </div>
         </div>
@@ -299,7 +302,7 @@ const Message = ({ location, username, id }) => {
         <div className="right-sidebar">
           <div className="profile">
             <img src="/assets/kathmandu.png" alt="" />
-            {group ? group.name : "Bhet-Ghat"}
+            {room ? room.data.name : "Bhet-Ghat"}
           </div>
           <div className="users">
             <div className="heading">
@@ -307,12 +310,12 @@ const Message = ({ location, username, id }) => {
               Users
             </div>
             <div className="users-list">
-              {gLoading ? (
+              {room.Loading ? (
                 <div className="loading">... </div>
-              ) : gError ? (
-                <div className="error"> {gError} </div>
-              ) : group.users.length ? (
-                group.users.map((user) => {
+              ) : room.error ? (
+                <div className="error"> {room.error} </div>
+              ) : room.data.users ? (
+                room.data.users.map((user) => {
                   return (
                     <div className="user" key={user._id}>
                       <div className="img">
