@@ -119,9 +119,11 @@ export const AppProvider = ({ children }) => {
 
   const fetchGroup = async (groupId) => {
     dispatch({ type: ROOM_FETCHING });
-
+    const decoded = decodeToken();
     try {
-      const res = await axios.get(`/api/groups/${groupId}`);
+      const res = await axios.put(
+        `/api/groups/${groupId}?user_id=${decoded.sub}`
+      );
       if (res.data.error) {
         return dispatch({
           type: ROOM_FETCHING_ERROR,
@@ -195,7 +197,31 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  // these should be helpers functions
+  const handleJoin = async (groupId) => {
+    dispatch({ type: ROOMS_FETCHING });
+
+    try {
+      const res = await axios.get(`/api/groups`);
+      if (res.data.error) {
+        return dispatch({
+          type: ROOMS_FETCHING_ERROR,
+          payload: res.data.error,
+        });
+      }
+      const groups = res.data;
+      return dispatch({
+        type: ROOMS_FETCH_SUCCESS,
+        payload: groups,
+      });
+    } catch (error) {
+      return dispatch({
+        type: ROOMS_FETCHING_ERROR,
+        payload: error.message,
+      });
+    }
+  };
+
+  // helper functions
   const decodeToken = () => {
     const token = Cookies.get("token");
     if (token) {

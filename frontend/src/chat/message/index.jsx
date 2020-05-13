@@ -24,12 +24,12 @@ const Message = ({ location, username, id }) => {
   const [showSidebar, setShowSidebar] = useState(true);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const { state, fetchGroup } = useContext(AppContext);
+  const { state } = useContext(AppContext);
   const divRef = useRef(null);
   const [typing, setTyping] = useState(null);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
   const [file, setFile] = useState(null);
-  const { room } = state;
+  const { room, user } = state;
 
   const onDrop = useCallback(
     (files) => {
@@ -37,10 +37,6 @@ const Message = ({ location, username, id }) => {
     },
     [room]
   );
-
-  useEffect(() => {
-    id && fetchGroup(id);
-  }, [id]);
 
   const sendMessageWithFile = () => {
     const formData = new FormData();
@@ -51,16 +47,31 @@ const Message = ({ location, username, id }) => {
         setFile(null);
         setMessage("");
         sendMessage({
-          file: {
-            image: res.data.image,
+          message: {
+            type: "image",
+            text: message,
           },
-          message: message,
-          username: state.user.username,
-          room: room.data.name,
+          user: state.user._id,
+          room: room.data._id,
         });
       })
       .catch((err) => console.error(err));
   };
+
+  useEffect(() => {
+    if (id && Object.keys(room.data).length) {
+      setMessages(room.data.messages);
+      socket.emit(
+        "join",
+        {
+          room: room.data.name,
+          username: user.data.username,
+        },
+        (msg) => {}
+      );
+      divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [id, room.data]);
 
   useEffect(() => {
     if (file) {
@@ -83,6 +94,7 @@ const Message = ({ location, username, id }) => {
       });
 
       socket.on("messages", (msg) => {
+        console.log(msg);
         setMessages((prevMessages) => [...prevMessages, msg]);
         messages.length &&
           divRef.current.scrollIntoView({ behavior: "smooth" });
@@ -94,25 +106,27 @@ const Message = ({ location, username, id }) => {
     }
   }, [state.config.SOCKET_URL]);
 
-  useEffect(() => {
-    if (Object.keys(room.data).length) {
-      socket.emit(
-        "join",
-        {
-          room: room.data.name,
-          username: state.user.data.username,
-          type: "admin",
-        },
-        (msg) => {}
-      );
-      divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [state]);
+  // useEffect(() => {
+  //   if (Object.keys(room.data).length) {
+  //     socket.emit(
+  //       "join",
+  //       {
+  //         room: room.data.name,
+  //        user: state.user.data.username,
+  //         type: "admin",
+  //       },
+  //       (msg) => {}
+  //     );
+  //     divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
+  //   }
+  // }, [state]);
 
   const formatMessage = (msg = message) => {
     return {
-      username: state.user.username,
+      user: user.data._id,
+      roomId: room.data._id,
       message: msg,
+      username: user.data.username,
       room: room.data.name,
     };
   };
@@ -124,6 +138,7 @@ const Message = ({ location, username, id }) => {
   const sendMessage = (msg = undefined) => {
     if (msg || message.length) {
       const message = msg || formatMessage();
+      console.log(message);
       socket.emit("message", message);
       setMessages((prevMessages) => [...prevMessages, message]);
       setMessage("");
@@ -135,7 +150,7 @@ const Message = ({ location, username, id }) => {
     if (message.length) {
       if (!typing) {
         socket.emit("typing", {
-          username: state.user.data.username,
+          username: user.data.username,
           room: room.data.name,
           active: true,
         });
@@ -199,13 +214,13 @@ const Message = ({ location, username, id }) => {
                       className={
                         msg.type === "admin"
                           ? "chat-item admin"
-                          : msg.username === state.user.username
+                          : msg.username === user.data.username
                           ? "chat-item chat-self"
                           : "chat-item chat-other"
                       }
                     >
                       <div className="username">
-                        {msg.username != state.user.username &&
+                        {msg.username != user.data.username &&
                           msg.type != "admin" &&
                           msg.username}
                       </div>
@@ -213,7 +228,7 @@ const Message = ({ location, username, id }) => {
                         className={
                           msg.type === "admin"
                             ? "chat-message center"
-                            : msg.username === state.user.username
+                            : msg.username === user.data.username
                             ? msg.type === "faIcon"
                               ? "chat-message chat-right chat-emoji"
                               : "chat-message right"
@@ -316,7 +331,7 @@ const Message = ({ location, username, id }) => {
                 <div className="loading">... </div>
               ) : room.error ? (
                 <div className="error"> {room.error} </div>
-              ) : room.data.users ? (
+              ) : room.data.users && room.data.users.length ? (
                 room.data.users.map((user) => {
                   return (
                     <div className="user" key={user._id}>

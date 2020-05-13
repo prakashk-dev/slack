@@ -44,6 +44,7 @@ async function findById(req, res) {
   if (req.params.id === "welcome") {
     return res.json({ name: "Bhet Ghat", users: [] });
   }
+
   try {
     const group = await Group.findOne({ _id: req.params.id })
       .populate("users", "username")
@@ -73,23 +74,29 @@ async function getUsers(req, res) {
     return res.json({ error: "error fetching users" });
   }
 }
-async function addUser(req, res) {
-  const { userId } = req.body;
+async function joinRoom(req, res) {
+  const { user_id } = req.query;
   const { id: groupId } = req.params;
-  if (!groupId || !userId) {
-    return res.json({ error: "groupId or userId missing." });
+  if (groupId === "welcome") {
+    return res.json({ name: "Bhet Ghat", users: [] });
+  }
+  if (!groupId || !user_id) {
+    return res.json({ error: "groupId or user_id missing." });
   }
   try {
-    await Group.updateOne(
+    await Group.findOneAndUpdate(
       { _id: groupId },
-      { $addToSet: { users: [userId] } }
+      { $addToSet: { users: [user_id] } }
     ).exec();
-    // should send the updated group data
-    return res.json({ message: "should update" });
+    const group = await Group.findOne({ _id: groupId })
+      .populate("users", "username")
+      .populate("messages.user", "username")
+      .exec();
+    return res.json(group);
   } catch (error) {
     console.log(error);
     return res.json({ error: error.message });
   }
 }
 
-export { list, getRecent, findById, groupName, getUsers, addUser };
+export { list, getRecent, findById, groupName, getUsers, joinRoom };

@@ -5,7 +5,8 @@ const router = express.Router();
 router.route("/").get(Group.list);
 router.route("/name").get(Group.groupName);
 router.route("/recent").get(Group.getRecent);
-router.route("/:id/users").post(Group.addUser);
+router.route("/:id").put(Group.joinRoom);
+// this might be redundent
 router.route("/:id/users").get(Group.getUsers);
 router.route("/:id").get(Group.findById);
 // router.route('/save')

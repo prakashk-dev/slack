@@ -12,10 +12,11 @@ import "./sidebar.scss";
 
 const Sidebar = ({ groupId }) => {
   const {
-    state: { user, rooms },
+    state: { user, rooms, room },
     logout,
     fetchAuthUser,
     fetchRooms,
+    fetchGroup,
   } = useContext(AppContext);
   const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -77,18 +78,17 @@ const Sidebar = ({ groupId }) => {
     );
   };
   useEffect(() => {
-    if (groupId) {
-      axios
-        .post(`/api/groups/${groupId}/users`, { userId: user.data._id })
-        .then((res) => console.log(res.data))
-        .catch(console.log);
-    }
+    const fetchRoom = async () => {
+      await fetchGroup(groupId);
+    };
+    groupId && fetchRoom();
   }, [groupId]);
 
   const handleLogout = () => {
     logout();
     navigate("/");
   };
+
   return (
     <div className="sidebar">
       <Profile />

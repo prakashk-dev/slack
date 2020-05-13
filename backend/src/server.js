@@ -15,6 +15,10 @@ import socketio from "socket.io";
 import multer from "multer";
 import fs from "fs";
 import { seedData, unSeedData } from "./test-data/data";
+import Group from "./models/group.model";
+import User from "./models/user.model";
+const moment = require("moment");
+
 import {
   roomJoin,
   getCurrentRoom,
@@ -24,6 +28,7 @@ import {
 } from "./helpers/room";
 
 import formatMessage from "./helpers/message";
+import { kMaxLength } from "buffer";
 
 const app = express();
 const server = http.createServer(app);
@@ -117,10 +122,15 @@ app.get("/", (req, res) => {
 });
 
 function handleIO(socket) {
+  // fetch rooms and user data from the database
+  // Group.find({}, (err, groups) => {
+  //   if(err) throw err;
+  //   const groupNames = groups.map(g => g.name);
+
+  // })
   socket.on("join", (data, callback) => {
     const { room, username } = data;
     const rooms = Object.keys(socket.rooms);
-    console.log("Your rooms: ", rooms);
     if (!rooms.includes(room)) {
       socket.join(room, () => {
         const message = formatMessage({
@@ -141,10 +151,10 @@ function handleIO(socket) {
     }
   });
 
-  console.log("Connected");
-  socket.on("disconnecting", console.log);
   socket.on("error", console.log);
-  socket.on("disconnect", console.log);
+  socket.on("disconnect", (socket) => {
+    // remove user from that room
+  });
 
   // for react native
   socket.on("chat", (msg) => {
@@ -153,11 +163,27 @@ function handleIO(socket) {
 
   socket.on("message", (msg) => {
     socket.broadcast.emit("messages", formatMessage(msg));
+    // // save message to the databse
+    const message = {
+      user: msg.user,
+      message: msg.type ? msg.message : { text: msg.message },
+      timeStamp: moment.utc().format(),
+    };
+    console.log(message);
+    Group.findOneAndUpdate(
+      { _id: msg.roomId },
+      { $addToSet: { messages: [message] } },
+      (err, res) => {
+        if (err) throw err;
+        console.log("Successfully added", res);
+      }
+    );
   });
 
   socket.on("typing", (data) => {
-    const message = data.active ? `${data.username} is typing ...` : null;
-    socket.to(data.room).emit("typing", { ...data, message });
+    const { room, active, username } = data;
+    const message = active ? `${username} is typing ...` : null;
+    socket.to(room).emit("typing", { ...data, message });
   });
 }
 const io = socketio(server);
