@@ -24,13 +24,21 @@ export const initialState = () => {
   if (token) {
     const decoded = jwt.decode(token);
     return {
-      user: { username: decoded.username, id: decoded.sub },
+      user: {
+        data: {
+          username: decoded.username,
+          _id: decoded.sub,
+        },
+        loading: false,
+        error: null,
+      },
       config: { SOCKET_URL: decoded.socket },
       room: { error: null, loading: false, data: {} },
+      rooms: { data: [], error: null, loading: false },
     };
   }
   return {
-    user: { username: "", data: {}, error: null, loading: false },
+    user: { data: {}, error: null, loading: false },
     config: { SOCKET_URL: "", error: null, loading: false },
     room: { data: {}, error: null, loading: false },
     rooms: { data: [], error: null, loading: false },
@@ -41,7 +49,6 @@ const INIT_STATE = initialState();
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {
-  console.log(type, payload);
   switch (type) {
     case DECODE_TOKEN:
       return {
@@ -136,20 +143,20 @@ export const AppProvider = ({ children }) => {
 
   const fetchAuthUser = async () => {
     dispatch({ type: USER_FETCHING });
-    const payload = decodeToken();
-    if (payload) {
+    const decoded = decodeToken();
+    if (decoded) {
       try {
-        const res = await axios.get(`/api/users/${groupId}`);
+        const res = await axios.get(`/api/users/${decoded.sub}`);
         if (res.data.error) {
           return dispatch({
             type: USER_FETCHING_ERROR,
             payload: res.data.error,
           });
         }
-        const group = res.data;
+        const user = res.data;
         return dispatch({
           type: USER_FETCH_SUCCESS,
-          payload: group,
+          payload: user,
         });
       } catch (error) {
         return dispatch({

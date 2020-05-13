@@ -18,20 +18,25 @@ function list(req, res) {
 }
 
 async function findOne(req, res) {
-  if (!req.params.username) {
-    return res.json({ error: "Username is required" });
+  if (!req.params.id) {
+    return res.json({ error: "user id is required" });
   }
   try {
     const user = await User.findOne(
-      { username: req.params.username },
+      { _id: req.params.id },
       "username gender ageGroup location friends"
     )
       .populate("friends", "username")
       .exec();
-    return res.json(user);
+    if (user) {
+      return res.json(user);
+    }
+    return res.json({
+      error: `User not found with username: ${req.params.id}`,
+    });
   } catch (error) {
     return res.json({
-      error: `User not found with username: ${req.params.username}`,
+      error: `Error fetching user for id: ${req.params.id}`,
     });
   }
 }

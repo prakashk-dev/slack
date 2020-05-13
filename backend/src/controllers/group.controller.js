@@ -84,6 +84,7 @@ async function addUser(req, res) {
       { _id: groupId },
       { $addToSet: { users: [userId] } }
     ).exec();
+    // should send the updated group data
     return res.json({ message: "should update" });
   } catch (error) {
     console.log(error);

@@ -6,7 +6,6 @@ import React, {
   useCallback,
 } from "react";
 import { AppContext } from "src/context";
-import { useFetch } from "src/utils/axios";
 import io from "socket.io-client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -26,7 +25,6 @@ const Message = ({ location, username, id }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const { state, fetchGroup } = useContext(AppContext);
-  // const [room, gLoading, gError] = useFetch(`rooms/${id}`, id);
   const divRef = useRef(null);
   const [typing, setTyping] = useState(null);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
@@ -100,7 +98,11 @@ const Message = ({ location, username, id }) => {
     if (Object.keys(room.data).length) {
       socket.emit(
         "join",
-        { room: room.data.name, username: state.user.username, type: "admin" },
+        {
+          room: room.data.name,
+          username: state.user.data.username,
+          type: "admin",
+        },
         (msg) => {}
       );
       divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
@@ -133,7 +135,7 @@ const Message = ({ location, username, id }) => {
     if (message.length) {
       if (!typing) {
         socket.emit("typing", {
-          username: state.user.username,
+          username: state.user.data.username,
           room: room.data.name,
           active: true,
         });
@@ -142,7 +144,7 @@ const Message = ({ location, username, id }) => {
     } else {
       if (typing) {
         socket.emit("typing", {
-          username: state.user.username,
+          username: state.user.data.username,
           room: room.data.name,
           active: false,
         });

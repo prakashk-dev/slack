@@ -6,15 +6,17 @@ import React, {
   useRef,
 } from "react";
 import { navigate } from "@reach/router";
-import { useFetch } from "src/utils/axios";
 import { AppContext } from "src/context";
 import axios from "axios";
 import "./sidebar.scss";
 
 const Sidebar = ({ groupId }) => {
-  const [rooms, rLoading, rError] = useFetch("groups");
-  const { state, logout, fetchAuthUser, fetchRooms } = useContext(AppContext);
-  const [user, uLoading, uError] = useFetch(`users/${state.user.username}`);
+  const {
+    state: { user, rooms },
+    logout,
+    fetchAuthUser,
+    fetchRooms,
+  } = useContext(AppContext);
   const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -41,7 +43,11 @@ const Sidebar = ({ groupId }) => {
   }, [profileOpen]);
 
   const Profile = () => {
-    let text = uLoading ? "..." : uError ? uError.error : user.username;
+    let text = user.loading
+      ? "..."
+      : user.error
+      ? user.error
+      : user.data.username;
     return (
       <div className="user-profile">
         <div className="profile-picture">
@@ -73,7 +79,7 @@ const Sidebar = ({ groupId }) => {
   useEffect(() => {
     if (groupId) {
       axios
-        .post(`/api/groups/${groupId}/users`, { userId: state.user.id })
+        .post(`/api/groups/${groupId}/users`, { userId: user.data._id })
         .then((res) => console.log(res.data))
         .catch(console.log);
     }
@@ -92,13 +98,12 @@ const Sidebar = ({ groupId }) => {
           Rooms
         </div>
         <div className="rooms-list">
-          {rLoading ? (
+          {rooms.loading ? (
             <div className="loading">... </div>
-          ) : rError ? (
-            <div className="error"> {rError} </div>
+          ) : rooms.error ? (
+            <div className="error"> {rooms.error} </div>
           ) : (
-            rooms &&
-            rooms.map((g) => (
+            rooms.data.map((g) => (
               <li
                 onClick={() => navigate(`/chat/g/${g._id}`)}
                 key={g._id}
@@ -116,12 +121,12 @@ const Sidebar = ({ groupId }) => {
           Direct Messages
         </div>
         <div className="users-list">
-          {uLoading ? (
+          {user.loading ? (
             <li className="loading"> ... </li>
-          ) : uError ? (
-            <div className="error">{uError}</div>
-          ) : user && user.friends.length ? (
-            user.friends.map((friend) => {
+          ) : user.error ? (
+            <div className="error">{user.error}</div>
+          ) : user.data.friends && user.data.friends.length ? (
+            user.data.friends.map((friend) => {
               return <li key={friend._id}>{friend.username}</li>;
             })
           ) : (
