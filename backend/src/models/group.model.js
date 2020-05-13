@@ -10,11 +10,16 @@ const GroupSchema = new Schema({
   description: String,
   image: String,
   users: [{ type: Schema.Types.ObjectId, ref: "user" }],
+  // create a separate document
   messages: [
     {
-      user: { type: Schema.Types.ObjectId, ref: "user" },
+      from: { type: Schema.Types.ObjectId, ref: "user" },
+      to: { type: Schema.Types.ObjectId, ref: "group" },
       message: {
-        type: { type: String },
+        type: {
+          type: String,
+          enum: ["image", "video", "icon", "text", "file"],
+        },
         text: String,
         url: String,
       },

@@ -23,6 +23,7 @@ let socket;
 const Message = ({ location, username, id }) => {
   const [showSidebar, setShowSidebar] = useState(true);
   const [message, setMessage] = useState("");
+  // { from: {}, to: {}, message: { type: [text|imgage|video|file], text: '', url: null}, timeStamp}
   const [messages, setMessages] = useState([]);
   const { state } = useContext(AppContext);
   const divRef = useRef(null);
@@ -46,21 +47,20 @@ const Message = ({ location, username, id }) => {
       .then((res) => {
         setFile(null);
         setMessage("");
-        sendMessage({
-          message: {
-            type: "image",
+        sendMessage(
+          formatMessage({
             text: message,
-          },
-          user: state.user._id,
-          room: room.data._id,
-        });
+            type: "image",
+            url: res.data.url,
+          })
+        );
       })
       .catch((err) => console.error(err));
   };
 
   useEffect(() => {
     if (id && Object.keys(room.data).length) {
-      setMessages(room.data.messages);
+      setMessages(room.data.messages || []);
       socket.emit(
         "join",
         {
@@ -94,8 +94,8 @@ const Message = ({ location, username, id }) => {
       });
 
       socket.on("messages", (msg) => {
-        console.log(msg);
         setMessages((prevMessages) => [...prevMessages, msg]);
+        console.log(msg);
         messages.length &&
           divRef.current.scrollIntoView({ behavior: "smooth" });
       });
@@ -106,28 +106,15 @@ const Message = ({ location, username, id }) => {
     }
   }, [state.config.SOCKET_URL]);
 
-  // useEffect(() => {
-  //   if (Object.keys(room.data).length) {
-  //     socket.emit(
-  //       "join",
-  //       {
-  //         room: room.data.name,
-  //        user: state.user.data.username,
-  //         type: "admin",
-  //       },
-  //       (msg) => {}
-  //     );
-  //     divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
-  //   }
-  // }, [state]);
-
-  const formatMessage = (msg = message) => {
+  const formatMessage = ({ text = message, type = "text", url = "" }) => {
     return {
-      user: user.data._id,
-      roomId: room.data._id,
-      message: msg,
-      username: user.data.username,
-      room: room.data.name,
+      from: { _id: user.data._id, username: user.data.username },
+      to: { _id: room.data._id, name: room.data.name },
+      message: {
+        text,
+        type,
+        url,
+      },
     };
   };
 
@@ -135,14 +122,10 @@ const Message = ({ location, username, id }) => {
     divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messages, file]);
 
-  const sendMessage = (msg = undefined) => {
-    if (msg || message.length) {
-      const message = msg || formatMessage();
-      console.log(message);
-      socket.emit("message", message);
-      setMessages((prevMessages) => [...prevMessages, message]);
-      setMessage("");
-    }
+  const sendMessage = (msg) => {
+    socket.emit("message", msg);
+    setMessages((prevMessages) => [...prevMessages, msg]);
+    setMessage("");
   };
 
   // Refactor this
@@ -170,11 +153,18 @@ const Message = ({ location, username, id }) => {
 
   const handleSendLike = () => {
     const msg = {
-      ...formatMessage(),
-      message: "faThumbsUp",
-      type: "faIcon",
+      text: "thumbs-up",
+      type: "icon",
     };
-    sendMessage(msg);
+
+    sendMessage(formatMessage(msg));
+  };
+
+  const handleSend = () => {
+    const msg = {
+      text: message,
+    };
+    sendMessage(formatMessage(msg));
   };
 
   const removeImage = () => {
@@ -208,47 +198,49 @@ const Message = ({ location, username, id }) => {
           <div className="message-container">
             {messages.length
               ? messages.map((msg, index) => {
-                  return msg.room === room.data.name ? (
+                  return msg.to.name === room.data.name ? (
                     <div
                       key={index}
                       className={
-                        msg.type === "admin"
+                        msg.message.type === "admin"
                           ? "chat-item admin"
-                          : msg.username === user.data.username
+                          : msg.from === user.data.username
                           ? "chat-item chat-self"
                           : "chat-item chat-other"
                       }
                     >
                       <div className="username">
-                        {msg.username != user.data.username &&
-                          msg.type != "admin" &&
-                          msg.username}
+                        {msg.from.username != user.data.username &&
+                          msg.message.type != "admin" &&
+                          msg.from.username}
                       </div>
                       <div
                         className={
-                          msg.type === "admin"
+                          msg.message.type === "admin"
                             ? "chat-message center"
-                            : msg.username === user.data.username
-                            ? msg.type === "faIcon"
+                            : msg.from.username === user.data.username
+                            ? msg.message.type === "faIcon"
                               ? "chat-message chat-right chat-emoji"
                               : "chat-message right"
                             : "chat-message left"
                         }
                       >
-                        {msg.file && msg.file.image && (
+                        {msg.message.type === "image" && (
                           <img
                             className="chat-image"
-                            src={msg.file.image}
+                            src={msg.message.url}
                             alt="Image not found"
                           ></img>
                         )}
-                        {msg.type == "faIcon" ? (
+                        {msg.message.type == "icon" ? (
                           <FontAwesomeIcon icon={faThumbsUp} />
                         ) : (
-                          msg.message
+                          msg.message.text
                         )}
                       </div>
-                      <div className="time">{convertToLocalTime(msg.time)}</div>
+                      <div className="time">
+                        {convertToLocalTime(msg.timeStamp)}
+                      </div>
                     </div>
                   ) : null;
                 })
@@ -290,7 +282,7 @@ const Message = ({ location, username, id }) => {
                 e.key === "Enter"
                   ? file
                     ? sendMessageWithFile()
-                    : sendMessage()
+                    : handleSend()
                   : null
               }
             />
@@ -299,7 +291,7 @@ const Message = ({ location, username, id }) => {
                 file
                   ? sendMessageWithFile()
                   : message.length
-                  ? sendMessage()
+                  ? handleSend()
                   : handleSendLike()
               }
             >

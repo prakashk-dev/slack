@@ -7,7 +7,7 @@ function list(req, res) {
       return res.status(400).json({ error: "Error Fetching Groups" });
     }
     if (groups.length === 0) {
-      return res.json({ error: "No user in database." });
+      return res.json({ error: "No group in database." });
     }
     return res.json(groups);
   });
@@ -48,6 +48,8 @@ async function findById(req, res) {
   try {
     const group = await Group.findOne({ _id: req.params.id })
       .populate("users", "username")
+      .populate("messages.from", "username")
+      .populate("messages.to", "name")
       .exec();
     return res.json(group);
   } catch (e) {
@@ -90,7 +92,8 @@ async function joinRoom(req, res) {
     ).exec();
     const group = await Group.findOne({ _id: groupId })
       .populate("users", "username")
-      .populate("messages.user", "username")
+      .populate("messages.from", "username")
+      .populate("messages.to", "name")
       .exec();
     return res.json(group);
   } catch (error) {

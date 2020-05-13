@@ -25,8 +25,16 @@ const UserSchema = new Schema({
   image: "",
   messages: [
     {
-      user: { type: Schema.Types.ObjectId, ref: "user" },
-      text: String,
+      from: { type: Schema.Types.ObjectId, ref: "user" },
+      to: { type: Schema.Types.ObjectId, ref: "group" },
+      message: {
+        type: {
+          type: String,
+          enum: ["image", "video", "icon", "text", "file"],
+        },
+        text: String,
+        url: String,
+      },
       timeStamp: Date,
     },
   ],

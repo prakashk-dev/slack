@@ -134,16 +134,25 @@ function handleIO(socket) {
     if (!rooms.includes(room)) {
       socket.join(room, () => {
         const message = formatMessage({
-          ...data,
-          message: `Welcome to the ${room} room.`,
+          from: { username },
+          to: { name: room },
+          message: {
+            text: `Welcome to the ${room} room.`,
+            type: "text",
+          },
         });
         socket.emit("messages", message);
-        socket
-          .to(room)
-          .emit(
-            "messages",
-            formatMessage({ ...data, message: `${username} has joined.` })
-          );
+        socket.to(room).emit(
+          "messages",
+          formatMessage({
+            from: { username },
+            to: { name: room },
+            message: {
+              text: `${username} has joined.`,
+              type: "text",
+            },
+          })
+        );
       });
       callback(`Users rooms: ${Object.keys(socket.rooms)}`);
     } else {
@@ -163,16 +172,18 @@ function handleIO(socket) {
 
   socket.on("message", (msg) => {
     socket.broadcast.emit("messages", formatMessage(msg));
+    const { from, to, message } = msg;
     // // save message to the databse
-    const message = {
-      user: msg.user,
-      message: msg.type ? msg.message : { text: msg.message },
+    const formattedMessage = {
+      from: from._id,
+      to: to._id,
+      message,
       timeStamp: moment.utc().format(),
     };
-    console.log(message);
+    console.log(formattedMessage);
     Group.findOneAndUpdate(
-      { _id: msg.roomId },
-      { $addToSet: { messages: [message] } },
+      { _id: to._id },
+      { $addToSet: { messages: [formattedMessage] } },
       (err, res) => {
         if (err) throw err;
         console.log("Successfully added", res);
