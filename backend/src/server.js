@@ -134,7 +134,7 @@ function handleIO(socket) {
     if (!rooms.includes(room)) {
       socket.join(room, () => {
         const message = formatMessage({
-          from: { username },
+          from: { name: room },
           to: { name: room },
           message: {
             text: `Welcome to the ${room} room.`,
@@ -145,7 +145,7 @@ function handleIO(socket) {
         socket.to(room).emit(
           "messages",
           formatMessage({
-            from: { username },
+            from: { name: room },
             to: { name: room },
             message: {
               text: `${username} has joined.`,

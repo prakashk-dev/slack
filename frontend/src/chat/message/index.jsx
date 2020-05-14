@@ -60,21 +60,6 @@ const Message = ({ location, username, id }) => {
   };
 
   useEffect(() => {
-    if (id && Object.keys(room.data).length && Object.keys(user.data).length) {
-      setMessages(room.data.messages || []);
-      socket.emit(
-        "join",
-        {
-          room: room.data.name,
-          username: user.data.username,
-        },
-        (msg) => {}
-      );
-      divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [id, room.data, user.data]);
-
-  useEffect(() => {
     if (file) {
       document.getElementById("previewImage").src = window.URL.createObjectURL(
         file
@@ -105,6 +90,21 @@ const Message = ({ location, username, id }) => {
       return () => socket.disconnect();
     }
   }, [config.data.SOCKET_URL]);
+
+  useEffect(() => {
+    if (id && Object.keys(room.data).length && Object.keys(user.data).length) {
+      setMessages(room.data.messages || []);
+      socket.emit(
+        "join",
+        {
+          room: room.data.name,
+          username: user.data.username,
+        },
+        (msg) => {}
+      );
+      divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [id, room.data, user.data]);
 
   const formatMessage = ({ text = message, type = "text", url = "" }) => {
     return {
@@ -209,9 +209,10 @@ const Message = ({ location, username, id }) => {
                     <div
                       key={index}
                       className={
-                        msg.message.type === "admin"
+                        msg.from.name === room.data.name &&
+                        msg.to.name === room.data.name
                           ? "chat-item admin"
-                          : msg.from === user.data.username
+                          : msg.from.username === user.data.username
                           ? "chat-item chat-self"
                           : "chat-item chat-other"
                       }
@@ -223,7 +224,8 @@ const Message = ({ location, username, id }) => {
                       </div>
                       <div
                         className={
-                          msg.message.type === "admin"
+                          msg.from.name === room.data.name &&
+                          msg.to.name === room.data.name
                             ? "chat-message center"
                             : msg.from.username === user.data.username
                             ? msg.message.type === "faIcon"
