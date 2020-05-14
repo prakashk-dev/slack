@@ -98,9 +98,10 @@
 @media only screen and (max-width: 500px) {
   .form {
     grid-row-gap: 5px;
-    grid-template-rows: 1.5em 1fr 1fr 1.2fr;
+    grid-template-rows: 1.5em 1fr 1fr 1fr;
     width: 90%;
     margin: auto;
+    margin-top: 0px;
     font-size: 1em;
 
     .error {
@@ -140,6 +141,7 @@
         transition: 300ms ease-in-out;
         width: 95%;
         height: 30px;
+        font-size: 1em;
 
         &:focus {
           border-color: $hover_color;
@@ -159,6 +161,10 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
+
+      button {
+        width: 100%;
+      }
     }
   }
 }

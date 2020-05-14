@@ -34,15 +34,29 @@
 }
 
 .mobile-home {
-  grid-template-rows: 40px 1fr;
+  @extend .home;
 
   .body {
-    width: 100%;
-    height: auto;
+    width: 95%;
+    margin: auto;
+    height: 100%;
     margin-bottom: 0px;
-    margin-top: 0px;
+    margin-top: 5%;
     border-radius: 0px;
     padding-bottom: 0px;
+    grid-template-rows: 105px auto;
     box-shadow: 0px 0px 4px 2px $box_shadow inset;
+
+    .heading {
+      text-align: center;
+
+      .title {
+        font-size: 22px;
+      }
+
+      p {
+        margin-top: 8px;
+      }
+    }
   }
 }

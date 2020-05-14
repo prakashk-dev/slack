@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Navigation from "./nav";
 import UserForm from "./form/";
 
@@ -9,8 +9,9 @@ const Home = () => {
   const {
     state: { style },
   } = useContext(AppContext);
+  console.log(style.device);
   return (
-    <div className={style.layout === "mobile" ? "mobile-home" : "home"}>
+    <div className={style.device === "mobile" ? "mobile-home" : "home"}>
       <Navigation></Navigation>
       <div className="body">
         <div className="heading">
