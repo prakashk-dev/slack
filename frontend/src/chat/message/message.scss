@@ -355,6 +355,7 @@
 
 .mobile-message {
   @extend .message;
+  grid-template-rows: 50px 1fr;
   grid-template-areas:
     "chat-navigation chat-navigation"
     "chat-room chat-room";
@@ -364,6 +365,12 @@
     grid-template-columns: 60px 1fr 60px;
     background-color: $hover_color;
     color: $color;
+
+    p {
+      font-size: 1em;
+      font-weight: bold;
+      text-overflow: ellipsis;
+    }
 
     .gear {
       i.active {
