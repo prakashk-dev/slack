@@ -328,8 +328,6 @@ export const AppProvider = ({ children }) => {
   };
 
   const changeLayout = ({ width, height }) => {
-    console.log(width < 800 || height < 600);
-
     if (width < 800 || height < 600) {
       return dispatch({
         type: SMALL_SCREEN_LAYOUT,

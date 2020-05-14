@@ -8,10 +8,12 @@ const PIN = /^\d{4}/;
 const HomeForm = () => {
   const {
     state: {
-      user: { data, error },
+      user: { data, error, loading },
     },
     saveOrAuthenticateUser,
     isAuthenticated,
+    fetchRooms,
+    fetchAuthUser,
   } = useContext(AppContext);
 
   const [username, setUsername] = useState("");
@@ -20,6 +22,7 @@ const HomeForm = () => {
   const [formError, setFormError] = useState(error);
   const [message, setMessage] = useState(null);
   const [pinError, setPinError] = useState(null);
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   // validatoin for submit button
   useEffect(() => {
@@ -32,15 +35,19 @@ const HomeForm = () => {
   }, [username]);
 
   useEffect(() => {
-    if (data.username) {
-      navigate(`/chat/g/welcome`);
-    } else if (error) {
+    console.log(data.username);
+    console.log(loading);
+    if (error) {
       setFormError(error);
+    } else if (data.username && formSubmitted && !loading) {
+      setFormSubmitted(false);
+      navigate(`/chat/g/welcome`);
     }
-  }, [data, error]);
+  }, [data, error, loading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormSubmitted(true);
     saveOrAuthenticateUser({ username, pin });
   };
 

@@ -1,12 +1,16 @@
-import React from "react";
+import React, { useContext } from "react";
 import Navigation from "./nav";
 import UserForm from "./form/";
 
 import "./home.scss";
+import { AppContext } from "src/context";
 
 const Home = () => {
+  const {
+    state: { style },
+  } = useContext(AppContext);
   return (
-    <div className="home">
+    <div className={style.layout === "mobile" ? "mobile-home" : "home"}>
       <Navigation></Navigation>
       <div className="body">
         <div className="heading">
