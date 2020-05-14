@@ -6,8 +6,10 @@ import jwt from "jsonwebtoken";
 import axios from "axios";
 
 // Define constacts action verbs
-const DECODE_TOKEN = "DECODE_TOKEN";
-const SAVE_CONFIG = "SAVE_CONFIG";
+const USER_AUTHENTICATING = "USER_AUTHENTICATING";
+const USER_AUTHENTICATING_ERROR = "USER_AUTHENTICATING_ERROR";
+const USER_AUTHENTICATING_SUCCESS = "USER_AUTHENTICATING_SUCCESS";
+
 const ROOM_FETCHING = "ROOM_FETCHING";
 const ROOM_FETCHING_ERROR = "ROOM_FETCHING_ERROR";
 const ROOM_FETCH_SUCCESS = "ROOM_FETCHING_SUCCESS";
@@ -18,6 +20,14 @@ const ROOMS_FETCHING = "ROOMS_FETCHING";
 const ROOMS_FETCHING_ERROR = "ROOMS_FETCHING_ERROR";
 const ROOMS_FETCH_SUCCESS = "ROOMS_FETCHING_SUCCESS";
 
+const LOGOUT = "LOGOUT";
+
+const DEFAULT_STATE = {
+  user: { data: {}, error: null, loading: false },
+  config: { data: { SOCKET_URL: "" }, error: null, loading: false },
+  room: { data: {}, error: null, loading: false },
+  rooms: { data: [], error: null, loading: false },
+};
 // Initial state of the application
 export const initialState = () => {
   const token = Cookies.get("token");
@@ -32,17 +42,16 @@ export const initialState = () => {
         loading: false,
         error: null,
       },
-      config: { SOCKET_URL: decoded.socket },
+      config: {
+        data: { SOCKET_URL: decoded.socket },
+        loading: false,
+        error: null,
+      },
       room: { error: null, loading: false, data: {} },
       rooms: { data: [], error: null, loading: false },
     };
   }
-  return {
-    user: { data: {}, error: null, loading: false },
-    config: { SOCKET_URL: "", error: null, loading: false },
-    room: { data: {}, error: null, loading: false },
-    rooms: { data: [], error: null, loading: false },
-  };
+  return DEFAULT_STATE;
 };
 
 const INIT_STATE = initialState();
@@ -50,11 +59,41 @@ const INIT_STATE = initialState();
 // Reducer
 export const appReducer = (state, { type, payload }) => {
   switch (type) {
-    case DECODE_TOKEN:
+    case USER_AUTHENTICATING:
       return {
-        user: { username: payload.username, id: payload.sub },
-        config: { SOCKET_URL: payload.socket },
+        ...state,
+        user: { ...state.user, loading: true, error: null },
+        config: { ...state.config, loading: true, error: null },
       };
+    case USER_AUTHENTICATING_ERROR:
+      return {
+        ...state,
+        user: { ...state.user, loading: false, error: payload },
+      };
+    case USER_AUTHENTICATING_SUCCESS:
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          loading: false,
+          error: null,
+          data: {
+            ...state.user.data,
+            username: payload.username,
+            _id: payload.sub,
+          },
+        },
+        config: {
+          ...state.config,
+          data: {
+            ...state.config.data,
+            SOCKET_URL: payload.socket,
+          },
+          loading: false,
+          error: null,
+        },
+      };
+
     case ROOM_FETCHING:
       return { ...state, room: { ...state.room, error: null, loading: true } };
     case ROOM_FETCHING_ERROR:
@@ -94,6 +133,8 @@ export const appReducer = (state, { type, payload }) => {
         ...state,
         rooms: { data: payload, loading: false, error: null },
       };
+    case LOGOUT:
+      return DEFAULT_STATE;
     default:
       return INIT_STATE;
   }
@@ -103,17 +144,26 @@ export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, INIT_STATE);
   // Actions
   const saveOrAuthenticateUser = async (user) => {
+    dispatch({ type: USER_AUTHENTICATING });
+
     try {
       const res = await axios.post("/api/auth", user);
-      if (res.data.error) return res.data.error;
+      if (res.data.error) {
+        return dispatch({
+          type: USER_AUTHENTICATING_ERROR,
+          payload: res.data.error,
+        });
+      }
       const token = res.data.token;
-
       return dispatch({
-        type: DECODE_TOKEN,
+        type: USER_AUTHENTICATING_SUCCESS,
         payload: jwt.decode(token),
       });
     } catch (error) {
-      return error.message;
+      return dispatch({
+        type: USER_AUTHENTICATING_ERROR,
+        payload: error.message,
+      });
     }
   };
 
@@ -246,6 +296,9 @@ export const AppProvider = ({ children }) => {
   const logout = () => {
     const token = isAuthenticated();
     if (token) Cookies.remove("token");
+    return dispatch({
+      type: logout,
+    });
   };
 
   const value = {

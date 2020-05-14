@@ -25,12 +25,13 @@ const Message = ({ location, username, id }) => {
   const [message, setMessage] = useState("");
   // { from: {}, to: {}, message: { type: [text|imgage|video|file], text: '', url: null}, timeStamp}
   const [messages, setMessages] = useState([]);
-  const { state } = useContext(AppContext);
+  const {
+    state: { user, rooms, room, config },
+  } = useContext(AppContext);
   const divRef = useRef(null);
   const [typing, setTyping] = useState(null);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
   const [file, setFile] = useState(null);
-  const { room, user } = state;
 
   const onDrop = useCallback(
     (files) => {
@@ -59,7 +60,7 @@ const Message = ({ location, username, id }) => {
   };
 
   useEffect(() => {
-    if (id && Object.keys(room.data).length) {
+    if (id && Object.keys(room.data).length && Object.keys(user.data).length) {
       setMessages(room.data.messages || []);
       socket.emit(
         "join",
@@ -71,7 +72,7 @@ const Message = ({ location, username, id }) => {
       );
       divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [id, room.data]);
+  }, [id, room.data, user.data]);
 
   useEffect(() => {
     if (file) {
@@ -82,8 +83,8 @@ const Message = ({ location, username, id }) => {
   }, [file]);
 
   useEffect(() => {
-    if (state.config.SOCKET_URL) {
-      socket = io.connect(state.config.SOCKET_URL);
+    if (config.data.SOCKET_URL) {
+      socket = io.connect(config.data.SOCKET_URL);
       socket.on("connect", () => console.log("Connected"));
       socket.on("disconnect", (reason) =>
         console.log("Disconnected: ", reason)
@@ -95,7 +96,6 @@ const Message = ({ location, username, id }) => {
 
       socket.on("messages", (msg) => {
         setMessages((prevMessages) => [...prevMessages, msg]);
-        console.log(msg);
         messages.length &&
           divRef.current.scrollIntoView({ behavior: "smooth" });
       });
@@ -104,7 +104,7 @@ const Message = ({ location, username, id }) => {
       });
       return () => socket.disconnect();
     }
-  }, [state.config.SOCKET_URL]);
+  }, [config.data.SOCKET_URL]);
 
   const formatMessage = ({ text = message, type = "text", url = "" }) => {
     return {
@@ -142,7 +142,7 @@ const Message = ({ location, username, id }) => {
     } else {
       if (typing) {
         socket.emit("typing", {
-          username: state.user.data.username,
+          username: user.data.username,
           room: room.data.name,
           active: false,
         });
@@ -177,7 +177,14 @@ const Message = ({ location, username, id }) => {
   return (
     <div className={showSidebar ? "message sidebar-open" : "message"}>
       <div className="message-nav">
-        <p>Chat Room - {room ? room.data.name : "Bhet-Ghat"}</p>
+        <p>
+          Chat Room -{" "}
+          {room.loading
+            ? "..."
+            : room.error
+            ? "Error Fetching Room"
+            : room.data.name || "Bhet-Ghat"}
+        </p>
         <div className="gear" onClick={() => setShowSidebar(!showSidebar)}>
           <i
             className={
@@ -191,7 +198,7 @@ const Message = ({ location, username, id }) => {
           <h1>
             Connect Users to the some random/general room and show some
             instruction on how to use application{" "}
-          </h1>{" "}
+          </h1>
         </div>
       ) : (
         <div className={file ? "messages-file-preview" : "messages"}>
@@ -311,7 +318,11 @@ const Message = ({ location, username, id }) => {
         <div className="right-sidebar">
           <div className="profile">
             <img src="/assets/kathmandu.png" alt="" />
-            {room ? room.data.name : "Bhet-Ghat"}
+            {room.loading
+              ? "..."
+              : room.error
+              ? "Error Fetching Room"
+              : room.data.name || "Bhet-Ghat"}
           </div>
           <div className="users">
             <div className="heading">
@@ -319,7 +330,7 @@ const Message = ({ location, username, id }) => {
               Users
             </div>
             <div className="users-list">
-              {room.Loading ? (
+              {room.loading ? (
                 <div className="loading">... </div>
               ) : room.error ? (
                 <div className="error"> {room.error} </div>

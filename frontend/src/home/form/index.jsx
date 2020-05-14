@@ -1,35 +1,47 @@
 import React, { useState, useContext, useEffect } from "react";
-import { navigate, Redirect } from "@reach/router";
+import { navigate, Redirect, useParams } from "@reach/router";
 import axios from "axios";
 import { AppContext } from "src/context";
 
 import "./form.scss";
 const PIN = /^\d{4}/;
 const HomeForm = () => {
-  const { saveOrAuthenticateUser, fetchConfig, isAuthenticated } = useContext(
-    AppContext
-  );
+  const {
+    state: {
+      user: { data, error },
+    },
+    saveOrAuthenticateUser,
+    isAuthenticated,
+  } = useContext(AppContext);
+
   const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
-  const [error, setError] = useState(null);
   const [valid, setValid] = useState(false);
+  const [formError, setFormError] = useState(error);
   const [message, setMessage] = useState(null);
   const [pinError, setPinError] = useState(null);
 
   // validatoin for submit button
   useEffect(() => {
     setValid(username.length && PIN.test(pin));
-    setError(null);
+    setFormError(null);
   }, [username, pin]);
 
   useEffect(() => {
     setMessage(null);
   }, [username]);
 
+  useEffect(() => {
+    if (data.username) {
+      navigate(`/chat/g/welcome`);
+    } else if (error) {
+      setFormError(error);
+    }
+  }, [data, error]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const error = await saveOrAuthenticateUser({ username, pin });
-    error ? setError(error) : navigate(`/chat/g/welcome`);
+    saveOrAuthenticateUser({ username, pin });
   };
 
   const handleChange = (e) => {
@@ -47,12 +59,11 @@ const HomeForm = () => {
   };
   const InfoBar = () => {
     return (
-      <div className={error ? "error" : message ? "info" : ""}>
-        {error || message}
+      <div className={formError ? "error" : message ? "info" : ""}>
+        {formError || message}
       </div>
     );
   };
-
   return isAuthenticated() ? (
     <Redirect to="/chat/g/welcome" noThrow />
   ) : (

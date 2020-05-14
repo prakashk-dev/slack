@@ -20,7 +20,6 @@ const Sidebar = ({ groupId }) => {
   } = useContext(AppContext);
   const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
-
   useEffect(() => {
     fetchAuthUser();
     fetchRooms();
@@ -102,7 +101,7 @@ const Sidebar = ({ groupId }) => {
             <div className="loading">... </div>
           ) : rooms.error ? (
             <div className="error"> {rooms.error} </div>
-          ) : (
+          ) : rooms.data.length ? (
             rooms.data.map((g) => (
               <li
                 onClick={() => navigate(`/chat/g/${g._id}`)}
@@ -112,6 +111,8 @@ const Sidebar = ({ groupId }) => {
                 # {g.name}
               </li>
             ))
+          ) : (
+            <div> No Rooms </div>
           )}
         </div>
       </div>

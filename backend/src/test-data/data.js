@@ -77,10 +77,12 @@ async function seedData() {
       msg = "Room data already exists.";
     } else {
       // push some user ids to the dummy rooms data
-      GroupModel.insertMany(rooms, (err, rooms) => {
-        if (err) msg = err.message;
+      try {
+        await GroupModel.insertMany(rooms);
         msg = "Room data successfully inserted.";
-      });
+      } catch (err) {
+        msg = err.message;
+      }
     }
     return { msg };
   };
