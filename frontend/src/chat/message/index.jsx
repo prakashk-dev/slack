@@ -12,6 +12,7 @@ import {
   faThumbsUp,
   faArrowAltCircleRight,
   faFileImage,
+  faBars,
 } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment";
 import { useDropzone } from "react-dropzone";
@@ -21,12 +22,12 @@ import Axios from "axios";
 
 let socket;
 const Message = ({ location, username, id }) => {
-  const [showSidebar, setShowSidebar] = useState(true);
   const [message, setMessage] = useState("");
   // { from: {}, to: {}, message: { type: [text|imgage|video|file], text: '', url: null}, timeStamp}
   const [messages, setMessages] = useState([]);
   const {
-    state: { user, rooms, room, config },
+    state: { user, rooms, room, config, style },
+    toggleSidebar,
   } = useContext(AppContext);
   const divRef = useRef(null);
   const [typing, setTyping] = useState(null);
@@ -174,22 +175,60 @@ const Message = ({ location, username, id }) => {
   const convertToLocalTime = (time) => {
     return moment(moment.utc(time).toDate()).local().format("h:m a");
   };
+
   return (
-    <div className={showSidebar ? "message sidebar-open" : "message"}>
+    <div
+      className={
+        style.device === "mobile"
+          ? style.showInfobar
+            ? "mobile-message-with-infobar-open"
+            : "mobile-message"
+          : style.showInfobar
+          ? "message"
+          : "desktop-message"
+      }
+    >
       <div className="message-nav">
+        {style.device === "mobile" && (
+          <div
+            className="gear"
+            onClick={() =>
+              toggleSidebar({
+                showSidebar: !style.showSidebar,
+              })
+            }
+          >
+            <i
+              className={
+                style.showSidebar ? "las la-bars" : "las la-bars active"
+              }
+            ></i>
+          </div>
+        )}
         <p>
-          Chat Room -{" "}
+          Chat Room -
           {room.loading
             ? "..."
             : room.error
             ? "Error Fetching Room"
             : room.data.name || "Bhet-Ghat"}
         </p>
-        <div className="gear" onClick={() => setShowSidebar(!showSidebar)}>
+        <div
+          className="gear"
+          onClick={() =>
+            toggleSidebar({
+              showInfobar: !style.showInfobar,
+            })
+          }
+        >
           <i
-            className={
-              showSidebar ? "las la-info-circle" : "las la-info-circle active"
-            }
+            className={`${
+              style.device === "mobile"
+                ? "las la-ellipsis-v"
+                : style.showSidebar
+                ? "las la-info-circle"
+                : "las la-info-circle active"
+            }`}
           ></i>
         </div>
       </div>
@@ -316,7 +355,7 @@ const Message = ({ location, username, id }) => {
           </div>
         </div>
       )}
-      {showSidebar && (
+      {style.showInfobar && (
         <div className="right-sidebar">
           <div className="profile">
             <img src="/assets/kathmandu.png" alt="" />

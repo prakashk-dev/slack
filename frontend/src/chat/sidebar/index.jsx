@@ -7,16 +7,16 @@ import React, {
 } from "react";
 import { navigate } from "@reach/router";
 import { AppContext } from "src/context";
-import axios from "axios";
 import "./sidebar.scss";
 
 const Sidebar = ({ groupId }) => {
   const {
-    state: { user, rooms, room },
+    state: { user, rooms, room, style },
     logout,
     fetchAuthUser,
     fetchRooms,
     fetchGroup,
+    toggleSidebar,
   } = useContext(AppContext);
   const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -88,8 +88,19 @@ const Sidebar = ({ groupId }) => {
     navigate("/");
   };
 
+  const handleClick = (id) => {
+    navigate(`/chat/g/${id}`);
+    if (style.device === "mobile") {
+      setTimeout(() => {
+        toggleSidebar({
+          showSidebar: false,
+        });
+      }, 100);
+    }
+  };
+
   return (
-    <div className="sidebar">
+    <div className={style.device === "mobile" ? "mobile-sidebar" : "sidebar"}>
       <Profile />
       <div className="rooms">
         <div className="rooms-heading">
@@ -104,7 +115,7 @@ const Sidebar = ({ groupId }) => {
           ) : rooms.data.length ? (
             rooms.data.map((g) => (
               <li
-                onClick={() => navigate(`/chat/g/${g._id}`)}
+                onClick={() => handleClick(g._id)}
                 key={g._id}
                 className={g._id === groupId ? "active" : null}
               >

@@ -4,6 +4,7 @@
   display: grid;
   grid-template-rows: 60px 1fr 1fr;
   box-shadow: 0px 0px 1px 1px $box_shadow inset;
+  z-index: 10;
 
   .user-profile {
     display: grid;
@@ -15,6 +16,7 @@
     background-color: $background_color;
     grid-template-columns: 60px auto 40px;
     position: relative;
+
     .profile-picture {
       img {
         width: 40px;
@@ -22,6 +24,7 @@
         border-radius: 50%;
       }
     }
+
     .gear-icon {
       i.active {
         color: black;
@@ -29,6 +32,7 @@
         border-radius: 50%;
       }
     }
+
     .profile-popup {
       background-color: white;
       color: black;
@@ -44,6 +48,7 @@
       display: grid;
       align-items: center;
       grid-template-rows: 150px 1fr 1fr;
+
       i {
         position: absolute;
         top: -23px;
@@ -51,15 +56,18 @@
         color: white;
         font-size: 2em;
       }
+
       .profile-status {
         display: grid;
         justify-items: center;
         align-items: center;
         font-size: 0.8em;
         grid-template-rows: auto 30px;
+
         .profile-status-text {
           align-self: end;
         }
+
         .status {
           .status-bar {
             width: 80px;
@@ -73,6 +81,7 @@
           }
         }
       }
+
       li {
         list-style: none;
         padding: 6px;
@@ -80,9 +89,11 @@
         cursor: pointer;
         transition: 0.2s ease-in-out;
         box-shadow: 0px -1px 1px 0px $box-shadow;
+
         &:last-child {
           box-shadow: 0px 0px 1px 1px $box-shadow;
         }
+
         &:hover {
           background-color: $background_color;
           color: $color;
@@ -90,6 +101,7 @@
       }
     }
   }
+
   .rooms,
   .users {
     display: grid;
@@ -128,14 +140,36 @@
       list-style: none;
       cursor: pointer;
       transition: 0.2s ease-in-out;
+
       &:hover {
         background-color: $background_color;
         color: $color;
       }
     }
+
     li.active {
       background-color: $hover_color;
       color: $color;
+    }
+  }
+}
+
+.mobile-sidebar {
+  @extend .sidebar;
+  grid-template-rows: 60px auto auto;
+  max-height: 91vh;
+
+  .rooms,
+  .users {
+    height: calc(45vh - 30px);
+  }
+
+  .rooms-list,
+  .users.list {
+    padding-bottom: 0px;
+
+    li {
+      padding: 16px;
     }
   }
 }

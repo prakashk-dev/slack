@@ -19,6 +19,9 @@ const USER_FETCH_SUCCESS = "USER_FETCHING_SUCCESS";
 const ROOMS_FETCHING = "ROOMS_FETCHING";
 const ROOMS_FETCHING_ERROR = "ROOMS_FETCHING_ERROR";
 const ROOMS_FETCH_SUCCESS = "ROOMS_FETCHING_SUCCESS";
+const SMALL_SCREEN_LAYOUT = "SMALL_SCREEN_LAYOUT";
+const DEFAULT_LAYOUT = "DEFAULT_LAYOUT";
+const TOGGLE_SIDEBAR = "TOGGLE_SIDEBAR";
 
 const LOGOUT = "LOGOUT";
 
@@ -27,6 +30,7 @@ const DEFAULT_STATE = {
   config: { data: { SOCKET_URL: "" }, error: null, loading: false },
   room: { data: {}, error: null, loading: false },
   rooms: { data: [], error: null, loading: false },
+  style: { showSidebar: true, showInfobar: true, layout: "desktop" },
 };
 // Initial state of the application
 export const initialState = () => {
@@ -34,21 +38,18 @@ export const initialState = () => {
   if (token) {
     const decoded = jwt.decode(token);
     return {
+      ...DEFAULT_STATE,
       user: {
+        ...DEFAULT_STATE.user,
         data: {
           username: decoded.username,
           _id: decoded.sub,
         },
-        loading: false,
-        error: null,
       },
       config: {
+        ...DEFAULT_STATE.config,
         data: { SOCKET_URL: decoded.socket },
-        loading: false,
-        error: null,
       },
-      room: { error: null, loading: false, data: {} },
-      rooms: { data: [], error: null, loading: false },
     };
   }
   return DEFAULT_STATE;
@@ -135,6 +136,31 @@ export const appReducer = (state, { type, payload }) => {
       };
     case LOGOUT:
       return DEFAULT_STATE;
+    case SMALL_SCREEN_LAYOUT:
+      return {
+        ...state,
+        style: {
+          ...state.layout,
+          showSidebar: false,
+          showInfobar: false,
+          device: "mobile",
+        },
+      };
+    case DEFAULT_LAYOUT:
+      return {
+        ...state,
+        style: {
+          ...state.layout,
+          showSidebar: true,
+          showInfobar: true,
+          device: "desktop",
+        },
+      };
+    case TOGGLE_SIDEBAR:
+      return {
+        ...state,
+        style: { ...state.style, ...payload },
+      };
     default:
       return INIT_STATE;
   }
@@ -301,6 +327,27 @@ export const AppProvider = ({ children }) => {
     });
   };
 
+  const changeLayout = ({ width, height }) => {
+    console.log(width < 800 || height < 600);
+
+    if (width < 800 || height < 600) {
+      return dispatch({
+        type: SMALL_SCREEN_LAYOUT,
+      });
+    } else {
+      return dispatch({
+        type: DEFAULT_LAYOUT,
+      });
+    }
+  };
+
+  const toggleSidebar = (payload) => {
+    return dispatch({
+      type: TOGGLE_SIDEBAR,
+      payload,
+    });
+  };
+
   const value = {
     state,
     saveOrAuthenticateUser,
@@ -310,6 +357,8 @@ export const AppProvider = ({ children }) => {
     fetchGroup,
     fetchAuthUser,
     fetchRooms,
+    changeLayout,
+    toggleSidebar,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

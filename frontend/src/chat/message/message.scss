@@ -4,8 +4,9 @@
   display: grid;
   grid-template-areas:
     "chat-navigation chat-navigation"
-    "chat-room chat-room";
+    "chat-room chat-sidebar";
   grid-template-rows: 60px 1fr;
+  grid-template-columns: 1fr 250px;
   height: 100%;
   overflow-x: hidden;
 
@@ -17,20 +18,31 @@
     align-items: center;
     color: $black;
     box-shadow: 0px 1px 2px 1px $box_shadow;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     p {
       font-size: 1.2em;
       font-weight: bold;
+      text-overflow: ellipsis;
     }
+
     .gear {
       i {
         font-size: 2em;
       }
+
       i.active {
         background-color: #ddd;
         border-radius: 50%;
       }
     }
+  }
+
+  .message-nav-with-hamburger {
+    @extend .message-nav;
+    grid-template-columns: 60px 1fr 60px;
+
   }
 
   .messages {
@@ -44,6 +56,7 @@
       padding: 0px 8px;
       height: calc(100vh - 135px);
       overflow-y: auto;
+      overflow-x: hidden;
       grid-gap: 10px;
       position: relative;
 
@@ -52,6 +65,7 @@
         clear: both;
       }
     }
+
     .chat-image {
       width: 100%;
     }
@@ -76,6 +90,7 @@
         background: $background_color;
         color: $color;
       }
+
       .chat-emoji {
         background-color: $color;
         color: $background_color;
@@ -134,6 +149,7 @@
       align-items: center;
       width: 100%;
       margin: auto;
+
       .typing {
         grid-area: typing;
         font-style: italic;
@@ -142,6 +158,7 @@
         justify-self: flex-start;
         align-self: end;
       }
+
       .icons {
         grid-area: icon;
         color: #ddd;
@@ -169,6 +186,7 @@
         outline: none;
         transition: 300ms ease-in-out;
         font-size: 16px;
+
         &:focus {
           outline: 0;
           box-shadow: 0 0 1px 1px $box_shadow;
@@ -184,6 +202,7 @@
         color: $background_color;
         justify-self: center;
         background-color: none;
+
         svg.fa-thumbs-up {
           margin-bottom: 2px;
         }
@@ -191,6 +210,7 @@
         &:hover {
           color: $hover_color;
         }
+
         &:disabled {
           opacity: 0.6;
           cursor: not-allowed;
@@ -198,23 +218,28 @@
       }
     }
   }
+
   .messages-file-preview {
     @extend .messages;
     grid-template-rows: 1fr 100px 65px;
     grid-row-gap: 0px;
+
     .message-container {
       height: calc(100vh - 235px);
     }
+
     .file_preview {
       position: relative;
       height: 100px;
       z-index: 1;
       background: white;
       box-shadow: 0px -1px 2px 0px #eee;
+
       img {
         height: 100px;
         width: 100px;
       }
+
       .removeImage {
         position: absolute;
         left: 75px;
@@ -229,6 +254,7 @@
         font-size: 0.6em;
         cursor: pointer;
         color: white;
+
         &:hover {
           background: #aaa;
         }
@@ -238,19 +264,11 @@
 
   .right-sidebar {
     grid-area: chat-sidebar;
-  }
-}
-
-.sidebar-open {
-  grid-template-areas:
-    "chat-navigation chat-navigation"
-    "chat-room chat-sidebar";
-  grid-template-columns: 3fr 1fr;
-
-  .right-sidebar {
     display: grid;
     grid-template-rows: 150px 1fr;
     box-shadow: 0px 0px 1px 1px $box_shadow inset;
+    z-index: 10;
+    background: white;
 
     .profile {
       display: grid;
@@ -271,6 +289,7 @@
       display: grid;
       grid-template-rows: 40px 1fr;
       height: calc(100vh - 230px);
+
       .no-user {
         text-align: center;
       }
@@ -287,6 +306,7 @@
 
       .users-list {
         overflow-y: auto;
+        overflow-x: hidden;
         padding-bottom: 16px;
 
         .user {
@@ -316,10 +336,60 @@
   }
 }
 
-@media only screen and (max-width: 812px) {
-  .message {
-    .message-body {
-      grid-template-areas: "chat chat";
+.desktop-message {
+  @extend .message;
+  grid-template-areas:
+    "chat-navigation chat-navigation"
+    "chat-room chat-room";
+
+  .messages {
+    grid-column: 1fr;
+  }
+
+  .right-sidebar {
+    width: 250px;
+  }
+
+
+}
+
+.mobile-message {
+  @extend .message;
+  grid-template-areas:
+    "chat-navigation chat-navigation"
+    "chat-room chat-room";
+  grid-template-columns: 100px 1fr;
+
+  .message-nav {
+    grid-template-columns: 60px 1fr 60px;
+    background-color: $hover_color;
+    color: $color;
+
+    .gear {
+      i.active {
+        background-color: inherit;
+      }
+    }
+  }
+
+  .messages {
+    .message-container {
+      height: calc(91vh - 135px);
+    }
+  }
+
+}
+
+.mobile-message-with-infobar-open {
+  @extend .mobile-message;
+  grid-template-areas:
+    "chat-navigation chat-navigation"
+    "chat-room chat-sidebar";
+
+  .right-sidebar {
+
+    .users {
+      height: calc(91vh - 230px);
     }
   }
 }

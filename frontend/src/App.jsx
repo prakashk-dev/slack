@@ -5,7 +5,6 @@ import Chat from "src/chat";
 import GroupMessage from "src/chat/message";
 import Home from "src/home";
 import "./style.scss";
-import { AppContext } from "./context";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useContext(AppContext);

@@ -1,5 +1,18 @@
 .chat {
   height: 100%;
   display: grid;
+  grid-template-areas: "sidebar chat";
   grid-template-columns: 240px 1fr;
+}
+
+
+.mobile-chat {
+  @extend .chat;
+  padding-top: 10px;
+  grid-template-columns: 1fr;
+}
+
+.mobile-chat-with-sidebar-open {
+  @extend .mobile-chat;
+  grid-template-columns: 1fr 100px;
 }
