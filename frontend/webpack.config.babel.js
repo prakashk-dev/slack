@@ -25,10 +25,18 @@ const config = {
         use: "babel-loader",
       },
       {
-        test: /\.s?css$/,
+        test: /\.s[ac]ss$/,
         include: resolveSrc(),
         exclude: resolveRoot("node_modules"),
-        use: ["style-loader", "css-loader", "sass-loader", "postcss-loader"],
+        use: ["style-loader", "css-loader", "sass-loader"],
+      },
+      {
+        test: /\.css$/,
+        use: [
+          "style-loader",
+          { loader: "css-loader", options: { importLoaders: 1 } },
+          "postcss-loader",
+        ],
       },
     ],
   },
