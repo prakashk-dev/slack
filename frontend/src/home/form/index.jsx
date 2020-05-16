@@ -5,7 +5,7 @@ import { Form, Input, Button } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 
 import "./form.scss";
-const PIN = /^\d{4}/;
+const PIN = /[0-9]/;
 const HomeForm = () => {
   const {
     state: {
@@ -17,106 +17,107 @@ const HomeForm = () => {
     fetchAuthUser,
   } = useContext(AppContext);
 
-  const [username, setUsername] = useState("");
-  const [pin, setPin] = useState("");
-  const [valid, setValid] = useState(false);
-  const [formError, setFormError] = useState(error);
+  const [form] = Form.useForm();
+  const [httpError, setHttpError] = useState(error);
   const [message, setMessage] = useState(null);
-  const [pinError, setPinError] = useState(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [submitLayout, setSubmitLayout] = useState({
     block: true,
     type: "primary",
     htmlType: "submit",
-    disabled: valid,
   });
 
-  // validatoin for submit button
   useEffect(() => {
-    setValid(username.length && PIN.test(pin));
-    setFormError(null);
-  }, [username, pin]);
-
-  useEffect(() => {
-    setMessage(null);
-  }, [username]);
-
-  useEffect(() => {
-    console.log(data.username);
-    console.log(loading);
     if (error) {
-      setFormError(error);
+      setHttpError(error);
     } else if (data.username && formSubmitted && !loading) {
       setFormSubmitted(false);
       navigate(`/chat/g/welcome`);
     }
   }, [data, error, loading]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (values) => {
+    console.log("Form Values", values);
     setFormSubmitted(true);
-    saveOrAuthenticateUser({ username, pin });
+    saveOrAuthenticateUser(values);
   };
 
-  const handleChange = (e) => {
-    const { value } = e.target;
-    if (!isNaN(value)) {
-      setPin(value);
-      setPinError(null);
-    } else {
-      setPinError("Only digits are allowed for PIN");
-    }
-  };
+  const pinValidationRules = [
+    {
+      required: true,
+      message: "PIN is required",
+    },
+    {
+      validator(_, value) {
+        return !value || !isNaN(value)
+          ? Promise.resolve()
+          : Promise.reject("Only digits are allowed for PIN");
+      },
+    },
+  ];
+
+  const usernameValidationRules = [
+    {
+      required: true,
+      message: "Username is requird",
+    },
+  ];
 
   const checkUsername = () => {
+    const username = form.getFieldValue("username");
     username.length && setMessage(`Welcome Back, ${username}`);
   };
   const InfoBar = () => {
     return (
-      <div className={formError ? "error" : message ? "info" : ""}>
-        {formError || message}
+      <div className={httpError ? "error" : message ? "info" : ""}>
+        {httpError || message}
       </div>
     );
   };
-  const formLayout = {
+  const handleSubmitError = (error) => {
+    console.log("Error:", error);
+  };
+
+  const formConfig = {
+    form,
     scrollToFirstError: true,
+    name: "userForm",
     size: "large",
     layout: "vertical",
     onFinish: handleSubmit,
-    help: "Some help text",
+    onFinishFailed: handleSubmitError,
   };
 
   return isAuthenticated() ? (
     <Redirect to="/chat/g/welcome" noThrow />
   ) : (
     <div className="form">
-      <Form {...formLayout}>
+      <Form {...formConfig}>
         <InfoBar />
-
-        <Form.Item label="Username">
+        <Form.Item
+          label="Username"
+          name="username"
+          rules={usernameValidationRules}
+        >
           <Input
             prefix={<UserOutlined className="site-form-item-icon" />}
             type="text"
             name="username"
-            id="username"
-            onChange={(e) => setUsername(e.target.value)}
+            id="Username"
             onBlur={checkUsername}
-            placeholder="Choose a username or enter one if you already visited before."
-            rules={[{ required: true, message: "$name is requird" }]}
+            onChange={() => setMessage(null)}
+            placeholder="Choose a username or enter your last one"
           />
         </Form.Item>
-        <Form.Item label="PIN">
+        <Form.Item label="PIN" name="pin" rules={pinValidationRules}>
           <Input.Password
             prefix={<LockOutlined className="site-form-item-icon" />}
             type="password"
             name="pin"
             maxLength="4"
             inputMode="numeric"
-            id="pin"
-            value={pin}
-            onChange={handleChange}
+            id="PIN"
             placeholder="Choose your 4 digits pin"
-            rules={[{ required: true, message: "$name is requird" }]}
           />
         </Form.Item>
         <Form.Item>
