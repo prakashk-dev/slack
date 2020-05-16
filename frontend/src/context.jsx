@@ -135,12 +135,17 @@ export const appReducer = (state, { type, payload }) => {
         rooms: { data: payload, loading: false, error: null },
       };
     case LOGOUT:
-      return DEFAULT_STATE;
+      return {
+        ...DEFAULT_STATE,
+        style: {
+          ...state.style,
+        },
+      };
     case SMALL_SCREEN_LAYOUT:
       return {
         ...state,
         style: {
-          ...state.layout,
+          ...state.style,
           showSidebar: false,
           showInfobar: false,
           device: "mobile",
@@ -150,7 +155,7 @@ export const appReducer = (state, { type, payload }) => {
       return {
         ...state,
         style: {
-          ...state.layout,
+          ...state.style,
           showSidebar: true,
           showInfobar: true,
           device: "desktop",
@@ -323,7 +328,7 @@ export const AppProvider = ({ children }) => {
     const token = isAuthenticated();
     if (token) Cookies.remove("token");
     return dispatch({
-      type: logout,
+      type: LOGOUT,
     });
   };
 
