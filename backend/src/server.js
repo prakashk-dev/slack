@@ -104,8 +104,8 @@ app.post("/api/upload", (req, res, next) => {
       return res.json({ message: "Somethign went wrong", error: err });
     }
     // /use/app comes from docker
-    const image = req.file.path.replace("/usr/app", "/api");
-    return res.json({ image: image });
+    const url = req.file.path.replace("/usr/app", "/api");
+    return res.json({ url });
   });
 });
 
