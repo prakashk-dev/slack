@@ -28,6 +28,7 @@ const Message = ({ location, username, id }) => {
   const {
     state: { user, rooms, room, config, style },
     toggleSidebar,
+    fetchGroup,
   } = useContext(AppContext);
   const divRef = useRef(null);
   const [typing, setTyping] = useState(null);
@@ -152,6 +153,9 @@ const Message = ({ location, username, id }) => {
     }
   }, [message]);
 
+  useEffect(() => {
+    id && fetchGroup(id);
+  }, [id]);
   const handleSendLike = () => {
     const msg = {
       text: "thumbs-up",

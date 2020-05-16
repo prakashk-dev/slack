@@ -20,6 +20,7 @@ const Sidebar = ({ groupId }) => {
   } = useContext(AppContext);
   const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
+
   useEffect(() => {
     fetchAuthUser();
     fetchRooms();

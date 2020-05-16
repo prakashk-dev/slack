@@ -378,8 +378,7 @@
 
   .messages {
     .message-container {
-      height: calc(91vh - 135px);
-      max-height: calc(calc(var(--vh, 1vh) * 100) - 135px);
+      height: calc(calc(var(--vh, 1vh) * 100) - 135px);
     }
   }
 }
