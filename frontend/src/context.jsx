@@ -139,6 +139,7 @@ export const appReducer = (state, { type, payload }) => {
         ...DEFAULT_STATE,
         style: {
           ...state.style,
+          showSidebar: false,
         },
       };
     case SMALL_SCREEN_LAYOUT:
