@@ -177,7 +177,7 @@ const Message = ({ location, username, id }) => {
   };
 
   const convertToLocalTime = (time) => {
-    return moment(moment.utc(time).toDate()).local().format("h:m a");
+    return moment(moment.utc(time).toDate()).local().format("h:mm a");
   };
 
   return (

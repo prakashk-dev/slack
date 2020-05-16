@@ -1,8 +1,14 @@
 #!/bin/bash
+echo "Pulling master branch"
 git pull origin master
+echo "Finish pulling master branch"
+
 cd backend
-docker-compose build production --no-cache
+echo "Building backend production images"
+docker-compose build --no-cache production
 ./docker.sh prod
+
 cd ../frontend
-docker-compose build production --no-cache
+echo "Building frontend production image"
+docker-compose build --no-cache production
 ./docker.sh prod
