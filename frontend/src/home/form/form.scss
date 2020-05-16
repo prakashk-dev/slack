@@ -1,108 +1,11 @@
 @import "src/style.scss";
 
 .form {
-  display: grid;
-  grid-row-gap: 10px;
-  grid-template-rows: 2em 1fr 1fr 2fr;
-  width: 80%;
-  margin: auto;
-
-  .error {
-    color: firebrick;
-    font-size: 0.8em;
-    font-weight: 300;
-    text-align: center;
-    box-shadow: 0px -1px 2px 2px firebrick;
-  }
-
-  .info {
-    background-color: $button-primary;
-    color: $color;
+  form {
     display: grid;
-    justify-items: center;
-    align-items: center;
-  }
-
-  .form-group {
-    display: grid;
-    grid-template-rows: 0.5fr auto 1em;
-    width: 100%;
-
-    label {
-      font-weight: 500;
-      line-height: 1.5;
-    }
-
-    .form-control {
-      display: grid;
-      border-radius: 4px;
-      border: none;
-      border: 1px solid $box_shadow;
-      padding: 0.375rem 0.75rem;
-      line-height: 1.5;
-      outline: none;
-      transition: 300ms ease-in-out;
-      width: 100%;
-
-      &:focus {
-        border-color: $hover_color;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-      }
-    }
-
-    .pin-error {
-      font-size: 0.6em;
-      color: firebrick;
-      text-align: left;
-    }
-  }
-
-  .form-footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-
-    button {
-      width: 200px;
-      padding: 16px;
-      border: none;
-      cursor: pointer;
-      color: $color;
-      font-size: 18px;
-      height: auto;
-      opacity: 1;
-
-      &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-    }
-
-    button.chat {
-      background-color: $button_primary;
-
-      &:hover {
-        background-color: $hover_color;
-      }
-
-      &:disabled {
-        background-color: $button_primary;
-        cursor: not-allowed;
-      }
-    }
-  }
-}
-
-@media only screen and (max-width: 500px) {
-  .form {
-    grid-row-gap: 5px;
-    grid-template-rows: 1.5em 1fr 1fr 1fr;
-    width: 90%;
-    margin: auto;
-    margin-top: 0px;
-    font-size: 1em;
+    grid-row-gap: 10px;
+    grid-template-rows: 2em 1fr 1fr 1fr;
+    height: 100%;
 
     .error {
       color: firebrick;
@@ -118,53 +21,6 @@
       display: grid;
       justify-items: center;
       align-items: center;
-    }
-
-    .form-group {
-      display: grid;
-      grid-template-rows: 0.5fr auto 1em;
-      width: 100%;
-
-      label {
-        font-weight: 500;
-        line-height: 1.5;
-      }
-
-      .form-control {
-        display: grid;
-        border-radius: 4px;
-        border: none;
-        border: 1px solid $box_shadow;
-        padding: 0.375rem 0.75rem;
-        line-height: 1.5;
-        outline: none;
-        transition: 300ms ease-in-out;
-        width: 95%;
-        height: 30px;
-        font-size: 1em;
-
-        &:focus {
-          border-color: $hover_color;
-          outline: 0;
-          box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-      }
-
-      .pin-error {
-        font-size: 0.6em;
-        color: firebrick;
-        text-align: left;
-      }
-    }
-
-    .form-footer {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-
-      button {
-        width: 100%;
-      }
     }
   }
 }

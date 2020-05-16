@@ -5,27 +5,24 @@
   grid-template-rows: 80px 1fr;
 
   .body {
-    justify-self: center;
-    display: grid;
-    box-shadow: 0px 4px 12px 4px $box_shadow;
-    border-radius: 12px;
     width: 450px;
     height: 475px;
-    margin-top: 50px;
-    padding-bottom: 12px;
-    grid-template-rows: 150px auto;
+    display: grid;
+    margin-top: 20px;
+    padding: 15px 25px;
+    border-radius: 12px;
+    justify-self: center;
+    grid-template-rows: 120px auto;
+    box-shadow: 0px 4px 12px 4px $box_shadow;
 
     .heading {
       text-align: center;
-
       .title {
         font-size: 24px;
       }
-
       p {
         margin-bottom: 8px;
       }
-
       hr {
         width: 40%;
       }
@@ -35,27 +32,30 @@
 
 .mobile-home {
   @extend .home;
-
+  height: 100%;
   .body {
-    width: 95%;
-    margin: auto;
-    height: 100%;
-    margin-bottom: 0px;
-    margin-top: 5%;
+    margin: 0px;
+    width: 100%;
+    height: auto;
     border-radius: 0px;
     padding-bottom: 0px;
-    grid-template-rows: 105px auto;
+    grid-template-rows: 105px 1fr;
     box-shadow: 0px 0px 4px 2px $box_shadow inset;
 
-    .heading {
-      text-align: center;
-
-      .title {
-        font-size: 22px;
+    .ant-form-vertical {
+      .ant-form-item {
+        display: grid;
+        grid-template-rows: 40px auto;
+        margin-bottom: 0px;
       }
+    }
 
+    .heading {
+      .title {
+        font-size: 20px;
+      }
       p {
-        margin-top: 8px;
+        margin: 4px;
       }
     }
   }
