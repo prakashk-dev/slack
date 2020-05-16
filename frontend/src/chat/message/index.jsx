@@ -20,6 +20,16 @@ import Dropzone from "react-dropzone";
 import "./message.scss";
 import Axios from "axios";
 
+import { Layout, Menu } from "antd";
+const { Header, Sider, Content } = Layout;
+import {
+  MenuUnfoldOutlined,
+  MenuFoldOutlined,
+  UserOutlined,
+  VideoCameraOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
+
 let socket;
 const Message = ({ location, username, id }) => {
   const [message, setMessage] = useState("");
@@ -41,25 +51,6 @@ const Message = ({ location, username, id }) => {
     },
     [room]
   );
-
-  const sendMessageWithFile = () => {
-    const formData = new FormData();
-    formData.append("room", room.data.name);
-    formData.append("file", file);
-    Axios.post("/api/upload", formData)
-      .then((res) => {
-        setFile(null);
-        setMessage("");
-        sendMessage(
-          formatMessage({
-            text: message,
-            type: "image",
-            url: res.data.url,
-          })
-        );
-      })
-      .catch((err) => console.error(err));
-  };
 
   useEffect(() => {
     if (file) {
@@ -108,28 +99,9 @@ const Message = ({ location, username, id }) => {
     }
   }, [id, room.data, user.data]);
 
-  const formatMessage = ({ text = message, type = "text", url = "" }) => {
-    return {
-      from: { _id: user.data._id, username: user.data.username },
-      to: { _id: room.data._id, name: room.data.name },
-      message: {
-        text,
-        type,
-        url,
-      },
-    };
-  };
-
   useEffect(() => {
     divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messages, file]);
-
-  const sendMessage = (msg) => {
-    socket.emit("message", msg);
-    setMessages((prevMessages) => [...prevMessages, msg]);
-    setMessage("");
-  };
-
   // Refactor this
   useEffect(() => {
     if (message.length) {
@@ -164,6 +136,42 @@ const Message = ({ location, username, id }) => {
 
     sendMessage(formatMessage(msg));
   };
+  const formatMessage = ({ text = message, type = "text", url = "" }) => {
+    return {
+      from: { _id: user.data._id, username: user.data.username },
+      to: { _id: room.data._id, name: room.data.name },
+      message: {
+        text,
+        type,
+        url,
+      },
+    };
+  };
+
+  const sendMessageWithFile = () => {
+    const formData = new FormData();
+    formData.append("room", room.data.name);
+    formData.append("file", file);
+    Axios.post("/api/upload", formData)
+      .then((res) => {
+        setFile(null);
+        setMessage("");
+        sendMessage(
+          formatMessage({
+            text: message,
+            type: "image",
+            url: res.data.url,
+          })
+        );
+      })
+      .catch((err) => console.error(err));
+  };
+
+  const sendMessage = (msg) => {
+    socket.emit("message", msg);
+    setMessages((prevMessages) => [...prevMessages, msg]);
+    setMessage("");
+  };
 
   const handleSend = () => {
     const msg = {
@@ -192,212 +200,209 @@ const Message = ({ location, username, id }) => {
           : "desktop-message"
       }
     >
-      <div className="message-nav">
-        {style.device === "mobile" && (
-          <div
-            className="gear"
-            onClick={() =>
-              toggleSidebar({
-                showSidebar: !style.showSidebar,
-              })
-            }
-          >
-            <i
-              className={
-                style.showSidebar ? "las la-bars" : "las la-bars active"
+      <Header>
+        <div className="message-nav">
+          {style.device === "mobile" &&
+            React.createElement(
+              style.showSidebar ? MenuUnfoldOutlined : MenuFoldOutlined,
+              {
+                className: "trigger",
+                onClick: () =>
+                  toggleSidebar({ showSidebar: !style.showSidebar }),
               }
-            ></i>
-          </div>
-        )}
-        <p>
-          Chat Room -
-          {room.loading
-            ? "..."
-            : room.error
-            ? "Error Fetching Room"
-            : room.data.name || "Bhet-Ghat"}
-        </p>
-        <div
-          className="gear"
-          onClick={() =>
-            toggleSidebar({
-              showInfobar: !style.showInfobar,
-            })
-          }
-        >
-          <i
-            className={`${
-              style.device === "mobile"
-                ? "las la-ellipsis-v"
-                : style.showSidebar
-                ? "las la-info-circle"
-                : "las la-info-circle active"
-            }`}
-          ></i>
-        </div>
-      </div>
-      {id === "welcome" ? (
-        <div style={{ color: "white", justifySelf: "center" }}>
-          <h1>
-            Connect Users to the some random/general room and show some
-            instruction on how to use application{" "}
-          </h1>
-        </div>
-      ) : (
-        <div className={file ? "messages-file-preview" : "messages"}>
-          <div className="message-container">
-            {messages.length
-              ? messages.map((msg, index) => {
-                  return msg.to.name === room.data.name ? (
-                    <div
-                      key={index}
-                      className={
-                        msg.from.name === room.data.name &&
-                        msg.to.name === room.data.name
-                          ? "chat-item admin"
-                          : msg.from.username === user.data.username
-                          ? "chat-item chat-self"
-                          : "chat-item chat-other"
-                      }
-                    >
-                      <div className="username">
-                        {msg.from.username != user.data.username &&
-                          msg.message.type != "admin" &&
-                          msg.from.username}
-                      </div>
-                      <div
-                        className={
-                          msg.from.name === room.data.name &&
-                          msg.to.name === room.data.name
-                            ? "chat-message center"
-                            : msg.from.username === user.data.username
-                            ? msg.message.type === "faIcon"
-                              ? "chat-message chat-right chat-emoji"
-                              : "chat-message right"
-                            : "chat-message left"
-                        }
-                      >
-                        {msg.message.type === "image" && (
-                          <img
-                            className="chat-image"
-                            src={msg.message.url}
-                            alt="Image not found"
-                          ></img>
-                        )}
-                        {msg.message.type == "icon" ? (
-                          <FontAwesomeIcon icon={faThumbsUp} />
-                        ) : (
-                          msg.message.text
-                        )}
-                      </div>
-                      <div className="time">
-                        {convertToLocalTime(msg.timeStamp)}
-                      </div>
-                    </div>
-                  ) : null;
-                })
-              : null}
-            <div ref={divRef} id="recentMessage"></div>
-          </div>
-          {file && (
-            <div className="file_preview">
-              <img
-                src="#"
-                alt="Invalid Image"
-                id="previewImage"
-                title="Remove Attachment"
-              />
-              <div className="removeImage" onClick={removeImage}>
-                X
-              </div>
-            </div>
-          )}
-          <div className="message-footer">
-            <div className="icons">
-              <Dropzone onDrop={onDrop}>
-                {({ getRootProps, getInputProps }) => (
-                  <section>
-                    <div {...getRootProps()}>
-                      <input {...getInputProps()} />
-                      <FontAwesomeIcon icon={faFileImage} />
-                    </div>
-                  </section>
-                )}
-              </Dropzone>
-            </div>
-            <input
-              type="text"
-              value={message}
-              name="message"
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={(e) =>
-                e.key === "Enter"
-                  ? file
-                    ? sendMessageWithFile()
-                    : handleSend()
-                  : null
-              }
-            />
-            <button
-              onClick={() =>
-                file
-                  ? sendMessageWithFile()
-                  : message.length
-                  ? handleSend()
-                  : handleSendLike()
-              }
-            >
-              <FontAwesomeIcon
-                icon={
-                  message.length || file ? faArrowAltCircleRight : faThumbsUp
-                }
-              />
-            </button>
-            <div className="typing">
-              {typing && typing.room === room.data.name && typing.message}
-            </div>
-          </div>
-        </div>
-      )}
-      {style.showInfobar && (
-        <div className="right-sidebar">
-          <div className="profile">
-            <img src="/assets/kathmandu.png" alt="" />
+            )}
+          <p>
+            Chat Room -
             {room.loading
               ? "..."
               : room.error
               ? "Error Fetching Room"
               : room.data.name || "Bhet-Ghat"}
+          </p>
+          <div
+            className="gear"
+            onClick={() =>
+              toggleSidebar({
+                showInfobar: !style.showInfobar,
+              })
+            }
+          >
+            <i
+              className={`${
+                style.device === "mobile"
+                  ? "las la-ellipsis-v"
+                  : style.showSidebar
+                  ? "las la-info-circle"
+                  : "las la-info-circle active"
+              }`}
+            ></i>
           </div>
-          <div className="users">
-            <div className="heading">
-              <i className="las la-angle-right"></i>
-              Users
-            </div>
-            <div className="users-list">
-              {room.loading ? (
-                <div className="loading">... </div>
-              ) : room.error ? (
-                <div className="error"> {room.error} </div>
-              ) : room.data.users && room.data.users.length ? (
-                room.data.users.map((user) => {
-                  return (
-                    <div className="user" key={user._id}>
-                      <div className="img">
-                        <img src="/assets/kathmandu.png" alt="" />
-                      </div>
-                      <li>{user.username}</li>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="no-user">No Users</div>
-              )}
-            </div>
-          </div>
-          <div className="activity"></div>
         </div>
-      )}
+      </Header>
+      <Content>
+        {id === "welcome" ? (
+          <div style={{ color: "white", justifySelf: "center" }}>
+            <h1>
+              Connect Users to the some random/general room and show some
+              instruction on how to use application{" "}
+            </h1>
+          </div>
+        ) : (
+          <div className={file ? "messages-file-preview" : "messages"}>
+            <div className="message-container">
+              {messages.length
+                ? messages.map((msg, index) => {
+                    return msg.to.name === room.data.name ? (
+                      <div
+                        key={index}
+                        className={
+                          msg.from.name === room.data.name &&
+                          msg.to.name === room.data.name
+                            ? "chat-item admin"
+                            : msg.from.username === user.data.username
+                            ? "chat-item chat-self"
+                            : "chat-item chat-other"
+                        }
+                      >
+                        <div className="username">
+                          {msg.from.username != user.data.username &&
+                            msg.message.type != "admin" &&
+                            msg.from.username}
+                        </div>
+                        <div
+                          className={
+                            msg.from.name === room.data.name &&
+                            msg.to.name === room.data.name
+                              ? "chat-message center"
+                              : msg.from.username === user.data.username
+                              ? msg.message.type === "faIcon"
+                                ? "chat-message chat-right chat-emoji"
+                                : "chat-message right"
+                              : "chat-message left"
+                          }
+                        >
+                          {msg.message.type === "image" && (
+                            <img
+                              className="chat-image"
+                              src={msg.message.url}
+                              alt="Image not found"
+                            ></img>
+                          )}
+                          {msg.message.type == "icon" ? (
+                            <FontAwesomeIcon icon={faThumbsUp} />
+                          ) : (
+                            msg.message.text
+                          )}
+                        </div>
+                        <div className="time">
+                          {convertToLocalTime(msg.timeStamp)}
+                        </div>
+                      </div>
+                    ) : null;
+                  })
+                : null}
+              <div ref={divRef} id="recentMessage"></div>
+            </div>
+            {file && (
+              <div className="file_preview">
+                <img
+                  src="#"
+                  alt="Invalid Image"
+                  id="previewImage"
+                  title="Remove Attachment"
+                />
+                <div className="removeImage" onClick={removeImage}>
+                  X
+                </div>
+              </div>
+            )}
+            <div className="message-footer">
+              <div className="icons">
+                <Dropzone onDrop={onDrop}>
+                  {({ getRootProps, getInputProps }) => (
+                    <section>
+                      <div {...getRootProps()}>
+                        <input {...getInputProps()} />
+                        <FontAwesomeIcon icon={faFileImage} />
+                      </div>
+                    </section>
+                  )}
+                </Dropzone>
+              </div>
+              <input
+                type="text"
+                value={message}
+                name="message"
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={(e) =>
+                  e.key === "Enter"
+                    ? file
+                      ? sendMessageWithFile()
+                      : handleSend()
+                    : null
+                }
+              />
+              <button
+                onClick={() =>
+                  file
+                    ? sendMessageWithFile()
+                    : message.length
+                    ? handleSend()
+                    : handleSendLike()
+                }
+              >
+                <FontAwesomeIcon
+                  icon={
+                    message.length || file ? faArrowAltCircleRight : faThumbsUp
+                  }
+                />
+              </button>
+              <div className="typing">
+                {typing && typing.room === room.data.name && typing.message}
+              </div>
+            </div>
+          </div>
+        )}
+        {style.showInfobar && (
+          <div className="right-sidebar">
+            <div className="profile">
+              <img src="/assets/kathmandu.png" alt="" />
+              {room.loading
+                ? "..."
+                : room.error
+                ? "Error Fetching Room"
+                : room.data.name || "Bhet-Ghat"}
+            </div>
+            <div className="users">
+              <div className="heading">
+                <i className="las la-angle-right"></i>
+                Users
+              </div>
+              <div className="users-list">
+                {room.loading ? (
+                  <div className="loading">... </div>
+                ) : room.error ? (
+                  <div className="error"> {room.error} </div>
+                ) : room.data.users && room.data.users.length ? (
+                  room.data.users.map((user) => {
+                    return (
+                      <div className="user" key={user._id}>
+                        <div className="img">
+                          <img src="/assets/kathmandu.png" alt="" />
+                        </div>
+                        <li>{user.username}</li>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="no-user">No Users</div>
+                )}
+              </div>
+            </div>
+            <div className="activity"></div>
+          </div>
+        )}
+      </Content>
     </div>
   );
 };

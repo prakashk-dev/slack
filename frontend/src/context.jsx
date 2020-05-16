@@ -30,7 +30,7 @@ const DEFAULT_STATE = {
   config: { data: { SOCKET_URL: "" }, error: null, loading: false },
   room: { data: {}, error: null, loading: false },
   rooms: { data: [], error: null, loading: false },
-  style: { showSidebar: true, showInfobar: true, device: "desktop" },
+  style: { showSidebar: true, showInfobar: false, device: "desktop" },
 };
 // Initial state of the application
 export const initialState = () => {
@@ -158,7 +158,7 @@ export const appReducer = (state, { type, payload }) => {
         style: {
           ...state.style,
           showSidebar: true,
-          showInfobar: true,
+          showInfobar: false,
           device: "desktop",
         },
       };

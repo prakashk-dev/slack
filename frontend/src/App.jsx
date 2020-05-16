@@ -51,11 +51,11 @@ const Root = () => {
 
 const App = () => {
   return (
-    <React.StrictMode>
-      <AppProvider>
-        <Root />
-      </AppProvider>
-    </React.StrictMode>
+    // <React.StrictMode>
+    <AppProvider>
+      <Root />
+    </AppProvider>
+    // </React.StrictMode>
   );
 };
 
