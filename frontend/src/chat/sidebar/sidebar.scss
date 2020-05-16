@@ -156,12 +156,12 @@
 
 .mobile-sidebar {
   @extend .sidebar;
-  grid-template-rows: 60px auto auto;
+  grid-template-rows: 50px auto auto;
   max-height: 91vh;
 
   .rooms,
   .users {
-    height: calc(45vh - 30px);
+    height: calc(calc(var(--vh, 1vh) * 50) - 30px);
   }
 
   .rooms-list,

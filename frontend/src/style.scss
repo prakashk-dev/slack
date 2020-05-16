@@ -25,11 +25,9 @@ body {
   max-height: calc(var(--vh, 1vh) * 100);
   .app {
     height: 100%;
-    div {
-      &:first-child {
-        height: 100%;
-      }
-    }
+  }
+  .app > div:first-child {
+    height: 100%;
   }
 }
 

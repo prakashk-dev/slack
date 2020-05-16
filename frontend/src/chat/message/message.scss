@@ -42,7 +42,6 @@
   .message-nav-with-hamburger {
     @extend .message-nav;
     grid-template-columns: 60px 1fr 60px;
-
   }
 
   .messages {
@@ -349,8 +348,6 @@
   .right-sidebar {
     width: 250px;
   }
-
-
 }
 
 .mobile-message {
@@ -382,9 +379,9 @@
   .messages {
     .message-container {
       height: calc(91vh - 135px);
+      max-height: calc(calc(var(--vh, 1vh) * 100) - 135px);
     }
   }
-
 }
 
 .mobile-message-with-infobar-open {
@@ -394,7 +391,6 @@
     "chat-room chat-sidebar";
 
   .right-sidebar {
-
     .users {
       height: calc(91vh - 230px);
     }
