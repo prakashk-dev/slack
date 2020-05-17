@@ -3,37 +3,30 @@ import React, {
   useContext,
   useEffect,
   useRef,
-  useCallback,
+  Fragment,
 } from "react";
 import { AppContext } from "src/context";
 import io from "socket.io-client";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faThumbsUp,
-  faArrowAltCircleRight,
-  faFileImage,
-  faBars,
-} from "@fortawesome/free-solid-svg-icons";
-import moment from "moment";
-import { useDropzone } from "react-dropzone";
-import Dropzone from "react-dropzone";
+import Infobar from "src/chat/infobar";
+
 import "./message.scss";
 import Axios from "axios";
 
-import { Layout, Menu } from "antd";
-const { Header, Sider, Content } = Layout;
+import { Layout, Input } from "antd";
+const { Header, Content } = Layout;
 import {
+  LikeTwoTone,
+  SendOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
-  UploadOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
+import { Upload, Comment } from "src/common";
 
 let socket;
-const Message = ({ location, username, id }) => {
-  const [message, setMessage] = useState("");
+const Message = ({ groupId }) => {
   // { from: {}, to: {}, message: { type: [text|imgage|video|file], text: '', url: null}, timeStamp}
+  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const {
     state: { user, rooms, room, config, style },
@@ -42,23 +35,7 @@ const Message = ({ location, username, id }) => {
   } = useContext(AppContext);
   const divRef = useRef(null);
   const [typing, setTyping] = useState(null);
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
   const [file, setFile] = useState(null);
-
-  const onDrop = useCallback(
-    (files) => {
-      setFile(files[0]);
-    },
-    [room]
-  );
-
-  useEffect(() => {
-    if (file) {
-      document.getElementById("previewImage").src = window.URL.createObjectURL(
-        file
-      );
-    }
-  }, [file]);
 
   useEffect(() => {
     if (config.data.SOCKET_URL) {
@@ -85,7 +62,11 @@ const Message = ({ location, username, id }) => {
   }, [config.data.SOCKET_URL]);
 
   useEffect(() => {
-    if (id && Object.keys(room.data).length && Object.keys(user.data).length) {
+    if (
+      groupId &&
+      Object.keys(room.data).length &&
+      Object.keys(user.data).length
+    ) {
       setMessages(room.data.messages || []);
       socket.emit(
         "join",
@@ -97,7 +78,7 @@ const Message = ({ location, username, id }) => {
       );
       divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [id, room.data, user.data]);
+  }, [groupId, room.data, user.data]);
 
   useEffect(() => {
     divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
@@ -126,8 +107,19 @@ const Message = ({ location, username, id }) => {
   }, [message]);
 
   useEffect(() => {
-    id && fetchGroup(id);
-  }, [id]);
+    groupId && fetchGroup(groupId);
+  }, [groupId]);
+
+  const ToggleIcon = (props) => {
+    return style.showSidebar ? (
+      <MenuFoldOutlined {...props} />
+    ) : (
+      <MenuUnfoldOutlined {...props} />
+    );
+  };
+  const handleFileUpload = (uploads) => {
+    setFile(uploads[0].originFileObj);
+  };
   const handleSendLike = () => {
     const msg = {
       text: "thumbs-up",
@@ -180,67 +172,26 @@ const Message = ({ location, username, id }) => {
     sendMessage(formatMessage(msg));
   };
 
-  const removeImage = () => {
-    setFile(null);
+  const messageBy = (msg) => {
+    return msg.from.name === room.data.name && msg.to.name === room.data.name
+      ? "admin"
+      : msg.from.username === user.data.username
+      ? "sender"
+      : "receiver";
   };
-
-  const convertToLocalTime = (time) => {
-    return moment(moment.utc(time).toDate()).local().format("h:mm a");
-  };
-
   return (
-    <div
-      className={
-        style.device === "mobile"
-          ? style.showInfobar
-            ? "mobile-message-with-infobar-open"
-            : "mobile-message"
-          : style.showInfobar
-          ? "message"
-          : "desktop-message"
-      }
-    >
-      <Header>
-        <div className="message-nav">
-          {style.device === "mobile" &&
-            React.createElement(
-              style.showSidebar ? MenuUnfoldOutlined : MenuFoldOutlined,
-              {
-                className: "trigger",
-                onClick: () =>
-                  toggleSidebar({ showSidebar: !style.showSidebar }),
-              }
-            )}
-          <p>
-            Chat Room -
-            {room.loading
-              ? "..."
-              : room.error
-              ? "Error Fetching Room"
-              : room.data.name || "Bhet-Ghat"}
-          </p>
-          <div
-            className="gear"
-            onClick={() =>
-              toggleSidebar({
-                showInfobar: !style.showInfobar,
-              })
-            }
-          >
-            <i
-              className={`${
-                style.device === "mobile"
-                  ? "las la-ellipsis-v"
-                  : style.showSidebar
-                  ? "las la-info-circle"
-                  : "las la-info-circle active"
-              }`}
-            ></i>
-          </div>
-        </div>
+    <Layout className="chat-body">
+      <Header className="chat-header" style={{ padding: 0 }}>
+        <ToggleIcon
+          onClick={() => toggleSidebar({ showSidebar: !style.showSidebar })}
+        />
+        <div className="chat-title">Kathmandu</div>
+        <InfoCircleOutlined
+          onClick={() => toggleSidebar({ showInfobar: !style.showInfobar })}
+        />
       </Header>
-      <Content>
-        {id === "welcome" ? (
+      <Content className="chat-content">
+        {groupId === "welcome" ? (
           <div style={{ color: "white", justifySelf: "center" }}>
             <h1>
               Connect Users to the some random/general room and show some
@@ -248,162 +199,56 @@ const Message = ({ location, username, id }) => {
             </h1>
           </div>
         ) : (
-          <div className={file ? "messages-file-preview" : "messages"}>
-            <div className="message-container">
-              {messages.length
-                ? messages.map((msg, index) => {
-                    return msg.to.name === room.data.name ? (
-                      <div
-                        key={index}
-                        className={
-                          msg.from.name === room.data.name &&
-                          msg.to.name === room.data.name
-                            ? "chat-item admin"
-                            : msg.from.username === user.data.username
-                            ? "chat-item chat-self"
-                            : "chat-item chat-other"
-                        }
-                      >
-                        <div className="username">
-                          {msg.from.username != user.data.username &&
-                            msg.message.type != "admin" &&
-                            msg.from.username}
-                        </div>
-                        <div
-                          className={
-                            msg.from.name === room.data.name &&
-                            msg.to.name === room.data.name
-                              ? "chat-message center"
-                              : msg.from.username === user.data.username
-                              ? msg.message.type === "faIcon"
-                                ? "chat-message chat-right chat-emoji"
-                                : "chat-message right"
-                              : "chat-message left"
-                          }
-                        >
-                          {msg.message.type === "image" && (
-                            <img
-                              className="chat-image"
-                              src={msg.message.url}
-                              alt="Image not found"
-                            ></img>
-                          )}
-                          {msg.message.type == "icon" ? (
-                            <FontAwesomeIcon icon={faThumbsUp} />
-                          ) : (
-                            msg.message.text
-                          )}
-                        </div>
-                        <div className="time">
-                          {convertToLocalTime(msg.timeStamp)}
-                        </div>
-                      </div>
-                    ) : null;
-                  })
-                : null}
-              <div ref={divRef} id="recentMessage"></div>
-            </div>
-            {file && (
-              <div className="file_preview">
-                <img
-                  src="#"
-                  alt="Invalid Image"
-                  id="previewImage"
-                  title="Remove Attachment"
-                />
-                <div className="removeImage" onClick={removeImage}>
-                  X
-                </div>
-              </div>
-            )}
-            <div className="message-footer">
-              <div className="icons">
-                <Dropzone onDrop={onDrop}>
-                  {({ getRootProps, getInputProps }) => (
-                    <section>
-                      <div {...getRootProps()}>
-                        <input {...getInputProps()} />
-                        <FontAwesomeIcon icon={faFileImage} />
-                      </div>
-                    </section>
-                  )}
-                </Dropzone>
-              </div>
-              <input
-                type="text"
-                value={message}
-                name="message"
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={(e) =>
-                  e.key === "Enter"
-                    ? file
-                      ? sendMessageWithFile()
-                      : handleSend()
-                    : null
-                }
-              />
-              <button
-                onClick={() =>
-                  file
-                    ? sendMessageWithFile()
-                    : message.length
-                    ? handleSend()
-                    : handleSendLike()
-                }
-              >
-                <FontAwesomeIcon
-                  icon={
-                    message.length || file ? faArrowAltCircleRight : faThumbsUp
-                  }
-                />
-              </button>
-              <div className="typing">
-                {typing && typing.room === room.data.name && typing.message}
-              </div>
-            </div>
+          <div className="message-container">
+            {messages.length
+              ? messages.map((msg, index) => {
+                  return msg.to.name === room.data.name ? (
+                    <Comment by={messageBy(msg)} message={msg} key={index} />
+                  ) : null;
+                })
+              : null}
+            <div ref={divRef} id="recentMessage"></div>
           </div>
         )}
-        {style.showInfobar && (
-          <div className="right-sidebar">
-            <div className="profile">
-              <img src="/assets/kathmandu.png" alt="" />
-              {room.loading
-                ? "..."
-                : room.error
-                ? "Error Fetching Room"
-                : room.data.name || "Bhet-Ghat"}
-            </div>
-            <div className="users">
-              <div className="heading">
-                <i className="las la-angle-right"></i>
-                Users
-              </div>
-              <div className="users-list">
-                {room.loading ? (
-                  <div className="loading">... </div>
-                ) : room.error ? (
-                  <div className="error"> {room.error} </div>
-                ) : room.data.users && room.data.users.length ? (
-                  room.data.users.map((user) => {
-                    return (
-                      <div className="user" key={user._id}>
-                        <div className="img">
-                          <img src="/assets/kathmandu.png" alt="" />
-                        </div>
-                        <li>{user.username}</li>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="no-user">No Users</div>
-                )}
-              </div>
-            </div>
-            <div className="activity"></div>
+        <div className="message-footer">
+          <Upload
+            className="upload-icon"
+            onChange={handleFileUpload}
+            uploaded={!file}
+          />
+
+          <Input
+            value={message}
+            type="text"
+            name="message"
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyPress={(e) =>
+              e.key === "Enter"
+                ? file
+                  ? sendMessageWithFile()
+                  : handleSend()
+                : null
+            }
+            placeholder="Type a message ..."
+          />
+          <button
+            onClick={() =>
+              file
+                ? sendMessageWithFile()
+                : message.length
+                ? handleSend()
+                : handleSendLike()
+            }
+          >
+            {message.length || file ? <SendOutlined /> : <LikeTwoTone />}
+          </button>
+          <div className="typing">
+            {typing && typing.room === room.data.name && typing.message}
           </div>
-        )}
+        </div>
       </Content>
-    </div>
+      <Infobar />
+    </Layout>
   );
 };
 export default Message;

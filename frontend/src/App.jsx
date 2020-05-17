@@ -41,7 +41,7 @@ const Root = () => {
         <Home path="/" />
         <Chat path="chat">
           {/* <GroupMessage path="u/:username" /> */}
-          <GroupMessage path="g/:id" />
+          <GroupMessage path="g/:groupId" />
         </Chat>
         <Home path="*" />
       </Router>

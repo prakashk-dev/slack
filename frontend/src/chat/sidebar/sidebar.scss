@@ -1,8 +1,43 @@
 @import "src/style.scss";
 /*** New Styling **/
-.menu-item {
-  li {
-    display: flex;
-    flex-direction: column;
+
+.left-sidebar {
+  height: 100vh;
+  max-height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
+  max-height: calc(var(--vh, 1vh) * 100);
+
+  .logo {
+    height: 64px;
+    display: grid;
+    grid-template-columns: 1fr 40px 40px;
+    color: white;
+    justify-items: center;
+    align-items: center;
+
+    .anticon-down {
+      svg {
+        color: white;
+        font-size: 1.5em;
+      }
+    }
   }
+
+  .logo-small {
+    @extend .logo;
+    grid-template-columns: 1fr;
+  }
+
+  li.ant-menu-submenu {
+    div.ant-menu-submenu-title {
+      box-shadow: 0px 1px 1px 1px $box-shadow;
+    }
+
+    ul {
+      height: calc(50vh - 80px);
+      height: calc(calc(var(--vh, 1vh) * 50) - 80px);
+      overflow-y: auto;
+    }
+  }
+
 }

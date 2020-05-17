@@ -9,6 +9,7 @@ import {
   DownOutlined,
   SlackSquareOutlined,
   MessageOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 
 import { Wrapper } from "src/common";
@@ -82,11 +83,11 @@ const Sidebar = ({ groupId }) => {
       breakpoint={"sm"}
       className="left-sidebar"
     >
-      <div className={style.showSidebar ? "logo" : "logo-collapse"}>
+      <div className={style.showSidebar ? "logo" : "logo-small"}>
         <Wrapper data={user}>
           {style.showSidebar && user.data.username}
           {style.showSidebar && (
-            <Avatar size={40} src="/assets/kathmandu.png" alt="" />
+            <Avatar size={40} icon={<UserOutlined />} alt="" />
           )}
           <Dropdown overlay={profile} trigger={["hover", "click"]}>
             {style.showSidebar ? (
@@ -97,7 +98,7 @@ const Sidebar = ({ groupId }) => {
                 <DownOutlined />
               </a>
             ) : (
-              <Avatar size={40} src="/assets/kathmandu.png" alt="" />
+              <Avatar size={40} icon={<UserOutlined />} alt="" />
             )}
           </Dropdown>
         </Wrapper>

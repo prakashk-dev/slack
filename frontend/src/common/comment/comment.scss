@@ -1,0 +1,75 @@
+@import "src/style.scss";
+
+.ant-comment {
+  .ant-comment-inner {
+    .ant-comment-avatar {
+      margin-right: 4px;
+    }
+    .ant-comment-content {
+      padding: 6px 12px;
+      border-radius: 4px;
+      .ant-comment-content-author {
+        margin-top: -24px;
+        .ant-comment-author-time {
+          color: #aaa;
+        }
+      }
+      .ant-comment-content-detail {
+        img {
+          width: 100%;
+          height: 100%;
+          max-width: 200px;
+        }
+      }
+    }
+  }
+}
+
+.sender {
+  @extend .ant-comment;
+  .ant-comment-inner {
+    .ant-comment-avatar {
+      margin-right: 4px;
+    }
+    .ant-comment-content {
+      background: $background_color;
+      color: whitesmoke;
+    }
+  }
+}
+.receiver {
+  @extend .ant-comment;
+  .ant-comment-inner {
+    .ant-comment-content {
+      background: white;
+    }
+  }
+}
+
+.admin {
+  @extend .ant-comment;
+  .ant-comment-inner {
+    .ant-comment-content {
+      background: #b3e5fc;
+    }
+  }
+}
+
+.icon-receiver {
+  @extend .receiver;
+  text-align: left;
+  .ant-comment-inner {
+    .ant-comment-content {
+      background: none;
+    }
+  }
+}
+.icon-sender {
+  @extend .sender;
+  text-align: right;
+  .ant-comment-inner {
+    .ant-comment-content {
+      background: none;
+    }
+  }
+}

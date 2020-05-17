@@ -95,17 +95,22 @@ const upload = multer({ storage }).single("file");
 
 app.post("/api/upload", (req, res, next) => {
   upload(req, res, (err) => {
-    if (err instanceof multer.MulterError) {
-      return res.json({
-        message: "Somethign went wrong from multer",
-        error: err,
-      });
-    } else if (err) {
-      return res.json({ message: "Somethign went wrong", error: err });
+    try {
+      if (err instanceof multer.MulterError) {
+        return res.json({
+          message: "Somethign went wrong from multer",
+          error: err,
+        });
+      } else if (err) {
+        return res.json({ message: "Somethign went wrong", error: err });
+      }
+      // /use/app comes from docker
+      const url = req.file.path.replace("/usr/app", "/api");
+      return res.json({ url });
+    } catch (error) {
+      console.log("Error", error.message);
+      return res.json({ error: error.message });
     }
-    // /use/app comes from docker
-    const url = req.file.path.replace("/usr/app", "/api");
-    return res.json({ url });
   });
 });
 
@@ -180,13 +185,11 @@ function handleIO(socket) {
       message,
       timeStamp: moment.utc().format(),
     };
-    console.log(formattedMessage);
     Group.findOneAndUpdate(
       { _id: to._id },
       { $addToSet: { messages: [formattedMessage] } },
       (err, res) => {
         if (err) throw err;
-        console.log("Successfully added", res);
       }
     );
   });

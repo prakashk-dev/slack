@@ -1,0 +1,17 @@
+.right-sidebar {
+    height: calc(100vh - 65px);
+    height: calc(calc(var(--vh, 1vh) * 100) - 64px);
+
+    .profile {
+        height: 150px;
+        color: white;
+        display: grid;
+        grid-template-rows: 1fr 45px;
+        justify-items: center;
+        align-items: center;
+
+        span {
+            align-self: flex-end;
+        }
+    }
+}

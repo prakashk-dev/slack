@@ -206,6 +206,7 @@ export const AppProvider = ({ children }) => {
       const res = await axios.put(
         `/api/groups/${groupId}?user_id=${decoded.sub}`
       );
+      console.log(res.data);
       if (res.data.error) {
         return dispatch({
           type: ROOM_FETCHING_ERROR,
