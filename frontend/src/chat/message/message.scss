@@ -9,13 +9,18 @@
   .chat-header {
     flex: 0 0 100%;
     display: grid;
+    padding: 0px;
     grid-template-columns: 60px auto 60px;
+    grid-template-areas: "menu header info";
     color: white;
     justify-items: center;
     align-items: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     .chat-heading {
       color: white;
+      grid-area: header;
     }
 
     svg {
@@ -23,10 +28,20 @@
       font-size: 1.2em;
     }
 
+    .anticon-menu-fold {
+      grid-area: menu;
+    }
+
     .anticon-info-circle {
+      grid-area: info;
       font-size: 1.5em;
       cursor: pointer;
     }
+  }
+
+  .chat-header-small {
+    @extend .chat-header;
+    grid-template-areas: "menu menu menu";
   }
 
   .chat-content {

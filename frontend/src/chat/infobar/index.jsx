@@ -16,7 +16,13 @@ const Infobar = ({ entity, field }) => {
     <Sider
       collapsible
       collapsed={!style.showInfobar}
-      className="right-sidebar"
+      className={
+        style.device === "mobile"
+          ? style.showInfobar
+            ? "right-sidebar-mobile-shown"
+            : "right-sidebar-mobile"
+          : "right-sidebar"
+      }
       collapsedWidth={0}
       breakpoint={"sm"}
       defaultCollapsed={false}
@@ -31,20 +37,22 @@ const Infobar = ({ entity, field }) => {
         // onSelect={() => handleMenuItemClick("showInfobar")}
       >
         <SubMenu key="users" icon={<UserOutlined />} title="Users">
-          {users && users.length
-            ? users.map((user) => {
-                return (
-                  <Menu.Item
-                    key={user._id}
-                    icon={
-                      <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
-                    }
-                  >
-                    {user.username}
-                  </Menu.Item>
-                );
-              })
-            : "No users."}
+          {users && users.length ? (
+            users.map((user) => {
+              return (
+                <Menu.Item
+                  key={user._id}
+                  icon={
+                    <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
+                  }
+                >
+                  {user.username}
+                </Menu.Item>
+              );
+            })
+          ) : (
+            <li className="no-users">No Users</li>
+          )}
         </SubMenu>
       </Menu>
     </Sider>

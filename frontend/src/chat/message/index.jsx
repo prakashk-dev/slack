@@ -181,9 +181,16 @@ const Message = ({ entity, roomId, field }) => {
       ? "sender"
       : "receiver";
   };
+
   return (
     <Layout className="chat-body">
-      <Header className="chat-header" style={{ padding: 0 }}>
+      <Header
+        className={
+          style.device === "mobile" && style.showSidebar
+            ? "chat-header-small"
+            : "chat-header"
+        }
+      >
         <ToggleIcon
           onClick={() => toggleSidebar({ showSidebar: !style.showSidebar })}
         />

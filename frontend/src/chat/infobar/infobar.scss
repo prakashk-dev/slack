@@ -14,4 +14,23 @@
             align-self: flex-end;
         }
     }
+
+    .no-users {
+        padding: 16px 32px;
+    }
+}
+
+.right-sidebar-mobile {
+    @extend .right-sidebar;
+    position: absolute !important;
+    top: 65px;
+    right: 0px;
+    width: 0px;
+    transition: right 0.2s;
+}
+
+.right-sidebar-mobile-shown {
+    @extend .right-sidebar-mobile;
+    top: 65px;
+    width: 200px;
 }

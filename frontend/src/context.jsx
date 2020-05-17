@@ -398,6 +398,11 @@ export const AppProvider = ({ children }) => {
   };
 
   const toggleSidebar = (payload) => {
+    if (state.style.device === "mobile") {
+      payload = payload.showInfobar
+        ? { ...payload, showSidebar: false }
+        : { ...payload, showInfobar: false };
+    }
     return dispatch({
       type: TOGGLE_SIDEBAR,
       payload,
