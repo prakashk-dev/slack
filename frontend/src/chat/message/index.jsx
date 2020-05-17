@@ -24,18 +24,15 @@ import {
 import { Upload, Comment } from "src/common";
 
 let socket;
-const Message = ({ groupId }) => {
+const Message = ({ entity, roomId, field }) => {
   // { from: {}, to: {}, message: { type: [text|imgage|video|file], text: '', url: null}, timeStamp}
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const {
-    state: { user, rooms, room, config, style },
-    toggleSidebar,
-    fetchGroup,
-  } = useContext(AppContext);
+  const { state, toggleSidebar, updateUsers } = useContext(AppContext);
   const divRef = useRef(null);
   const [typing, setTyping] = useState(null);
   const [file, setFile] = useState(null);
+  const { user, config, style } = state;
 
   useEffect(() => {
     if (config.data.SOCKET_URL) {
@@ -54,6 +51,10 @@ const Message = ({ groupId }) => {
         messages.length &&
           divRef.current.scrollIntoView({ behavior: "smooth" });
       });
+      socket.on("updateUsers", (msg) => {
+        console.log(msg);
+        updateUsers(msg);
+      });
       socket.on("typing", (data) => {
         setTyping(data);
       });
@@ -63,22 +64,23 @@ const Message = ({ groupId }) => {
 
   useEffect(() => {
     if (
-      groupId &&
-      Object.keys(room.data).length &&
+      roomId &&
+      Object.keys(state[entity].data).length &&
       Object.keys(user.data).length
     ) {
-      setMessages(room.data.messages || []);
+      setMessages(state[entity].data.messages || []);
       socket.emit(
         "join",
         {
-          room: room.data.name,
-          username: user.data.username,
+          // room: state.room.data.name
+          [entity]: state[entity].data[field],
+          user: user.data,
         },
         (msg) => {}
       );
       divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [groupId, room.data, user.data]);
+  }, [roomId, state[entity], user.data]);
 
   useEffect(() => {
     divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
@@ -89,7 +91,7 @@ const Message = ({ groupId }) => {
       if (!typing) {
         socket.emit("typing", {
           username: user.data.username,
-          room: room.data.name,
+          [entity]: state[entity].data[field],
           active: true,
         });
         setTyping(true);
@@ -98,17 +100,13 @@ const Message = ({ groupId }) => {
       if (typing) {
         socket.emit("typing", {
           username: user.data.username,
-          room: room.data.name,
+          [entity]: state[entity].data[field],
           active: false,
         });
         setTyping(false);
       }
     }
   }, [message]);
-
-  useEffect(() => {
-    groupId && fetchGroup(groupId);
-  }, [groupId]);
 
   const ToggleIcon = (props) => {
     return style.showSidebar ? (
@@ -131,7 +129,10 @@ const Message = ({ groupId }) => {
   const formatMessage = ({ text = message, type = "text", url = "" }) => {
     return {
       from: { _id: user.data._id, username: user.data.username },
-      to: { _id: room.data._id, name: room.data.name },
+      to: {
+        _id: state[entity].data._id,
+        [entity]: state[entity].data[field],
+      },
       message: {
         text,
         type,
@@ -142,7 +143,7 @@ const Message = ({ groupId }) => {
 
   const sendMessageWithFile = () => {
     const formData = new FormData();
-    formData.append("room", room.data.name);
+    formData.append(entity, state[entity].data[field]);
     formData.append("file", file);
     Axios.post("/api/upload", formData)
       .then((res) => {
@@ -173,7 +174,8 @@ const Message = ({ groupId }) => {
   };
 
   const messageBy = (msg) => {
-    return msg.from.name === room.data.name && msg.to.name === room.data.name
+    return msg.from[field] === state[entity].data[field] &&
+      msg.to[field] === state[entity].data[field]
       ? "admin"
       : msg.from.username === user.data.username
       ? "sender"
@@ -185,13 +187,13 @@ const Message = ({ groupId }) => {
         <ToggleIcon
           onClick={() => toggleSidebar({ showSidebar: !style.showSidebar })}
         />
-        <div className="chat-title">Kathmandu</div>
+        <div className="chat-title">{state[entity].data[field]}</div>
         <InfoCircleOutlined
           onClick={() => toggleSidebar({ showInfobar: !style.showInfobar })}
         />
       </Header>
       <Content className="chat-content">
-        {groupId === "welcome" ? (
+        {roomId === "welcome" ? (
           <div style={{ color: "white", justifySelf: "center" }}>
             <h1>
               Connect Users to the some random/general room and show some
@@ -202,9 +204,9 @@ const Message = ({ groupId }) => {
           <div className="message-container">
             {messages.length
               ? messages.map((msg, index) => {
-                  return msg.to.name === room.data.name ? (
+                  return (
                     <Comment by={messageBy(msg)} message={msg} key={index} />
-                  ) : null;
+                  );
                 })
               : null}
             <div ref={divRef} id="recentMessage"></div>
@@ -243,11 +245,13 @@ const Message = ({ groupId }) => {
             {message.length || file ? <SendOutlined /> : <LikeTwoTone />}
           </button>
           <div className="typing">
-            {typing && typing.room === room.data.name && typing.message}
+            {typing &&
+              typing[entity] === state[entity].data[field] &&
+              typing.message}
           </div>
         </div>
       </Content>
-      <Infobar />
+      <Infobar entity={entity} field={field} />
     </Layout>
   );
 };

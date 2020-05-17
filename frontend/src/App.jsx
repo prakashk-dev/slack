@@ -1,17 +1,17 @@
 import React, { useContext, useLayoutEffect, useEffect, useState } from "react";
-import { Router, Redirect } from "@reach/router";
+import { Router } from "@reach/router";
 import { AppProvider } from "src/context";
 import Chat from "src/chat";
-import GroupMessage from "src/chat/message";
+// import GroupMessage from "src/chat/message";
 import { AppContext } from "src/context";
 import Home from "src/home";
+import UserMessage from "src/chat/user";
+import GroupMessage from "src/chat/group";
+import RoomMessage from "src/chat/room";
+
 import "antd/dist/antd.css";
 import "./style.scss";
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useContext(AppContext);
-  return isAuthenticated() ? <Router> {children}</Router> : <Redirect to="/" />;
-};
 const useWindowSize = () => {
   const [size, setSize] = useState([0, 0]);
   useLayoutEffect(() => {
@@ -40,8 +40,9 @@ const Root = () => {
       <Router>
         <Home path="/" />
         <Chat path="chat">
-          {/* <GroupMessage path="u/:username" /> */}
+          <UserMessage path="u/:username" />
           <GroupMessage path="g/:groupId" />
+          <RoomMessage path="r/:roomId" />
         </Chat>
         <Home path="*" />
       </Router>

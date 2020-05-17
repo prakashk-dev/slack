@@ -6,10 +6,8 @@ import "./home.scss";
 import { AppContext } from "src/context";
 
 const Home = () => {
-  const {
-    state: { style },
-  } = useContext(AppContext);
-  console.log(style.device);
+  const { state } = useContext(AppContext);
+  const { style } = state;
   return (
     <div className={style.device === "mobile" ? "mobile-home" : "home"}>
       <Navigation></Navigation>

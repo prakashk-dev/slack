@@ -20,7 +20,6 @@ const Sidebar = ({ groupId }) => {
     logout,
     fetchAuthUser,
     fetchRooms,
-    fetchGroup,
     toggleSidebar,
   } = useContext(AppContext);
 
@@ -29,21 +28,13 @@ const Sidebar = ({ groupId }) => {
     fetchRooms();
   }, []);
 
-  useEffect(() => {
-    const fetchRoom = async () => {
-      await fetchGroup(groupId);
-    };
-    groupId && fetchRoom();
-  }, [groupId]);
-
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
   const handleMenuItemClick = ({ key }) => {
-    navigate(`/chat/g/${key}`);
-    fetchGroup(key);
+    navigate(`/chat/r/${key}`);
     style.device === "mobile" &&
       toggleSidebar({ showSidebar: !style.showSidebar });
   };

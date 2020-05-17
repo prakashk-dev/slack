@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { navigate, Redirect, useParams } from "@reach/router";
+import { navigate, Redirect } from "@reach/router";
 import { AppContext } from "src/context";
 import { Form, Input, Button } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
@@ -13,33 +13,25 @@ const HomeForm = () => {
     },
     saveOrAuthenticateUser,
     isAuthenticated,
-    fetchRooms,
-    fetchAuthUser,
   } = useContext(AppContext);
 
   const [form] = Form.useForm();
   const [httpError, setHttpError] = useState(error);
   const [message, setMessage] = useState(null);
-  const [formSubmitted, setFormSubmitted] = useState(false);
   const [submitLayout, setSubmitLayout] = useState({
     block: true,
     type: "primary",
     htmlType: "submit",
   });
 
-  useEffect(() => {
-    if (error) {
-      setHttpError(error);
-    } else if (data.username && formSubmitted && !loading) {
-      setFormSubmitted(false);
-      navigate(`/chat/g/welcome`);
-    }
-  }, [data, error, loading]);
-
   const handleSubmit = async (values) => {
-    console.log("Form Values", values);
-    setFormSubmitted(true);
-    saveOrAuthenticateUser(values);
+    saveOrAuthenticateUser(values, (err) => {
+      if (err) {
+        setHttpError(err);
+        return;
+      }
+      navigate(`/chat/r/welcome`);
+    });
   };
 
   const pinValidationRules = [
@@ -89,7 +81,7 @@ const HomeForm = () => {
   };
 
   return isAuthenticated() ? (
-    <Redirect to="/chat/g/welcome" noThrow />
+    <Redirect to="/chat/r/welcome" noThrow />
   ) : (
     <div className="form">
       <Form {...formConfig}>

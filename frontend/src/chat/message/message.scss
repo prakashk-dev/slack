@@ -66,6 +66,7 @@
       justify-items: center;
       align-items: center;
       background: white;
+      position: relative;
 
       .upload-icon {
         position: relative;
@@ -112,6 +113,15 @@
 
       input {
         background: #f0f2f5;
+      }
+
+      .typing {
+        position: absolute;
+        bottom: 0px;
+        left: 60px;
+        font-size: 0.8em;
+        font-style: italic;
+        color: #757575
       }
     }
   }

@@ -12,10 +12,14 @@ const USER_AUTHENTICATING_SUCCESS = "USER_AUTHENTICATING_SUCCESS";
 
 const ROOM_FETCHING = "ROOM_FETCHING";
 const ROOM_FETCHING_ERROR = "ROOM_FETCHING_ERROR";
-const ROOM_FETCH_SUCCESS = "ROOM_FETCHING_SUCCESS";
+const ROOM_FETCHING_SUCCESS = "ROOM_FETCHING_SUCCESS";
+const UPDATE_USERS_LIST = "UPDATE_USERS_LIST";
+const GROUP_FETCHING = "GROUP_FETCHING";
+const GROUP_FETCHING_ERROR = "GROUP_FETCHING_ERROR";
+const GROUP_FETCHING_SUCCESS = "GROUP_FETCHING_SUCCESS";
 const USER_FETCHING = "USER_FETCHING";
 const USER_FETCHING_ERROR = "USER_FETCHING_ERROR";
-const USER_FETCH_SUCCESS = "USER_FETCHING_SUCCESS";
+const USER_FETCHING_SUCCESS = "USER_FETCHING_SUCCESS";
 const ROOMS_FETCHING = "ROOMS_FETCHING";
 const ROOMS_FETCHING_ERROR = "ROOMS_FETCHING_ERROR";
 const ROOMS_FETCH_SUCCESS = "ROOMS_FETCHING_SUCCESS";
@@ -36,6 +40,7 @@ const DEFAULT_STATE = {
 export const initialState = () => {
   const token = Cookies.get("token");
   if (token) {
+    // try to verify that token
     const decoded = jwt.decode(token);
     return {
       ...DEFAULT_STATE,
@@ -52,6 +57,7 @@ export const initialState = () => {
       },
     };
   }
+
   return DEFAULT_STATE;
 };
 
@@ -102,7 +108,7 @@ export const appReducer = (state, { type, payload }) => {
         ...state,
         room: { ...state.room, loading: false, error: payload },
       };
-    case ROOM_FETCH_SUCCESS:
+    case ROOM_FETCHING_SUCCESS:
       return {
         ...state,
         room: { data: payload, loading: false, error: null },
@@ -114,10 +120,21 @@ export const appReducer = (state, { type, payload }) => {
         ...state,
         user: { ...state.user, loading: false, error: payload },
       };
-    case USER_FETCH_SUCCESS:
+    case USER_FETCHING_SUCCESS:
       return {
         ...state,
         user: { data: payload, loading: false, error: null },
+      };
+    case UPDATE_USERS_LIST:
+      const { entity, user } = payload;
+      return {
+        ...state,
+        [entity]: {
+          ...state[entity],
+          data: {
+            users: [...state[entity].data.users, user],
+          },
+        },
       };
     case ROOMS_FETCHING:
       return {
@@ -175,18 +192,20 @@ export const appReducer = (state, { type, payload }) => {
 export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, INIT_STATE);
   // Actions
-  const saveOrAuthenticateUser = async (user) => {
+  const saveOrAuthenticateUser = async (user, callback) => {
     dispatch({ type: USER_AUTHENTICATING });
 
     try {
       const res = await axios.post("/api/auth", user);
       if (res.data.error) {
+        callback(res.data.error);
         return dispatch({
           type: USER_AUTHENTICATING_ERROR,
           payload: res.data.error,
         });
       }
       const token = res.data.token;
+      callback();
       return dispatch({
         type: USER_AUTHENTICATING_SUCCESS,
         payload: jwt.decode(token),
@@ -199,24 +218,50 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // change this once group feature is implemented from backend
   const fetchGroup = async (groupId) => {
-    dispatch({ type: ROOM_FETCHING });
+    dispatch({ type: GROUP_FETCHING });
     const decoded = decodeToken();
     try {
       const res = await axios.put(
         `/api/groups/${groupId}?user_id=${decoded.sub}`
       );
-      console.log(res.data);
+      if (res.data.error) {
+        return dispatch({
+          type: GROUP_FETCHING_ERROR,
+          payload: res.data.error,
+        });
+      }
+      const group = res.data;
+      return dispatch({
+        type: GROUP_FETCHING_SUCCESS,
+        payload: group,
+      });
+    } catch (error) {
+      return dispatch({
+        type: GROUP_FETCHING_ERROR,
+        payload: error.message,
+      });
+    }
+  };
+
+  const fetchRoom = async (roomId) => {
+    dispatch({ type: ROOM_FETCHING });
+    const decoded = decodeToken();
+    try {
+      const res = await axios.put(
+        `/api/rooms/${roomId}?user_id=${decoded.sub}`
+      );
       if (res.data.error) {
         return dispatch({
           type: ROOM_FETCHING_ERROR,
           payload: res.data.error,
         });
       }
-      const group = res.data;
+      const room = res.data;
       return dispatch({
-        type: ROOM_FETCH_SUCCESS,
-        payload: group,
+        type: ROOM_FETCHING_SUCCESS,
+        payload: room,
       });
     } catch (error) {
       return dispatch({
@@ -240,7 +285,7 @@ export const AppProvider = ({ children }) => {
         }
         const user = res.data;
         return dispatch({
-          type: USER_FETCH_SUCCESS,
+          type: USER_FETCHING_SUCCESS,
           payload: user,
         });
       } catch (error) {
@@ -260,17 +305,17 @@ export const AppProvider = ({ children }) => {
     dispatch({ type: ROOMS_FETCHING });
 
     try {
-      const res = await axios.get(`/api/groups`);
+      const res = await axios.get(`/api/rooms`);
       if (res.data.error) {
         return dispatch({
           type: ROOMS_FETCHING_ERROR,
           payload: res.data.error,
         });
       }
-      const groups = res.data;
+      const rooms = res.data;
       return dispatch({
         type: ROOMS_FETCH_SUCCESS,
-        payload: groups,
+        payload: rooms,
       });
     } catch (error) {
       return dispatch({
@@ -278,6 +323,12 @@ export const AppProvider = ({ children }) => {
         payload: error.message,
       });
     }
+  };
+  const updateUsers = (payload) => {
+    return dispatch({
+      type: UPDATE_USERS_LIST,
+      payload,
+    });
   };
 
   const handleJoin = async (groupId) => {
@@ -364,6 +415,8 @@ export const AppProvider = ({ children }) => {
     fetchRooms,
     changeLayout,
     toggleSidebar,
+    fetchRoom,
+    updateUsers,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

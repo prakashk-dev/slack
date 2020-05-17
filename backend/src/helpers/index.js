@@ -15,7 +15,7 @@ export const createToken = (user) => {
     socket: config.socket_url,
   };
   try {
-    return jwt.sign(payload, config.jwt_secret, { expiresIn: "375d" });
+    return jwt.sign(payload, config.jwt_secret, { expiresIn: "1d" });
   } catch (error) {
     console.log(error.message);
   }

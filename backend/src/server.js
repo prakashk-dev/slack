@@ -17,6 +17,7 @@ import fs from "fs";
 import { seedData, unSeedData } from "./test-data/data";
 import Group from "./models/group.model";
 import User from "./models/user.model";
+import Room from "./models/room.model";
 const moment = require("moment");
 
 import {
@@ -134,30 +135,38 @@ function handleIO(socket) {
 
   // })
   socket.on("join", (data, callback) => {
-    const { room, username } = data;
+    const { user } = data;
+    const { username } = user;
+    const room = data.room || data.group || data.user;
+    const entity = data.room ? "room" : data.group ? "group" : "user";
     const rooms = Object.keys(socket.rooms);
     if (!rooms.includes(room)) {
       socket.join(room, () => {
-        const message = formatMessage({
-          from: { name: room },
-          to: { name: room },
-          message: {
-            text: `Welcome to the ${room} room.`,
-            type: "text",
-          },
-        });
-        socket.emit("messages", message);
-        socket.to(room).emit(
-          "messages",
-          formatMessage({
+        if (entity === "room" || entity === "group") {
+          const message = formatMessage({
             from: { name: room },
             to: { name: room },
             message: {
-              text: `${username} has joined.`,
+              text: `Welcome to the ${room} room.`,
               type: "text",
             },
-          })
-        );
+          });
+          socket.emit("messages", message);
+          socket.to(room).emit(
+            "messages",
+            formatMessage({
+              from: { name: room },
+              to: { name: room },
+              message: {
+                text: `${username} has joined.`,
+                type: "text",
+              },
+            })
+          );
+          socket.to(room).emit("updateUsers", { user, entity });
+        } else {
+          // think what to send for user direct message
+        }
       });
       callback(`Users rooms: ${Object.keys(socket.rooms)}`);
     } else {
@@ -185,7 +194,8 @@ function handleIO(socket) {
       message,
       timeStamp: moment.utc().format(),
     };
-    Group.findOneAndUpdate(
+    const Modal = to.room ? Room : to.group ? Group : User;
+    Modal.findOneAndUpdate(
       { _id: to._id },
       { $addToSet: { messages: [formattedMessage] } },
       (err, res) => {
@@ -195,8 +205,10 @@ function handleIO(socket) {
   });
 
   socket.on("typing", (data) => {
-    const { room, active, username } = data;
+    console.log(data);
+    const { active, username } = data;
     const message = active ? `${username} is typing ...` : null;
+    const room = data.room || data.user || data.group;
     socket.to(room).emit("typing", { ...data, message });
   });
 }

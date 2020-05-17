@@ -1,4 +1,4 @@
-import { GroupModel } from "../models";
+import { RoomModel } from "../models";
 const rooms = [
   {
     name: "Kathmandu",
@@ -69,7 +69,7 @@ const rooms = [
 ];
 
 async function seedData() {
-  const room = await GroupModel.findOne({ name: rooms[0].name }).exec();
+  const room = await RoomModel.findOne({ name: rooms[0].name }).exec();
 
   const insertRoomData = async () => {
     let msg;
@@ -78,7 +78,7 @@ async function seedData() {
     } else {
       // push some user ids to the dummy rooms data
       try {
-        await GroupModel.insertMany(rooms);
+        await RoomModel.insertMany(rooms);
         msg = "Room data successfully inserted.";
       } catch (err) {
         msg = err.message;
@@ -98,7 +98,7 @@ async function seedData() {
 
 async function unSeedData() {
   try {
-    await GroupModel.deleteMany({});
+    await RoomModel.deleteMany({});
     return { msg: "Successfully deleted all the documents." };
   } catch (e) {
     return { error: e.message };
