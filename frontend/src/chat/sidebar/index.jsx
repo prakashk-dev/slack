@@ -71,7 +71,6 @@ const Sidebar = ({ groupId }) => {
       collapsible
       collapsed={!style.showSidebar}
       collapsedWidth={style.device === "mobile" ? 0 : 80}
-      breakpoint={"sm"}
       className="left-sidebar"
     >
       <div className={style.showSidebar ? "logo" : "logo-small"}>

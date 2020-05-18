@@ -184,79 +184,76 @@ const Message = ({ entity, roomId, field }) => {
 
   return (
     <Layout className="chat-body">
-      <Header
-        className={
-          style.device === "mobile" && style.showSidebar
-            ? "chat-header-small"
-            : "chat-header"
-        }
-      >
+      <Header className="chat-header">
         <ToggleIcon
           onClick={() => toggleSidebar({ showSidebar: !style.showSidebar })}
         />
         <div className="chat-title">{state[entity].data[field]}</div>
-        <InfoCircleOutlined
-          onClick={() => toggleSidebar({ showInfobar: !style.showInfobar })}
-        />
+        {style.device === "mobile" && style.showSidebar ? null : (
+          <InfoCircleOutlined
+            onClick={() => toggleSidebar({ showInfobar: !style.showInfobar })}
+          />
+        )}
       </Header>
       <Content className="chat-content">
         {roomId === "welcome" ? (
           <div style={{ color: "white", justifySelf: "center" }}>
             <h1>
-              Connect Users to the some random/general room and show some
-              instruction on how to use application{" "}
+              <pre>{JSON.stringify(state.style, null, 4)}</pre>
             </h1>
           </div>
         ) : (
-          <div className="message-container">
-            {messages.length
-              ? messages.map((msg, index) => {
-                  return (
-                    <Comment by={messageBy(msg)} message={msg} key={index} />
-                  );
-                })
-              : null}
-            <div ref={divRef} id="recentMessage"></div>
-          </div>
-        )}
-        <div className="message-footer">
-          <Upload
-            className="upload-icon"
-            onChange={handleFileUpload}
-            uploaded={!file}
-          />
+          <Fragment>
+            <div className="message-container">
+              {messages.length
+                ? messages.map((msg, index) => {
+                    return (
+                      <Comment by={messageBy(msg)} message={msg} key={index} />
+                    );
+                  })
+                : null}
+              <div ref={divRef} id="recentMessage"></div>
+            </div>
+            <div className="message-footer">
+              <Upload
+                className="upload-icon"
+                onChange={handleFileUpload}
+                uploaded={!file}
+              />
 
-          <Input
-            value={message}
-            type="text"
-            name="message"
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={(e) =>
-              e.key === "Enter"
-                ? file
-                  ? sendMessageWithFile()
-                  : handleSend()
-                : null
-            }
-            placeholder="Type a message ..."
-          />
-          <button
-            onClick={() =>
-              file
-                ? sendMessageWithFile()
-                : message.length
-                ? handleSend()
-                : handleSendLike()
-            }
-          >
-            {message.length || file ? <SendOutlined /> : <LikeTwoTone />}
-          </button>
-          <div className="typing">
-            {typing &&
-              typing[entity] === state[entity].data[field] &&
-              typing.message}
-          </div>
-        </div>
+              <Input
+                value={message}
+                type="text"
+                name="message"
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={(e) =>
+                  e.key === "Enter"
+                    ? file
+                      ? sendMessageWithFile()
+                      : handleSend()
+                    : null
+                }
+                placeholder="Type a message ..."
+              />
+              <button
+                onClick={() =>
+                  file
+                    ? sendMessageWithFile()
+                    : message.length
+                    ? handleSend()
+                    : handleSendLike()
+                }
+              >
+                {message.length || file ? <SendOutlined /> : <LikeTwoTone />}
+              </button>
+              <div className="typing">
+                {typing &&
+                  typing[entity] === state[entity].data[field] &&
+                  typing.message}
+              </div>
+            </div>
+          </Fragment>
+        )}
       </Content>
       <Infobar entity={entity} field={field} />
     </Layout>

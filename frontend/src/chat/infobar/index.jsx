@@ -24,7 +24,6 @@ const Infobar = ({ entity, field }) => {
           : "right-sidebar"
       }
       collapsedWidth={0}
-      breakpoint={"sm"}
       defaultCollapsed={false}
     >
       <div className="profile">

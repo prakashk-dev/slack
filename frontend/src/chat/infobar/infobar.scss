@@ -1,5 +1,5 @@
 .right-sidebar {
-    height: calc(100vh - 65px);
+    height: calc(100vh - 64px);
     height: calc(calc(var(--vh, 1vh) * 100) - 64px);
 
     .profile {
@@ -23,7 +23,7 @@
 .right-sidebar-mobile {
     @extend .right-sidebar;
     position: absolute !important;
-    top: 65px;
+    top: 64px;
     right: 0px;
     width: 0px;
     transition: right 0.2s;
@@ -31,6 +31,6 @@
 
 .right-sidebar-mobile-shown {
     @extend .right-sidebar-mobile;
-    top: 65px;
+    top: 64px;
     width: 200px;
 }

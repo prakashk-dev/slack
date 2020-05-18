@@ -164,9 +164,9 @@ export const appReducer = (state, { type, payload }) => {
         ...state,
         style: {
           ...state.style,
+          device: "mobile",
           showSidebar: false,
           showInfobar: false,
-          device: "mobile",
         },
       };
     case DEFAULT_LAYOUT:
@@ -174,8 +174,6 @@ export const appReducer = (state, { type, payload }) => {
         ...state,
         style: {
           ...state.style,
-          showSidebar: true,
-          showInfobar: false,
           device: "desktop",
         },
       };
@@ -385,8 +383,19 @@ export const AppProvider = ({ children }) => {
     });
   };
 
+  // {
+  //   xs: '480px',
+  //   sm: '576px',
+  //   md: '768px',
+  //   lg: '992px',
+  //   xl: '1200px',
+  //   xxl: '1600px',
+  // }
+
   const changeLayout = ({ width, height }) => {
-    if (width < 800 || height < 600) {
+    const isMobile = window.orientation !== undefined;
+    const smallScreen = width <= 800 || height <= 850;
+    if (isMobile || smallScreen) {
       return dispatch({
         type: SMALL_SCREEN_LAYOUT,
       });
