@@ -14,9 +14,9 @@ import {
 
 import { Wrapper } from "src/common";
 
-const Sidebar = ({ groupId }) => {
+const Sidebar = () => {
   const {
-    state: { user, rooms, style },
+    state: { user, rooms, style, room },
     logout,
     fetchAuthUser,
     fetchRooms,
@@ -38,6 +38,7 @@ const Sidebar = ({ groupId }) => {
     style.device === "mobile" &&
       toggleSidebar({ showSidebar: !style.showSidebar });
   };
+
   const profile = (
     <Menu className="menu-item">
       <Menu.Item key="0">
@@ -96,9 +97,10 @@ const Sidebar = ({ groupId }) => {
       <Wrapper data={rooms}>
         <Menu
           mode="inline"
-          defaultSelectedKeys={[groupId]}
           onSelect={handleMenuItemClick}
           defaultOpenKeys={["rooms", "directMessages"]}
+          forceSubMenuRender={true}
+          selectedKeys={[room.data._id]}
         >
           <SubMenu key="rooms" icon={<SlackSquareOutlined />} title="Room">
             {rooms.data.length
