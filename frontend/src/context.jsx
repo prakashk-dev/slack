@@ -35,6 +35,7 @@ const DEFAULT_STATE = {
   room: { data: {}, error: null, loading: false },
   rooms: { data: [], error: null, loading: false },
   style: { showSidebar: true, showInfobar: false, device: "desktop" },
+  globals: { loading: true, error: null },
 };
 // Initial state of the application
 export const initialState = () => {
@@ -42,20 +43,24 @@ export const initialState = () => {
   if (token) {
     // try to verify that token
     const decoded = jwt.decode(token);
-    return {
-      ...DEFAULT_STATE,
-      user: {
-        ...DEFAULT_STATE.user,
-        data: {
-          username: decoded.username,
-          _id: decoded.sub,
+    if (decoded) {
+      return {
+        ...DEFAULT_STATE,
+        user: {
+          ...DEFAULT_STATE.user,
+          data: {
+            username: decoded.username,
+            _id: decoded.sub,
+          },
         },
-      },
-      config: {
-        ...DEFAULT_STATE.config,
-        data: { SOCKET_URL: decoded.socket },
-      },
-    };
+        config: {
+          ...DEFAULT_STATE.config,
+          data: { SOCKET_URL: decoded.socket },
+        },
+      };
+    } else {
+      Cookies.remove("token");
+    }
   }
 
   return DEFAULT_STATE;
@@ -65,6 +70,8 @@ const INIT_STATE = initialState();
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {
+  console.log({ type, payload });
+  console.log("state:", state);
   switch (type) {
     case USER_AUTHENTICATING:
       return {
@@ -152,11 +159,11 @@ export const appReducer = (state, { type, payload }) => {
         rooms: { data: payload, loading: false, error: null },
       };
     case LOGOUT:
+      Cookies.remove("token");
       return {
         ...DEFAULT_STATE,
         style: {
           ...state.style,
-          showSidebar: false,
         },
       };
     case SMALL_SCREEN_LAYOUT:
@@ -276,6 +283,12 @@ export const AppProvider = ({ children }) => {
       try {
         const res = await axios.get(`/api/users/${decoded.sub}`);
         if (res.data.error) {
+          if (res.status === 401) {
+            // cookies expired
+            return dispatch({
+              type: LOGOUT,
+            });
+          }
           return dispatch({
             type: USER_FETCHING_ERROR,
             payload: res.data.error,
@@ -363,21 +376,17 @@ export const AppProvider = ({ children }) => {
     return null;
   };
   const isAuthenticated = () => {
-    return Cookies.get("token");
+    return Object.keys(state.user.data).length > 0;
   };
 
   const isAuthorised = (role) => {
-    const token = isAuthenticated();
-    if (token) {
-      const decoded = jwt.decode(token);
-      return decoded.roles.includes(role);
+    if (isAuthenticated()) {
+      return state.user.data.roles.includes(role);
     }
     return false;
   };
 
   const logout = () => {
-    const token = isAuthenticated();
-    if (token) Cookies.remove("token");
     return dispatch({
       type: LOGOUT,
     });

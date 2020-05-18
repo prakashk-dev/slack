@@ -32,7 +32,9 @@ const Root = () => {
   const [width, height] = useWindowSize();
   const { changeLayout } = useContext(AppContext);
   useEffect(() => {
-    changeLayout({ width, height });
+    if (width !== 0 || height !== 0) {
+      changeLayout({ width, height });
+    }
   }, [width, height]);
 
   return (

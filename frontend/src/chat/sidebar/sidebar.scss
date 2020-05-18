@@ -38,6 +38,7 @@
       height: calc(50vh - 80px);
       height: calc(calc(var(--vh, 1vh) * 50) - 80px);
       overflow-y: auto;
+      overflow-x: hidden;
     }
   }
 

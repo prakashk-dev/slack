@@ -2,8 +2,9 @@ import React, { useState, useEffect, useContext } from "react";
 import { Layout } from "antd";
 import { useLocation, Redirect } from "@reach/router";
 
-import Sidebar from "./sidebar";
-import { AppContext } from "../context";
+import Sidebar from "src/chat/sidebar";
+import { AppContext } from "src/context";
+import "./chat.scss";
 
 const { Content } = Layout;
 
