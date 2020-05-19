@@ -41,7 +41,7 @@
 
   .chat-header-small {
     @extend .chat-header;
-    grid-template-areas: "menu menu menu";
+    grid-template-areas: "menu header header";
   }
 
   .chat-content {
@@ -87,7 +87,6 @@
         position: relative;
 
         .ant-upload-picture-card-wrapper {
-
           .ant-upload,
           .ant-upload-select,
           .ant-upload-select-picture-card {
@@ -110,7 +109,6 @@
 
       .disabled {
         .ant-upload-picture-card-wrapper {
-
           .ant-upload .ant-upload-select,
           .ant-upload-select-picture-card {
             pointer-events: none;
@@ -136,7 +134,7 @@
         left: 60px;
         font-size: 0.8em;
         font-style: italic;
-        color: #757575
+        color: #757575;
       }
     }
   }

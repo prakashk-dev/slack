@@ -9,7 +9,7 @@ const Home = () => {
   const { state } = useContext(AppContext);
   const { style } = state;
   return (
-    <div className={style.device === "mobile" ? "mobile-home" : "home"}>
+    <div className="home">
       <Navigation></Navigation>
       <div className="body">
         <div className="heading">

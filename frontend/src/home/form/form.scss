@@ -4,7 +4,7 @@
   form {
     display: grid;
     grid-row-gap: 10px;
-    grid-template-rows: 2em 1fr 1fr 1fr;
+    grid-template-rows: 25px 75px 75px 90px;
     height: 100%;
 
     .error {
@@ -21,6 +21,13 @@
       display: grid;
       justify-items: center;
       align-items: center;
+    }
+    .ant-form-item {
+      display: grid;
+      grid-template-columns: 100px auto;
+      &:last-child {
+        grid-template-columns: auto;
+      }
     }
   }
 }

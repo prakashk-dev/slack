@@ -3,15 +3,16 @@
 .home {
   display: grid;
   grid-template-rows: 80px 1fr;
+  height: 100%;
 
   .body {
     width: 450px;
     height: 475px;
     display: grid;
-    margin-top: 20px;
     padding: 15px 25px;
     border-radius: 12px;
     justify-self: center;
+    align-self: center;
     grid-template-rows: 120px auto;
     box-shadow: 0px 4px 12px 4px $box_shadow;
 
@@ -30,32 +31,20 @@
   }
 }
 
-.mobile-home {
-  @extend .home;
-  height: 100%;
-  .body {
-    margin: 0px;
-    width: 100%;
-    height: auto;
-    border-radius: 0px;
-    padding-bottom: 0px;
-    grid-template-rows: 105px 1fr;
-    box-shadow: 0px 0px 4px 2px $box_shadow inset;
-
-    .ant-form-vertical {
-      .ant-form-item {
-        display: grid;
-        grid-template-rows: 40px auto;
-        margin-bottom: 0px;
-      }
-    }
-
-    .heading {
-      .title {
-        font-size: 20px;
-      }
-      p {
-        margin: 4px;
+@media screen and (max-width: 450px), screen and (max-height: 555px) {
+  .home {
+    .body {
+      height: 100%;
+      width: 100%;
+      border-radius: 0px;
+      box-shadow: 0px 0px 4px 2px $box_shadow inset;
+      .heading {
+        .title {
+          font-size: 20px;
+        }
+        p {
+          margin: 4px;
+        }
       }
     }
   }
