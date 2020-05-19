@@ -1,6 +1,6 @@
 import Room from "../models/room.model";
 import { $socket } from "../server";
-import formatMessage from "../helpers/message";
+import formatMessage from "../helpers";
 
 // get all rooms
 function list(req, res) {

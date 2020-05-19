@@ -4,34 +4,24 @@ import groupRoutes from "./group.route";
 import roomRoutes from "./room.route";
 import authMiddleware from "../middleware/auth";
 import authenticate from "./auth.route";
+import uploadRoute from "./upload.route";
+import mockRoute from "./mock.route";
+import publicRoute from "./public.route";
 
-const app = express();
 const router = express.Router();
 
-//using middleware
-app.use(function (req, res, next) {
-  next();
-});
+router.use("/", publicRoute);
 
-router.get("/ping", (req, res) => {
-  return res.json({ message: "OK" });
-});
-router.get("/version", (req, res) => {
-  return res.json({
-    Date: "09/01/2020",
-    changes: {
-      features: [],
-      bugfix: [],
-    },
-  });
-});
+// limit this to the dev only
+router.use("/mock", mockRoute);
+
 router.use("/auth", authenticate);
-
 router.use(authMiddleware);
 
 // Any route placed after this point should be authenticated
 router.use("/users", userRoutes);
 router.use("/groups", groupRoutes);
 router.use("/rooms", roomRoutes);
+router.use("/upload", uploadRoute);
 
 export default router;

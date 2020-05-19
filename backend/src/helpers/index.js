@@ -1,14 +1,16 @@
 import config from "../config";
 import jwt from "jsonwebtoken";
+import chalk from "chalk";
+import moment from "moment";
 
-export const createCookie = (cookieValue, cookieName = "token", exDays = 1) => {
+const createCookie = (cookieValue, cookieName = "token", exDays = 1) => {
   var d = new Date();
   d.setTime(d.getTime() + exDays * 24 * 60 * 60 * 1000);
   var expires = "expires=" + d.toUTCString();
   return `${cookieName}=${cookieValue}; ${expires}; path=/`;
 };
 
-export const createToken = (user) => {
+const createToken = (user) => {
   const payload = {
     sub: user._id,
     username: user.username,
@@ -20,3 +22,25 @@ export const createToken = (user) => {
     console.log(error.message);
   }
 };
+
+const logger = (data) => {
+  switch (typeof data) {
+    case "string":
+      console.log(chalk.inverse(data));
+    case "object":
+    case "string":
+      const stringify = JOSN.stringify(data, null, 4);
+      console.log(chalk.inverse(stringify));
+    default:
+      console.log(data);
+  }
+};
+
+function formatMessage(message) {
+  const timeStamp = moment.utc().format();
+  return {
+    ...message,
+    timeStamp,
+  };
+}
+export { createCookie, createToken, logger, formatMessage };
