@@ -1,4 +1,6 @@
 import Room from "../models/room.model";
+import { $socket } from "../server";
+import formatMessage from "../helpers/message";
 
 // get all rooms
 function list(req, res) {
@@ -79,6 +81,7 @@ async function getUsers(req, res) {
 async function joinRoom(req, res) {
   const { user_id } = req.query;
   const { id: groupId } = req.params;
+
   if (groupId === "welcome") {
     return res.json({ name: "Bhet Ghat", users: [] });
   }
@@ -86,11 +89,41 @@ async function joinRoom(req, res) {
     return res.json({ error: "groupId or user_id missing." });
   }
   try {
-    await Room.findOneAndUpdate(
-      { _id: groupId },
-      { $addToSet: { users: [user_id] } }
-    ).exec();
-    const group = await Room.findOne({ _id: groupId })
+    const roomQuery = Room.findOne({ _id: groupId });
+    const room = await roomQuery.populate("users").exec();
+    if (room) {
+      const user = room.users.find(({ _id }) => _id === user_id);
+      if (!user) {
+        room.users.push(user_id);
+        await room.save();
+        console.log(room);
+        $socket.join(room.name, () => {
+          const message = formatMessage({
+            from: { name: room.name },
+            to: { name: room.name },
+            message: {
+              text: `Welcome to the ${room.name} room.`,
+              type: "text",
+            },
+          });
+          $socket.emit("messages", message);
+          $socket.to(room.name).emit(
+            "messages",
+            formatMessage({
+              from: { name: room.name },
+              to: { name: room.name },
+              message: {
+                text: `${user_id} has joined.`,
+                type: "text",
+              },
+            })
+          );
+          $socket.to(room.name).emit("updateUsers", { user, entity: "room" });
+        });
+      }
+    }
+    // { $addToSet: { users: [user_id] } }
+    const group = await roomQuery
       .populate("users", "username")
       .populate("messages.from", "username")
       .populate("messages.to", "name")

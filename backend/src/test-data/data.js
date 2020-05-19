@@ -1,4 +1,4 @@
-import { RoomModel } from "../models";
+import { RoomModel, UserModel } from "../models";
 const rooms = [
   {
     name: "Kathmandu",
@@ -99,6 +99,7 @@ async function seedData() {
 async function unSeedData() {
   try {
     await RoomModel.deleteMany({});
+    await UserModel.deleteMany({});
     return { msg: "Successfully deleted all the documents." };
   } catch (e) {
     return { error: e.message };

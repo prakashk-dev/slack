@@ -52,7 +52,6 @@ const Message = ({ entity, roomId, field }) => {
           divRef.current.scrollIntoView({ behavior: "smooth" });
       });
       socket.on("updateUsers", (msg) => {
-        console.log(msg);
         updateUsers(msg);
       });
       socket.on("typing", (data) => {
@@ -63,24 +62,11 @@ const Message = ({ entity, roomId, field }) => {
   }, [config.data.SOCKET_URL]);
 
   useEffect(() => {
-    if (
-      roomId &&
-      Object.keys(state[entity].data).length &&
-      Object.keys(user.data).length
-    ) {
+    if (roomId && Object.keys(state[entity].data).length) {
       setMessages(state[entity].data.messages || []);
-      socket.emit(
-        "join",
-        {
-          // room: state.room.data.name
-          [entity]: state[entity].data[field],
-          user: user.data,
-        },
-        (msg) => {}
-      );
       divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [roomId, state[entity], user.data]);
+  }, [roomId, state[entity]]);
 
   useEffect(() => {
     divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });

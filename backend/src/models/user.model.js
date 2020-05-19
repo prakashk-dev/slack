@@ -23,6 +23,7 @@ const UserSchema = new Schema({
     city: String,
   },
   image: "",
+  rooms: [{ type: Schema.Types.ObjectId, ref: "room" }],
   messages: [
     {
       from: { type: Schema.Types.ObjectId, ref: "user" },
@@ -39,6 +40,7 @@ const UserSchema = new Schema({
     },
   ],
   friends: [{ type: Schema.Types.ObjectId, ref: "user" }],
+  groups: [{ type: Schema.Types.ObjectId, ref: "group" }],
 });
 
 UserSchema.pre("save", function (next) {
@@ -71,4 +73,8 @@ UserSchema.methods.comparePassword = function (pin, cb) {
     cb(null, isMatch);
   });
 };
+
+UserSchema.post("findOne", function (result) {
+  console.log("After finding the document", JSON.stringify(result));
+});
 module.exports = mongoose.model("user", UserSchema);

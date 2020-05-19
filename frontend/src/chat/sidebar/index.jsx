@@ -10,6 +10,7 @@ import {
   SlackSquareOutlined,
   MessageOutlined,
   UserOutlined,
+  CaretDownFilled,
 } from "@ant-design/icons";
 
 import { Wrapper } from "src/common";
@@ -86,7 +87,7 @@ const Sidebar = () => {
                 className="ant-dropdown-link"
                 onClick={(e) => e.preventDefault()}
               >
-                <DownOutlined />
+                <CaretDownFilled />
               </a>
             ) : (
               <Avatar size={40} icon={<UserOutlined />} alt="" />

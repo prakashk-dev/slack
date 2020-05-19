@@ -11,7 +11,10 @@ async function loginOrRegisterUser(req, res) {
   // change it to string so that pin can be hashed using salt
 
   try {
-    const user = await User.findOne({ username: { $regex: username } }).exec();
+    // use findOne only in this case, as we are using post hook to join the socket
+    const user = await User.findOne({ username: { $regex: username } })
+      .select("-pin")
+      .exec();
     if (user) {
       user.comparePassword(req.body.pin, function (err, isMatch) {
         if (isMatch && !err) {
@@ -30,7 +33,7 @@ async function loginOrRegisterUser(req, res) {
       // if user not exists register
     } else {
       const { username, pin } = req.body;
-      User({ username, pin }).save((err, user) => {
+      User.create({ username, pin }, (err, user) => {
         if (err) throw err;
         // set cookie to the frontend
         // also include username and hashed password so that when we decode the token

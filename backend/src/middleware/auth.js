@@ -13,7 +13,7 @@ router.use((req, res, next) => {
     jwt.verify(token, config.jwt_secret, (err, decoded) => {
       if (err) {
         return res.status(401).json({
-          error: "failed to authenticate token",
+          error: "Token is either expired or invalid",
         });
       } else {
         // const { username, password } = decoded;

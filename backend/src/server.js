@@ -1,7 +1,7 @@
 if (process.env.NODE_ENV !== "production") {
-  require("source-map-support/register");
+  console.log("requiring");
 }
-
+require("source-map-support/register");
 import express from "express";
 import path from "path";
 import http from "http";
@@ -126,54 +126,9 @@ server.listen(port, () => {
 app.get("/", (req, res) => {
   return res.json({ msg: "Socket is up and running" });
 });
-
+let $socket, $io;
 function handleIO(socket) {
-  // fetch rooms and user data from the database
-  // Group.find({}, (err, groups) => {
-  //   if(err) throw err;
-  //   const groupNames = groups.map(g => g.name);
-
-  // })
-  socket.on("join", (data, callback) => {
-    const { user } = data;
-    const { username } = user;
-    const room = data.room || data.group || data.user;
-    const entity = data.room ? "room" : data.group ? "group" : "user";
-    const rooms = Object.keys(socket.rooms);
-    if (!rooms.includes(room)) {
-      socket.join(room, () => {
-        if (entity === "room" || entity === "group") {
-          const message = formatMessage({
-            from: { name: room },
-            to: { name: room },
-            message: {
-              text: `Welcome to the ${room} room.`,
-              type: "text",
-            },
-          });
-          socket.emit("messages", message);
-          socket.to(room).emit(
-            "messages",
-            formatMessage({
-              from: { name: room },
-              to: { name: room },
-              message: {
-                text: `${username} has joined.`,
-                type: "text",
-              },
-            })
-          );
-          socket.to(room).emit("updateUsers", { user, entity });
-        } else {
-          // think what to send for user direct message
-        }
-      });
-      callback(`Users rooms: ${Object.keys(socket.rooms)}`);
-    } else {
-      callback(`User has aleady joined the chat room ${room}`);
-    }
-  });
-
+  $socket = socket;
   socket.on("error", console.log);
   socket.on("disconnect", (socket) => {
     // remove user from that room
@@ -185,7 +140,6 @@ function handleIO(socket) {
   });
 
   socket.on("message", (msg) => {
-    socket.broadcast.emit("messages", formatMessage(msg));
     const { from, to, message } = msg;
     // // save message to the databse
     const formattedMessage = {
@@ -200,12 +154,12 @@ function handleIO(socket) {
       { $addToSet: { messages: [formattedMessage] } },
       (err, res) => {
         if (err) throw err;
+        socket.broadcast.emit("messages", formatMessage(msg));
       }
     );
   });
 
   socket.on("typing", (data) => {
-    console.log(data);
     const { active, username } = data;
     const message = active ? `${username} is typing ...` : null;
     const room = data.room || data.user || data.group;
@@ -214,3 +168,7 @@ function handleIO(socket) {
 }
 const io = socketio(server);
 io.on("connection", handleIO);
+
+$io = io;
+
+export { $socket, $io };
