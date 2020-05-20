@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { AppContext } from "src/context";
+import { navigate } from "@reach/router";
 
 import "./infobar.scss";
 import { Layout, Menu, Dropdown, Avatar } from "antd";
@@ -12,6 +13,11 @@ const Infobar = ({ entity, field }) => {
   const { style } = state;
   const name = state[entity].data[field];
   const users = state[entity].data.users;
+
+  const handleMenuItemClick = ({ key }) => {
+    console.log(key);
+    // navigate(`/chat/u/${id}`);
+  };
   return (
     <Sider
       collapsible
@@ -33,14 +39,14 @@ const Infobar = ({ entity, field }) => {
       <Menu
         mode="inline"
         defaultOpenKeys={["users"]}
-        // onSelect={() => handleMenuItemClick("showInfobar")}
+        onSelect={handleMenuItemClick}
       >
         <SubMenu key="users" icon={<UserOutlined />} title="Users">
           {users && users.length ? (
             users.map((user) => {
               return (
                 <Menu.Item
-                  key={user._id}
+                  key={user.id}
                   icon={
                     <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
                   }

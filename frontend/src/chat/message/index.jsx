@@ -114,12 +114,11 @@ const Message = ({ entity, roomId, field }) => {
   };
   const formatMessage = ({ text = message, type = "text", url = "" }) => {
     return {
-      from: { _id: user.data._id, username: user.data.username },
+      from: user.data.id,
       to: {
-        _id: state[entity].data._id,
-        [entity]: state[entity].data[field],
+        [entity]: state[entity].data.id,
       },
-      message: {
+      body: {
         text,
         type,
         url,
@@ -156,6 +155,7 @@ const Message = ({ entity, roomId, field }) => {
     const msg = {
       text: message,
     };
+    console.log(formatMessage(msg));
     sendMessage(formatMessage(msg));
   };
 
@@ -193,9 +193,10 @@ const Message = ({ entity, roomId, field }) => {
             <div className="message-container">
               {messages.length
                 ? messages.map((msg, index) => {
-                    return (
+                    // modify msg.to.room
+                    return msg.to.room === state[entity].data[field] ? (
                       <Comment by={messageBy(msg)} message={msg} key={index} />
-                    );
+                    ) : null;
                   })
                 : null}
               <div ref={divRef} id="recentMessage"></div>

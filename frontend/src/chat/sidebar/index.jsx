@@ -101,12 +101,12 @@ const Sidebar = () => {
           onSelect={handleMenuItemClick}
           defaultOpenKeys={["rooms", "directMessages"]}
           forceSubMenuRender={true}
-          selectedKeys={[room.data._id]}
+          selectedKeys={[room.data.id]}
         >
           <SubMenu key="rooms" icon={<SlackSquareOutlined />} title="Room">
             {rooms.data.length
               ? rooms.data.map((rm) => {
-                  return <Menu.Item key={rm._id}># {rm.name}</Menu.Item>;
+                  return <Menu.Item key={rm.id}># {rm.name}</Menu.Item>;
                 })
               : "No Romms"}
           </SubMenu>

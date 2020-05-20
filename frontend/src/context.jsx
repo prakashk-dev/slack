@@ -50,7 +50,7 @@ export const initialState = () => {
           ...DEFAULT_STATE.user,
           data: {
             username: decoded.username,
-            _id: decoded.sub,
+            id: decoded.sub,
           },
         },
         config: {
@@ -94,7 +94,7 @@ export const appReducer = (state, { type, payload }) => {
           data: {
             ...state.user.data,
             username: payload.username,
-            _id: payload.sub,
+            id: payload.sub,
           },
         },
         config: {
@@ -211,6 +211,7 @@ export const AppProvider = ({ children }) => {
       }
       const token = res.data.token;
       callback();
+      console.log(res.data);
       return dispatch({
         type: USER_AUTHENTICATING_SUCCESS,
         payload: jwt.decode(token),

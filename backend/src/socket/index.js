@@ -55,7 +55,7 @@ async function onMessage(msg) {
   const receiver = to.room ? "room" : to.group ? "group" : "user";
   // here we need to push to the group as well as message document
   try {
-    const result = await Modal.findById(to[receiver]._id).exec();
+    const result = await Modal.findById(to[receiver].id).exec();
     if (result) {
       logger(result);
       result.messages.push(msg);

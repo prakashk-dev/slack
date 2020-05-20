@@ -11,11 +11,16 @@ async function loginOrRegisterUser(req, res) {
 
   try {
     // use findOne only in this case, as we are using post hook to join the socket
-    const user = await User.findOne({ username: { $regex: username } }).exec();
+    let user = await User.findOne({ username: { $regex: username } })
+      .select("+pin")
+      .exec();
     if (user) {
-      logger(req.body.pin);
       user.comparePassword(req.body.pin, function (err, isMatch) {
         if (isMatch && !err) {
+          // don't send these fields to client
+          user = user.toJSON();
+          delete user.pin;
+
           // set cookie to the frontend
           let token = createToken(user);
           res.cookie(createCookie(token));
@@ -24,9 +29,8 @@ async function loginOrRegisterUser(req, res) {
           join user to all the groups,
           join user to all the friends
           */
-
           return res.status(200).json({
-            user: user.toClient(),
+            user,
             token,
           });
         } else {

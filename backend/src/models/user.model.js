@@ -8,8 +8,14 @@ const UserSchema = new Schema({
     type: String,
     unique: true,
   },
-  pin: String,
-  password: String,
+  pin: {
+    type: String,
+    select: false,
+  },
+  password: {
+    type: String,
+    select: false,
+  },
   roles: [],
   gender: {
     type: String,
@@ -88,8 +94,6 @@ UserSchema.pre("save", function (next) {
 });
 
 UserSchema.methods.comparePassword = function (pin, cb) {
-  logger(pin);
-  logger(this.pin);
   bcrypt.compare(pin.toString(), this.pin, function (err, isMatch) {
     if (err) {
       return cb(err);

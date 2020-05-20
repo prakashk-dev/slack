@@ -59,6 +59,7 @@ const HomeForm = () => {
     const username = form.getFieldValue("username");
     username.length && setMessage(`Welcome Back, ${username}`);
   };
+
   const InfoBar = () => {
     return (
       <div className={httpError ? "error" : message ? "info" : ""}>
@@ -66,6 +67,7 @@ const HomeForm = () => {
       </div>
     );
   };
+
   const handleSubmitError = (error) => {
     console.log("Error:", error);
   };
