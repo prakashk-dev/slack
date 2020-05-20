@@ -6,9 +6,15 @@ const UserSchema = new Schema({
   username: {
     type: String,
     unique: true,
-    index: true,
   },
-  pin: String, // as it is hashed
+  pin: {
+    type: String,
+    select: false,
+  },
+  password: {
+    type: String,
+    select: false,
+  },
   roles: [],
   gender: {
     type: String,
@@ -23,24 +29,42 @@ const UserSchema = new Schema({
     city: String,
   },
   image: "",
-  rooms: [{ type: Schema.Types.ObjectId, ref: "room" }],
-  messages: [
+  status: {
+    type: String,
+    enum: ["online", "away", "offline"],
+  },
+  // last time user logged in
+  last_active: "",
+  rooms: [
     {
-      from: { type: Schema.Types.ObjectId, ref: "user" },
-      to: { type: Schema.Types.ObjectId, ref: "group" },
-      message: {
-        type: {
-          type: String,
-          enum: ["image", "video", "icon", "text", "file"],
-        },
-        text: String,
-        url: String,
-      },
-      timeStamp: Date,
+      name: { type: String, unique: true },
+      last_active: Date,
+      favourite: Boolean,
+      role: { type: String, enum: ["admin"] },
     },
   ],
-  friends: [{ type: Schema.Types.ObjectId, ref: "user" }],
-  groups: [{ type: Schema.Types.ObjectId, ref: "group" }],
+  groups: [
+    {
+      name: { type: String, unique: true },
+      last_active: Date,
+      role: { type: String, enum: ["admin"] },
+      request: {
+        status: { type: String, enum: ["pending", "approved", "rejected"] },
+        by: String,
+      },
+    },
+  ],
+  friends: [
+    {
+      friend: { type: Schema.Types.ObjectId, ref: "user" },
+      last_active: Date,
+      status: {
+        type: String,
+        enum: ["pending", "approved", "rejected"],
+      },
+    },
+  ],
+  notification: [{ receiver: String, count: Number }], // this contains only those messages that are not seen
 });
 
 UserSchema.pre("save", function (next) {
@@ -65,7 +89,6 @@ UserSchema.pre("save", function (next) {
 });
 
 UserSchema.methods.comparePassword = function (pin, cb) {
-  // const convertToString = pin.toString();
   bcrypt.compare(pin, this.pin, function (err, isMatch) {
     if (err) {
       return cb(err);
@@ -74,7 +97,4 @@ UserSchema.methods.comparePassword = function (pin, cb) {
   });
 };
 
-UserSchema.post("findOne", function (result) {
-  console.log("After finding the document", JSON.stringify(result));
-});
 module.exports = mongoose.model("user", UserSchema);
