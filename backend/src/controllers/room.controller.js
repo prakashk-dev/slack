@@ -1,6 +1,6 @@
 import Room from "../models/room.model";
-import { $socket } from "../server";
-import formatMessage from "../helpers";
+import { handleJoin } from "../socket";
+import { UserModel } from "../models";
 
 // get all rooms
 function list(req, res) {
@@ -78,57 +78,39 @@ async function getUsers(req, res) {
     return res.json({ error: "error fetching users" });
   }
 }
+// when user request for a room data, see if that user is already in that room, if not join him/her
+// to the socket
 async function joinRoom(req, res) {
   const { user_id } = req.query;
-  const { id: groupId } = req.params;
-
-  if (groupId === "welcome") {
+  const { id: roomId } = req.params;
+  if (roomId === "welcome") {
+    // send video url or something
     return res.json({ name: "Bhet Ghat", users: [] });
   }
-  if (!groupId || !user_id) {
-    return res.json({ error: "groupId or user_id missing." });
+  if (!roomId || !user_id) {
+    return res.json({ error: "roomId or user_id missing." });
   }
   try {
-    const roomQuery = Room.findOne({ _id: groupId });
+    const roomQuery = Room.findOne({ _id: roomId });
     const room = await roomQuery.populate("users").exec();
     if (room) {
       const user = room.users.find(({ _id }) => _id === user_id);
       if (!user) {
+        // new user has joined this room
         room.users.push(user_id);
         await room.save();
-        console.log(room);
-        $socket.join(room.name, () => {
-          const message = formatMessage({
-            from: { name: room.name },
-            to: { name: room.name },
-            message: {
-              text: `Welcome to the ${room.name} room.`,
-              type: "text",
-            },
-          });
-          $socket.emit("messages", message);
-          $socket.to(room.name).emit(
-            "messages",
-            formatMessage({
-              from: { name: room.name },
-              to: { name: room.name },
-              message: {
-                text: `${user_id} has joined.`,
-                type: "text",
-              },
-            })
-          );
-          $socket.to(room.name).emit("updateUsers", { user, entity: "room" });
-        });
+        let user = await UserModel.findById(user_id).exec();
+        user.rooms.push(room._id);
+        await user.save();
+        handleJoin(user, room, "room");
       }
     }
-    // { $addToSet: { users: [user_id] } }
-    const group = await roomQuery
+    const populatedRoom = await roomQuery
       .populate("users", "username")
-      .populate("messages.from", "username")
-      .populate("messages.to", "name")
+      .populate("messages.from")
+      .populate("messages.to.room")
       .exec();
-    return res.json(group);
+    return res.json(populatedRoom);
   } catch (error) {
     console.log(error);
     return res.json({ error: error.message });

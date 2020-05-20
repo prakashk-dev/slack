@@ -1,20 +1,15 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 import bcrypt from "bcrypt";
+import { logger } from "../helpers";
 
 const UserSchema = new Schema({
   username: {
     type: String,
     unique: true,
   },
-  pin: {
-    type: String,
-    select: false,
-  },
-  password: {
-    type: String,
-    select: false,
-  },
+  pin: String,
+  password: String,
   roles: [],
   gender: {
     type: String,
@@ -67,6 +62,10 @@ const UserSchema = new Schema({
   notification: [{ receiver: String, count: Number }], // this contains only those messages that are not seen
 });
 
+// write a hook that will always sort the rooms, groups and friends array
+// UserSchema.pre('findOne', function() {
+//   this.
+// })
 UserSchema.pre("save", function (next) {
   let user = this;
   if (this.isModified("pin") || this.isNew) {
@@ -89,12 +88,26 @@ UserSchema.pre("save", function (next) {
 });
 
 UserSchema.methods.comparePassword = function (pin, cb) {
-  bcrypt.compare(pin, this.pin, function (err, isMatch) {
+  logger(pin);
+  logger(this.pin);
+  bcrypt.compare(pin.toString(), this.pin, function (err, isMatch) {
     if (err) {
       return cb(err);
     }
     cb(null, isMatch);
   });
 };
+
+UserSchema.set("toJSON", {
+  virtuals: true,
+});
+
+UserSchema.set("toJSON", {
+  transform: function (doc, ret, options) {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+  },
+});
 
 module.exports = mongoose.model("user", UserSchema);

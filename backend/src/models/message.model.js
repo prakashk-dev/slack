@@ -55,4 +55,16 @@ MessageSchema.pre("find", function () {
   this.populate("sender").populate("receiver");
 });
 
+MessageSchema.set("toJSON", {
+  virtuals: true,
+});
+
+MessageSchema.set("toJSON", {
+  transform: function (doc, ret, options) {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+  },
+});
+
 module.exports = mongoose.model("message", MessageSchema);

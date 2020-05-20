@@ -1,5 +1,5 @@
 import User from "../models/user.model";
-import { createCookie, createToken } from "../helpers";
+import { createCookie, createToken, logger } from "../helpers";
 
 async function loginOrRegisterUser(req, res) {
   if (!req.body.username || !req.body.pin) {
@@ -8,20 +8,25 @@ async function loginOrRegisterUser(req, res) {
     });
   }
   const username = new RegExp("^" + req.body.username + "$", "i");
-  // change it to string so that pin can be hashed using salt
 
   try {
     // use findOne only in this case, as we are using post hook to join the socket
-    const user = await User.findOne({ username: { $regex: username } })
-      .select("-pin")
-      .exec();
+    const user = await User.findOne({ username: { $regex: username } }).exec();
     if (user) {
+      logger(req.body.pin);
       user.comparePassword(req.body.pin, function (err, isMatch) {
         if (isMatch && !err) {
           // set cookie to the frontend
           let token = createToken(user);
           res.cookie(createCookie(token));
+          /* 
+          join user to all the rooms
+          join user to all the groups,
+          join user to all the friends
+          */
+
           return res.status(200).json({
+            user: user.toClient(),
             token,
           });
         } else {

@@ -27,10 +27,12 @@ const logger = (data) => {
   switch (typeof data) {
     case "string":
       console.log(chalk.inverse(data));
+      break;
     case "object":
     case "string":
-      const stringify = JOSN.stringify(data, null, 4);
+      const stringify = JSON.stringify(data, null, 4);
       console.log(chalk.inverse(stringify));
+      break;
     default:
       console.log(data);
   }

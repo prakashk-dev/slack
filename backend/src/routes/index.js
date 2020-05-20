@@ -7,6 +7,7 @@ import authenticate from "./auth.route";
 import uploadRoute from "./upload.route";
 import mockRoute from "./mock.route";
 import publicRoute from "./public.route";
+import MessageRoute from "./message.route";
 
 const router = express.Router();
 
@@ -23,5 +24,6 @@ router.use("/users", userRoutes);
 router.use("/groups", groupRoutes);
 router.use("/rooms", roomRoutes);
 router.use("/upload", uploadRoute);
+router.use("/messages", uploadRoute);
 
 export default router;

@@ -11,8 +11,6 @@ const GroupSchema = new Schema(
     },
     description: String,
     image: String,
-    users: [{ type: Schema.Types.ObjectId, ref: "user" }],
-    messages: [{ type: Schema.Types.ObjectId, ref: "message" }],
   },
   {
     timestamps: {
@@ -22,30 +20,33 @@ const GroupSchema = new Schema(
     },
   }
 );
-GroupSchema.virtual(
-  "users",
-  {
-    ref: "user",
-    localField: "name",
-    foreignField: "rooms.name",
-    justOne: false,
-    // https://mongoosejs.com/docs/api.html#query_Query-setOptions
-    options: { sort: { "groups.last_active": 1 } },
-  },
-  { toJSON: { virtuals: true } }
-);
+GroupSchema.virtual("members", {
+  ref: "user",
+  localField: "name",
+  foreignField: "rooms.name",
+  justOne: false,
+  // https://mongoosejs.com/docs/api.html#query_Query-setOptions
+  options: { sort: { "groups.last_active": 1 } },
+});
 
-GroupSchema.virtual(
-  "messages",
-  {
-    ref: "message",
-    localField: "name",
-    foreignField: "receiver",
-    justOne: false,
-    // https://mongoosejs.com/docs/api.html#query_Query-setOptions
-    options: { sort: { created_at: 1 } },
-  },
-  { toJSON: { virtuals: true } }
-);
+GroupSchema.virtual("conversations", {
+  ref: "message",
+  localField: "name",
+  foreignField: "receiver",
+  justOne: false,
+  // https://mongoosejs.com/docs/api.html#query_Query-setOptions
+  options: { sort: { created_at: 1 } },
+});
 
+GroupSchema.set("toJSON", {
+  virtuals: true,
+});
+
+GroupSchema.set("toJSON", {
+  transform: function (doc, ret, options) {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+  },
+});
 module.exports = mongoose.model("group", GroupSchema);
