@@ -1,10 +1,6 @@
 import express from "express";
-import path from "path";
 
 const router = express.Router();
-
-router.get("/static", express.static(path.join(__dirname, "../../static")));
-
 router.get("/api/config", (req, res) => {
   return res.json({
     SOCKET_URL:

@@ -8,9 +8,9 @@ import { LikeTwoTone } from "@ant-design/icons";
 
 export default function Comment({ by, message, ...props }) {
   const Config =
-    by === "receiver"
+    by === "other"
       ? {
-          author: <a>{message.from.username}</a>,
+          author: <a>{message.sender.username}</a>,
           avatar: (
             <Avatar
               src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
@@ -18,24 +18,24 @@ export default function Comment({ by, message, ...props }) {
             />
           ),
           className:
-            message.message.type === "icon" ? "icon-receiver" : "receiver",
+            message.body.type === "icon" ? "icon-receiver" : "receiver",
         }
-      : by === "sender"
+      : by === "me"
       ? {
-          className: message.message.type === "icon" ? "icon-sender" : "sender",
+          className: message.body.type === "icon" ? "icon-sender" : "sender",
         }
       : { className: "admin" };
 
   const Content = () => {
     return (
       <Fragment>
-        {message.message.type === "image" && (
-          <img src={message.message.url} alt="No image found" />
+        {message.body.type === "image" && (
+          <img src={message.body.url} alt="No image found" />
         )}
-        {message.message.type === "icon" ? (
+        {message.body.type === "icon" ? (
           <LikeTwoTone />
         ) : (
-          <p>{message.message.text}</p>
+          <p>{message.body.text}</p>
         )}
       </Fragment>
     );

@@ -50,7 +50,7 @@ export const initialState = () => {
           ...DEFAULT_STATE.user,
           data: {
             username: decoded.username,
-            id: decoded.sub,
+            id: decoded.id,
           },
         },
         config: {
@@ -70,8 +70,8 @@ const INIT_STATE = initialState();
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {
-  console.log({ type, payload });
-  console.log("state:", state);
+  // console.log({ type, payload });
+  // console.log("state:", state);
   switch (type) {
     case USER_AUTHENTICATING:
       return {
@@ -88,21 +88,12 @@ export const appReducer = (state, { type, payload }) => {
       return {
         ...state,
         user: {
-          ...state.user,
           loading: false,
           error: null,
-          data: {
-            ...state.user.data,
-            username: payload.username,
-            id: payload.sub,
-          },
+          data: payload,
         },
         config: {
-          ...state.config,
-          data: {
-            ...state.config.data,
-            SOCKET_URL: payload.socket,
-          },
+          data: payload,
           loading: false,
           error: null,
         },
@@ -196,6 +187,7 @@ export const appReducer = (state, { type, payload }) => {
 
 export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, INIT_STATE);
+
   // Actions
   const saveOrAuthenticateUser = async (user, callback) => {
     dispatch({ type: USER_AUTHENTICATING });
@@ -209,17 +201,16 @@ export const AppProvider = ({ children }) => {
           payload: res.data.error,
         });
       }
-      const token = res.data.token;
-      callback();
-      console.log(res.data);
+      callback(null, res.data.user);
       return dispatch({
         type: USER_AUTHENTICATING_SUCCESS,
-        payload: jwt.decode(token),
+        payload: res.data.user,
       });
-    } catch (error) {
+    } catch (err) {
+      callback(err.message);
       return dispatch({
         type: USER_AUTHENTICATING_ERROR,
-        payload: error.message,
+        payload: err.message,
       });
     }
   };
@@ -230,7 +221,7 @@ export const AppProvider = ({ children }) => {
     const decoded = decodeToken();
     try {
       const res = await axios.put(
-        `/api/groups/${groupId}?user_id=${decoded.sub}`
+        `/api/groups/${groupId}?user_id=${decoded.id}`
       );
       if (res.data.error) {
         return dispatch({
@@ -251,13 +242,35 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const fetchRoomById = async (roomId) => {
+    dispatch({ type: ROOM_FETCHING });
+    try {
+      const res = await axios.get(
+        `/api/users/${state.user.data.id}/rooms/${roomId}`
+      );
+      if (res.data.error) {
+        return dispatch({
+          type: ROOM_FETCHING_ERROR,
+          payload: res.data.error,
+        });
+      }
+      const room = res.data;
+      return dispatch({
+        type: ROOM_FETCHING_SUCCESS,
+        payload: room,
+      });
+    } catch (error) {
+      return dispatch({
+        type: ROOM_FETCHING_ERROR,
+        payload: error.message,
+      });
+    }
+  };
   const fetchRoom = async (roomId) => {
     dispatch({ type: ROOM_FETCHING });
     const decoded = decodeToken();
     try {
-      const res = await axios.put(
-        `/api/rooms/${roomId}?user_id=${decoded.sub}`
-      );
+      const res = await axios.put(`/api/rooms/${roomId}?user_id=${decoded.id}`);
       if (res.data.error) {
         return dispatch({
           type: ROOM_FETCHING_ERROR,
@@ -282,7 +295,7 @@ export const AppProvider = ({ children }) => {
     const decoded = decodeToken();
     if (decoded) {
       try {
-        const res = await axios.get(`/api/users/${decoded.sub}`);
+        const res = await axios.get(`/api/users/${decoded.id}`);
         if (res.data.error) {
           if (res.status === 401) {
             // cookies expired
@@ -440,6 +453,7 @@ export const AppProvider = ({ children }) => {
     changeLayout,
     toggleSidebar,
     fetchRoom,
+    fetchRoomById,
     updateUsers,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -3,20 +3,15 @@ import { navigate, Redirect } from "@reach/router";
 import { AppContext } from "src/context";
 import { Form, Input, Button } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
+import moment from "moment";
 
 import "./form.scss";
 const PIN = /[0-9]/;
 const HomeForm = () => {
-  const {
-    state: {
-      user: { data, error, loading },
-    },
-    saveOrAuthenticateUser,
-    isAuthenticated,
-  } = useContext(AppContext);
+  const { saveOrAuthenticateUser, isAuthenticated } = useContext(AppContext);
 
   const [form] = Form.useForm();
-  const [httpError, setHttpError] = useState(error);
+  const [httpError, setHttpError] = useState(null);
   const [message, setMessage] = useState(null);
   const [submitLayout, setSubmitLayout] = useState({
     block: true,
@@ -24,13 +19,36 @@ const HomeForm = () => {
     htmlType: "submit",
   });
 
+  // refactor this
+  const getLastActiveEntityId = (user) => {
+    const { rooms, groups, friends } = user;
+    const compareArrays = [rooms[0], groups[0], friends[0]];
+    let lastActive = compareArrays.reduce(
+      (lastActive, current) =>
+        moment(lastActive).isAfter(current) ? lastActive : current,
+      compareArrays[0].last_active
+    );
+    const { friend, room, group } = lastActive;
+    const sub = friend ? "u" : room ? "r" : "g";
+    const id =
+      (friend && friend.id) || (room && room.id) || (group && group.id);
+    return { sub, id };
+  };
+
   const handleSubmit = async (values) => {
-    saveOrAuthenticateUser(values, (err) => {
+    saveOrAuthenticateUser(values, (err, user) => {
       if (err) {
         setHttpError(err);
         return;
       }
-      navigate(`/chat/r/welcome`);
+      const isReturningUser =
+        user.rooms.length || user.friends.length || user.groups.length;
+      if (isReturningUser) {
+        const { sub, id } = getLastActiveEntityId(user);
+        navigate(`/chat/${sub}/${id}`);
+      } else {
+        navigate(`/chat/r/welcome`);
+      }
     });
   };
 

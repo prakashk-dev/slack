@@ -25,7 +25,7 @@ import { Upload, Comment } from "src/common";
 
 let socket;
 const Message = ({ entity, roomId, field }) => {
-  // { from: {}, to: {}, message: { type: [text|imgage|video|file], text: '', url: null}, timeStamp}
+  // see backend/src/models/message.model.js
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const { state, toggleSidebar, updateUsers } = useContext(AppContext);
@@ -37,47 +37,45 @@ const Message = ({ entity, roomId, field }) => {
   useEffect(() => {
     if (config.data.SOCKET_URL) {
       socket = io.connect(config.data.SOCKET_URL);
-      socket.on("connect", () => console.log("Connected"));
-      socket.on("disconnect", (reason) =>
-        console.log("Disconnected: ", reason)
-      );
-      socket.on("error", (error) => console.log("Errors:", error));
-      socket.on("reconnect_attempt", () => {
-        console.log("Reconnecting");
-      });
-
-      socket.on("messages", (msg) => {
-        setMessages((prevMessages) => [...prevMessages, msg]);
-        messages.length &&
-          divRef.current.scrollIntoView({ behavior: "smooth" });
-      });
-      socket.on("updateUsers", (msg) => {
-        updateUsers(msg);
-      });
-      socket.on("typing", (data) => {
-        setTyping(data);
-      });
+      logger(socket);
+      handleEvents(socket);
       return () => socket.disconnect();
     }
   }, [config.data.SOCKET_URL]);
 
+  const handleEvents = (socket) => {
+    socket.on("messages", updateMessages);
+    socket.on("typing", handleTypingEvent);
+    // socket.on("welcome", console.log);
+    // socket.on("updateUsers", updateUsers);
+    // socket.on("updateUser", console.log);
+    // socket.on("newUserJoined", console.log);
+  };
+
+  const handleJoin = (roomId) => {
+    socket.emit("join", {
+      room: roomId,
+      username: state.user.data.username,
+    });
+  };
   useEffect(() => {
     if (roomId && Object.keys(state[entity].data).length) {
-      setMessages(state[entity].data.messages || []);
-      divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
+      updateMessages(state[entity].data.messages || []);
+      handleJoin(roomId);
     }
   }, [roomId, state[entity]]);
 
   useEffect(() => {
-    divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
+    scrollToButton();
   }, [messages, file]);
+
   // Refactor this
   useEffect(() => {
     if (message.length) {
       if (!typing) {
         socket.emit("typing", {
-          username: user.data.username,
-          [entity]: state[entity].data[field],
+          sender: user.data.username,
+          receiver: state[entity].data[field],
           active: true,
         });
         setTyping(true);
@@ -85,8 +83,8 @@ const Message = ({ entity, roomId, field }) => {
     } else {
       if (typing) {
         socket.emit("typing", {
-          username: user.data.username,
-          [entity]: state[entity].data[field],
+          sender: user.data.username,
+          receiver: state[entity].data[field],
           active: false,
         });
         setTyping(false);
@@ -94,6 +92,31 @@ const Message = ({ entity, roomId, field }) => {
     }
   }, [message]);
 
+  const filterArrayMessages = (prevMessages, msg) => {
+    return [...prevMessages, msg].filter((msg) => msg.length === undefined);
+  };
+  const updateMessages = (msg) => {
+    console.log("socket message", msg);
+    setMessages((prevMessages) => filterArrayMessages(prevMessages, msg));
+    scrollToButton();
+  };
+
+  const handleTypingEvent = (msg) => {
+    setTyping(msg);
+  };
+
+  const scrollToButton = () => {
+    divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const logger = (socket) => {
+    socket.on("connect", () => console.log("Connected"));
+    socket.on("disconnect", (reason) => console.log("Disconnected: ", reason));
+    socket.on("error", (error) => console.log("Errors:", error));
+    socket.on("reconnect_attempt", () => {
+      console.log("Reconnecting");
+    });
+  };
   const ToggleIcon = (props) => {
     return style.showSidebar ? (
       <MenuFoldOutlined {...props} />
@@ -101,6 +124,7 @@ const Message = ({ entity, roomId, field }) => {
       <MenuUnfoldOutlined {...props} />
     );
   };
+
   const handleFileUpload = (uploads) => {
     setFile(uploads[0].originFileObj);
   };
@@ -110,14 +134,31 @@ const Message = ({ entity, roomId, field }) => {
       type: "icon",
     };
 
-    sendMessage(formatMessage(msg));
+    sendMessage(msg);
   };
+
   const formatMessage = ({ text = message, type = "text", url = "" }) => {
     return {
-      from: user.data.id,
-      to: {
-        [entity]: state[entity].data.id,
+      sender: user.data.id,
+      receiver: state[entity].data.id,
+      onReceiver: entity,
+      body: {
+        text,
+        type,
+        url,
       },
+    };
+  };
+
+  const formatMessageForMyself = ({
+    text = message,
+    type = "text",
+    url = "",
+  }) => {
+    return {
+      sender: state.user.data,
+      receiver: state[entity].data,
+      onReceiver: entity,
       body: {
         text,
         type,
@@ -134,38 +175,37 @@ const Message = ({ entity, roomId, field }) => {
       .then((res) => {
         setFile(null);
         setMessage("");
-        sendMessage(
-          formatMessage({
-            text: message,
-            type: "image",
-            url: res.data.url,
-          })
-        );
+        sendMessage({
+          text: message,
+          type: "image",
+          url: res.data.url,
+        });
       })
       .catch((err) => console.error(err));
   };
 
   const sendMessage = (msg) => {
-    socket.emit("message", msg);
-    setMessages((prevMessages) => [...prevMessages, msg]);
+    //  send message with post action
+    setMessages((prevMessages) =>
+      filterArrayMessages(prevMessages, formatMessageForMyself(msg))
+    );
     setMessage("");
+    socket.emit("message", formatMessage(msg));
   };
 
   const handleSend = () => {
     const msg = {
       text: message,
     };
-    console.log(formatMessage(msg));
-    sendMessage(formatMessage(msg));
+    sendMessage(msg);
   };
 
   const messageBy = (msg) => {
-    return msg.from[field] === state[entity].data[field] &&
-      msg.to[field] === state[entity].data[field]
+    return msg.sender.id === state.user.data.id
+      ? "me"
+      : msg.sender.id === state[entity].data.id
       ? "admin"
-      : msg.from.username === user.data.username
-      ? "sender"
-      : "receiver";
+      : "other";
   };
 
   return (
@@ -194,7 +234,7 @@ const Message = ({ entity, roomId, field }) => {
               {messages.length
                 ? messages.map((msg, index) => {
                     // modify msg.to.room
-                    return msg.to.room === state[entity].data[field] ? (
+                    return msg.receiver.id === roomId ? (
                       <Comment by={messageBy(msg)} message={msg} key={index} />
                     ) : null;
                   })

@@ -27,16 +27,16 @@ const RoomSchema = new Schema(
 
 RoomSchema.virtual("members", {
   ref: "user",
-  localField: "name",
-  foreignField: "rooms.name",
+  localField: "_id",
+  foreignField: "rooms.room",
   justOne: false,
   // https://mongoosejs.com/docs/api.html#query_Query-setOptions
-  options: { sort: { "room.last_active": 1 } },
+  // options: { sort: { "room.last_active": 1 } },
 });
 
 RoomSchema.virtual("conversations", {
   ref: "message",
-  localField: "name",
+  localField: "_id",
   foreignField: "receiver",
   justOne: false,
   // https://mongoosejs.com/docs/api.html#query_Query-setOptions

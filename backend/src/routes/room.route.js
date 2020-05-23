@@ -2,13 +2,13 @@ import express from "express";
 import * as Room from "../controllers/room.controller";
 
 const router = express.Router();
-router.route("/").get(Room.list);
+router.route("/").get(Room.getAll);
 router.route("/name").get(Room.groupName);
 router.route("/recent").get(Room.getRecent);
-router.route("/:id").put(Room.joinRoom);
+router.route("/:id").get(Room.getOne);
 // this might be redundent
 router.route("/:id/users").get(Room.getUsers);
-router.route("/:id").get(Room.findById);
+// router.route("/:id").get(Room.findById);
 // router.route('/save')
 //   .post(User.save);
 // router.route('/:id')

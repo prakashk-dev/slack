@@ -1,19 +1,23 @@
 import Room from "../models/room.model";
-import { handleJoin } from "../socket";
 import { UserModel } from "../models";
+import { logger } from "../helpers";
+import mongoose from "mongoose";
 
 // get all rooms
-function list(req, res) {
-  Room.find((err, rooms) => {
-    if (err) {
-      return res.status(400).json({ error: "Error Fetching Rooms" });
-    }
-    if (rooms.length === 0) {
-      return res.json({ error: "No group in database." });
-    }
+const getAll = async (req, res) => {
+  try {
+    const rooms = await Room.find({})
+      .populate("members")
+      .populate("conversations")
+      .exec();
     return res.json(rooms);
-  });
-}
+  } catch (err) {
+    logger(err);
+    return res
+      .status(400)
+      .json({ error: `Error Fetching Rooms: ${err.message}` });
+  }
+};
 // get names only
 function groupName(req, res) {
   Room.find(null, "name", (err, names) => {
@@ -78,43 +82,46 @@ async function getUsers(req, res) {
     return res.json({ error: "error fetching users" });
   }
 }
-// when user request for a room data, see if that user is already in that room, if not join him/her
-// to the socket
-async function joinRoom(req, res) {
-  const { user_id } = req.query;
-  const { id: roomId } = req.params;
-  if (roomId === "welcome") {
+
+// /:id
+async function getOne(req, res) {
+  const id = res.locals.id || req.params.id;
+  if (id === "welcome") {
     // send video url or something
-    return res.json({ name: "Bhet Ghat", users: [] });
-  }
-  if (!roomId || !user_id) {
-    return res.json({ error: "roomId or user_id missing." });
-  }
-  try {
-    const roomQuery = Room.findOne({ _id: roomId });
-    const room = await roomQuery.populate("users").exec();
-    if (room) {
-      const user = room.users.find(({ _id }) => _id === user_id);
-      if (!user) {
-        // new user has joined this room
-        room.users.push(user_id);
-        await room.save();
-        let user = await UserModel.findById(user_id).exec();
-        user.rooms.push(room._id);
-        await user.save();
-        handleJoin(user, room, "room");
+    return res.json({ name: "Bhet Ghat", members: [] });
+  } else if (!id) {
+    return res.json({ error: "Room id is missing." });
+  } else if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.json({ error: "Not a valid room id" });
+  } else {
+    try {
+      const room = await Room.findById(id)
+        .populate("members")
+        .populate("conversations")
+        .exec();
+      if (room) {
+        // socket.handleJoin({ roomId: id, user: res.locals.user });
+        return res.json(room);
+
+        // if (!user) {
+        //   //new user has joined this room
+        //   /*
+        //   1. Add room in user.rooms - a
+        //   2. join user to that room - s
+        //   3. send recent user to the update user socket event - s
+        //   4. send welcome message self, user join other - s
+        //   5. send room info to frontned - a
+
+        //   */
+        // }
+      } else {
+        return res.json({ error: `Room not found with id ${id}` });
       }
+    } catch (error) {
+      console.log(error);
+      return res.json({ error: error.message });
     }
-    const populatedRoom = await roomQuery
-      .populate("users", "username")
-      .populate("messages.from")
-      .populate("messages.to.room")
-      .exec();
-    return res.json(populatedRoom);
-  } catch (error) {
-    console.log(error);
-    return res.json({ error: error.message });
   }
 }
 
-export { list, getRecent, findById, groupName, getUsers, joinRoom };
+export { getAll, getRecent, findById, groupName, getUsers, getOne };

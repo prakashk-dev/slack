@@ -47,7 +47,7 @@ const findRoomById = async (req, res) => {
   } else {
     try {
       // only push if the room is not exists
-      const user = await User.update(
+      await User.updateOne(
         { _id: id, "rooms.room": { $ne: roomId } },
         {
           $push: {
@@ -59,9 +59,15 @@ const findRoomById = async (req, res) => {
         },
         { new: true }
       ).exec();
+
+      const usr = await User.findById(id)
+        .populate("rooms.room")
+        .populate("groups.group")
+        .populate("friends.friend")
+        .exec();
       res.locals = {
         id: roomId,
-        user,
+        user: usr,
       };
       getOne(req, res);
     } catch (err) {

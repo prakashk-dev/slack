@@ -9,7 +9,7 @@ const MessageSchema = new Schema({
   receiver: {
     type: Schema.Types.ObjectId,
     required: true,
-    refPath: "onSender",
+    refPath: "onReceiver",
   },
   body: {
     type: {
@@ -22,7 +22,7 @@ const MessageSchema = new Schema({
   pinned: Boolean,
   created_at: {
     type: Date,
-    default: moment.utc().format,
+    default: moment.utc().format(),
   },
   updated_at: Date,
   reply: [
@@ -38,12 +38,12 @@ const MessageSchema = new Schema({
       },
       created_at: {
         type: Date,
-        default: moment.utc().format,
+        default: moment.utc().format(),
       },
       updated_at: Date,
     },
   ],
-  onSender: {
+  onReceiver: {
     type: String,
     required: true,
     enum: ["room", "group", "user"],

@@ -22,8 +22,8 @@ const GroupSchema = new Schema(
 );
 GroupSchema.virtual("members", {
   ref: "user",
-  localField: "name",
-  foreignField: "rooms.name",
+  localField: "_id",
+  foreignField: "groups.group",
   justOne: false,
   // https://mongoosejs.com/docs/api.html#query_Query-setOptions
   options: { sort: { "groups.last_active": 1 } },
@@ -31,7 +31,7 @@ GroupSchema.virtual("members", {
 
 GroupSchema.virtual("conversations", {
   ref: "message",
-  localField: "name",
+  localField: "_id",
   foreignField: "receiver",
   justOne: false,
   // https://mongoosejs.com/docs/api.html#query_Query-setOptions

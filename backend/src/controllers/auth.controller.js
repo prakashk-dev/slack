@@ -8,11 +8,13 @@ async function loginOrRegisterUser(req, res) {
     });
   }
   const username = new RegExp("^" + req.body.username + "$", "i");
-
   try {
     // use findOne only in this case, as we are using post hook to join the socket
     let user = await User.findOne({ username: { $regex: username } })
       .select("+pin")
+      .populate("friends.friend")
+      .populate("rooms.room")
+      .populate("groups.group")
       .exec();
     if (user) {
       user.comparePassword(req.body.pin, function (err, isMatch) {
@@ -20,15 +22,9 @@ async function loginOrRegisterUser(req, res) {
           // don't send these fields to client
           user = user.toJSON();
           delete user.pin;
-
           // set cookie to the frontend
           let token = createToken(user);
           res.cookie(createCookie(token));
-          /* 
-          join user to all the rooms
-          join user to all the groups,
-          join user to all the friends
-          */
           return res.status(200).json({
             user,
             token,
@@ -42,20 +38,23 @@ async function loginOrRegisterUser(req, res) {
       // if user not exists register
     } else {
       const { username, pin } = req.body;
-      User.create({ username, pin }, (err, user) => {
-        if (err) throw err;
-        // set cookie to the frontend
-        // also include username and hashed password so that when we decode the token
-        // we can verify that the username and password match to our database
-        const token = createToken(user);
-        res.cookie(createCookie(token));
-        return res.status(200).json({
-          token,
-        });
+      let user = await User.create({ username, pin });
+      // set cookie to the frontend
+      // also include username and hashed password so that when we decode the token
+      // we can verify that the username and password match to our database
+      let token = createToken(user);
+      res.cookie(createCookie(token));
+      user = user.toJSON();
+      delete user.pin;
+
+      return res.status(200).json({
+        user,
+        token,
       });
     }
-  } catch (e) {
-    return res.json({ error: e.message });
+  } catch (err) {
+    logger(err);
+    return res.json({ error: err.message });
   }
 }
 

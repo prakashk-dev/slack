@@ -34,10 +34,10 @@ const Sidebar = () => {
     navigate("/");
   };
 
-  const handleMenuItemClick = ({ key }) => {
-    navigate(`/chat/r/${key}`);
-    style.device === "mobile" &&
-      toggleSidebar({ showSidebar: !style.showSidebar });
+  const handleMenuItemClick = ({ id, sub }) => {
+    navigate(`/chat/${sub}/${id}`);
+    //   style.device === "mobile" &&
+    //     toggleSidebar({ showSidebar: !style.showSidebar });
   };
 
   const profile = (
@@ -98,7 +98,7 @@ const Sidebar = () => {
       <Wrapper data={rooms}>
         <Menu
           mode="inline"
-          onSelect={handleMenuItemClick}
+          // onSelect={handleMenuItemClick}
           defaultOpenKeys={["rooms", "directMessages"]}
           forceSubMenuRender={true}
           selectedKeys={[room.data.id]}
@@ -106,7 +106,16 @@ const Sidebar = () => {
           <SubMenu key="rooms" icon={<SlackSquareOutlined />} title="Room">
             {rooms.data.length
               ? rooms.data.map((rm) => {
-                  return <Menu.Item key={rm.id}># {rm.name}</Menu.Item>;
+                  return (
+                    <Menu.Item
+                      onClick={() =>
+                        handleMenuItemClick({ id: rm.id, sub: "r" })
+                      }
+                      key={rm.id}
+                    >
+                      # {rm.name}
+                    </Menu.Item>
+                  );
                 })
               : "No Romms"}
           </SubMenu>

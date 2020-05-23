@@ -1,5 +1,14 @@
 import { Message } from "../models";
+import { logger } from "../helpers";
 
+const getAll = async (_, res) => {
+  try {
+    const messages = await Message.find({}).exec();
+    return res.json(messages);
+  } catch (err) {
+    return res.json({ error: err.message });
+  }
+};
 // /api/messages/users/:uuid?uuid={user_ui}
 const getByUsers = async (req, res) => {
   const { user_id: senderId } = req.params;
@@ -10,13 +19,11 @@ const getByUsers = async (req, res) => {
   try {
     const messages = await Message.find({
       $or: [
-        { from: senderId, "to.user": receiverId },
-        { from: receiverId, "to.user": senderId },
+        { sender: senderId, receiver: receiverId },
+        { sender: receiverId, receiver: senderId },
       ],
     })
       .sort("created_at")
-      .populate("from")
-      .populate("to.user")
       .exec();
     return res.json(messages);
   } catch (err) {
@@ -24,4 +31,13 @@ const getByUsers = async (req, res) => {
   }
 };
 
-export { getByUsers };
+const saveMessage = async (data) => {
+  let message = await Message.create(data);
+  const msg = await Message.findOne({ _id: message._id })
+    .populate("receiver")
+    .populate("sender")
+    .exec();
+  return msg;
+};
+
+export { getByUsers, saveMessage, getAll };

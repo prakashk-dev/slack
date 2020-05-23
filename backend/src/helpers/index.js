@@ -12,7 +12,7 @@ const createCookie = (cookieValue, cookieName = "token", exDays = 1) => {
 
 const createToken = (user) => {
   const payload = {
-    sub: user.id,
+    id: user.id,
     username: user.username,
     socket: config.socket_url,
   };

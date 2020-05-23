@@ -1,77 +1,71 @@
-const moment = require("moment");
-import Group from "../models/group.model";
-import User from "../models/user.model";
-import Room from "../models/room.model";
-import { formatMessage, logger } from "../helpers";
-import chalk from "chalk";
+import { logger, formatMessage } from "../helpers";
+import { saveMessage } from "../controllers/message.controller";
 
-let socket, io;
-/* core functions */
-/* helper functions */
-function initSocket() {}
-
-function welcomeMessage() {}
-
-function joinMessage() {}
-
-function updateUserList() {}
-
-function handleJoin(user, room, entity) {
-  socket.join(room.name, () => {
-    const message = formatMessage({
-      from: { name: room.name },
-      to: { name: room.name },
-      message: {
-        text: `Welcome to the ${room.name} room.`,
-        type: "text",
-      },
-    });
-    socket.emit("messages", message);
-    socket.to(room.name).emit(
-      "messages",
-      formatMessage({
-        from: { name: room.name },
-        to: { name: room.name },
-        message: {
-          text: `${user.username} has joined.`,
-          type: "text",
-        },
-      })
-    );
-    socket.to(room.name).emit("updateUsers", { user, entity });
-  });
-}
-function leave() {}
-
-function broadcast() {}
-function broadcastToOthers() {}
-function emitToMyself() {}
-
-async function onMessage(msg) {
-  const { to } = msg;
-  // // save message to the databse
-  logger(msg);
-  const Modal = to.room ? Room : to.group ? Group : User;
-  const receiver = to.room ? "room" : to.group ? "group" : "user";
-  // here we need to push to the group as well as message document
+function welcomeMessage(socket) {
   try {
-    const result = await Modal.findById(to[receiver].id).exec();
-    if (result) {
-      logger(result);
-      result.messages.push(msg);
-      await result.save();
-      socket.broadcast.emit("messages", formatMessage(msg));
-    }
+    socket.emit("welcome", "Welcome to the room");
   } catch (err) {
-    console.log(chalk.red(err));
+    console.log(err);
   }
 }
 
-function onTyping(msg) {
-  const { active, username } = msg;
-  const message = active ? `${username} is typing ...` : null;
-  const room = msg.room || msg.user || msg.group;
-  socket.to(room).emit("typing", { ...msg, message });
+function joinMessage(socket, username, room) {
+  try {
+    socket.to(room).emit("newUserjoined", `${username} has joined the chat.`);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+function updateUserList(socket, user, room) {
+  try {
+    socket.to(room).emit("updateUser", user);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+function onJoin(socket, { username, room }) {
+  console.log("*********************************************");
+
+  console.log("Join event comming from client", { username, room });
+  console.log("Rooms", Object.keys(socket.rooms));
+
+  console.log("*********************************************");
+  if (room) {
+    try {
+      const exists = Object.keys(socket.rooms).includes(room);
+      if (!exists) {
+        socket.join(room, () => {
+          //   updateUserList(socket, user, room);
+          joinMessage(socket, username, room);
+          welcomeMessage(socket);
+        });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+}
+
+async function onMessage(socket, msg) {
+  try {
+    const message = await saveMessage(msg);
+    socket.to(msg.receiver).emit("messages", message);
+    // save this message to the database
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+function onTyping(socket, msg) {
+  try {
+    const { active, sender } = msg;
+    const message = active ? `${sender} is typing ...` : null;
+    socket.to(msg.receiver).emit("typing", { ...msg, message });
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 function onDisconnect(socket) {
@@ -82,31 +76,18 @@ function onError(error) {
   console.log("Erron on socket:", error);
 }
 
-function onChat(msg, io) {
-  io.emit("chat", msg);
+function onChat(socket, msg) {
+  socket.emit("chat", msg);
 }
 
-function handleIO(soc, i) {
-  socket = soc;
-  io = i;
-  // for react native
-  socket.on("chat", () => onChat(msg, io));
-  socket.on("message", onMessage);
-  // socket.on("join", (msg) => handleJoin(socket, msg));
-  socket.on("typing", onTyping);
+const handleConnection = (io, socket) => {
+  socket.on("chat", (msg) => onChat(socket, msg));
+  socket.on("typing", (msg) => onTyping(socket, msg));
+  socket.on("message", (msg) => onMessage(socket, msg));
+  socket.on("join", (msg) => onJoin(socket, msg));
   socket.on("error", onError);
   socket.on("disconnect", onDisconnect);
-}
-
-export {
-  initSocket,
-  welcomeMessage,
-  joinMessage,
-  updateUserList,
-  handleJoin,
-  leave,
-  onMessage,
-  onTyping,
-  onError,
-  handleIO,
 };
+
+module.exports = (io) =>
+  io.on("connection", (socket) => handleConnection(io, socket));
