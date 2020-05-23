@@ -25,16 +25,16 @@ const RoomSchema = new Schema(
 // these fields are large array and we don't want to store them, instead use virtuals methods to fetch users
 // https://docs.mongodb.com/manual/tutorial/model-referenced-one-to-many-relationships-between-documents/
 
-RoomSchema.virtual("members", {
+RoomSchema.virtual("users", {
   ref: "user",
-  localField: "_id",
-  foreignField: "rooms.room",
+  localField: "name",
+  foreignField: "rooms.name",
   justOne: false,
   // https://mongoosejs.com/docs/api.html#query_Query-setOptions
   // options: { sort: { "room.last_active": 1 } },
 });
 
-RoomSchema.virtual("conversations", {
+RoomSchema.virtual("messages", {
   ref: "message",
   localField: "_id",
   foreignField: "receiver",

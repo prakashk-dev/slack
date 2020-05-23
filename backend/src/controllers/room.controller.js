@@ -88,32 +88,18 @@ async function getOne(req, res) {
   const id = res.locals.id || req.params.id;
   if (id === "welcome") {
     // send video url or something
-    return res.json({ name: "Bhet Ghat", members: [] });
+    return res.json({ name: "Bhet Ghat", users: [] });
   } else if (!id) {
     return res.json({ error: "Room id is missing." });
-  } else if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.json({ error: "Not a valid room id" });
   } else {
     try {
       const room = await Room.findById(id)
-        .populate("members")
-        .populate("conversations")
+        .populate("users")
+        .populate("messages")
         .exec();
       if (room) {
-        // socket.handleJoin({ roomId: id, user: res.locals.user });
-        return res.json(room);
-
-        // if (!user) {
-        //   //new user has joined this room
-        //   /*
-        //   1. Add room in user.rooms - a
-        //   2. join user to that room - s
-        //   3. send recent user to the update user socket event - s
-        //   4. send welcome message self, user join other - s
-        //   5. send room info to frontned - a
-
-        //   */
-        // }
+        // don't know why schema level virtual is not working
+        return res.json(room.toJSON({ virtuals: true }));
       } else {
         return res.json({ error: `Room not found with id ${id}` });
       }

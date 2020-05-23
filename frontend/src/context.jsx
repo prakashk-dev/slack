@@ -31,7 +31,7 @@ const LOGOUT = "LOGOUT";
 
 const DEFAULT_STATE = {
   user: { data: {}, error: null, loading: false },
-  config: { data: { SOCKET_URL: "" }, error: null, loading: false },
+  config: { data: { socket: "" }, error: null, loading: false },
   room: { data: {}, error: null, loading: false },
   rooms: { data: [], error: null, loading: false },
   style: { showSidebar: true, showInfobar: false, device: "desktop" },
@@ -55,7 +55,7 @@ export const initialState = () => {
         },
         config: {
           ...DEFAULT_STATE.config,
-          data: { SOCKET_URL: decoded.socket },
+          data: { socket: decoded.socket },
         },
       };
     } else {
@@ -90,10 +90,10 @@ export const appReducer = (state, { type, payload }) => {
         user: {
           loading: false,
           error: null,
-          data: payload,
+          data: payload.user,
         },
         config: {
-          data: payload,
+          data: payload.socket,
           loading: false,
           error: null,
         },
@@ -204,7 +204,10 @@ export const AppProvider = ({ children }) => {
       callback(null, res.data.user);
       return dispatch({
         type: USER_AUTHENTICATING_SUCCESS,
-        payload: res.data.user,
+        payload: {
+          user: res.data.user,
+          socket: decodeToken(res.data.token).socket,
+        },
       });
     } catch (err) {
       callback(err.message);

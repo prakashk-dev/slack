@@ -38,7 +38,8 @@ const UserSchema = new Schema({
   last_active: "",
   rooms: [
     {
-      room: { type: Schema.Types.ObjectId, ref: "room" },
+      // room: { type: Schema.Types.ObjectId, ref: "room" },
+      name: String,
       last_active: Date,
       favourite: Boolean,
       role: { type: String, enum: ["admin"] },
@@ -46,7 +47,8 @@ const UserSchema = new Schema({
   ],
   groups: [
     {
-      group: { type: Schema.Types.ObjectId, ref: "group" },
+      name: String,
+      // group: { type: Schema.Types.ObjectId, ref: "group" },
       last_active: Date,
       role: { type: String, enum: ["admin"] },
       request: {

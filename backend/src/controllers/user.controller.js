@@ -42,17 +42,16 @@ const findRoomById = async (req, res) => {
     return res.json({ error: "Group id and user id needed" });
   } else if (roomId === "welcome") {
     return res.json({ name: "Bhetghat" });
-  } else if (!mongoose.Types.ObjectId.isValid(roomId)) {
-    return res.json({ error: "Not a valid room id" });
   } else {
     try {
+      const room = await Room.findById(roomId).exec();
       // only push if the room is not exists
       await User.updateOne(
-        { _id: id, "rooms.room": { $ne: roomId } },
+        { _id: id, "rooms.name": { $ne: room.name } },
         {
           $push: {
             rooms: {
-              room: mongoose.Types.ObjectId(roomId),
+              name: room.name,
               last_active: moment.utc().format(),
             },
           },

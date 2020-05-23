@@ -1,4 +1,4 @@
-import { Room, User } from "../models";
+import { Room, User, Message } from "../models";
 import Data from "./data";
 
 const seed = async (req, res) => {
@@ -20,6 +20,7 @@ const unseed = async (req, res) => {
   try {
     await Room.deleteMany({});
     await User.deleteMany({});
+    await Message.deleteMany({});
     return res.json({ msg: "Successfully deleted all the documents." });
   } catch (e) {
     return res.json({ error: e.message });

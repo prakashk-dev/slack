@@ -35,13 +35,13 @@ const Message = ({ entity, roomId, field }) => {
   const { user, config, style } = state;
 
   useEffect(() => {
-    if (config.data.SOCKET_URL) {
-      socket = io.connect(config.data.SOCKET_URL);
+    if (config.data.socket) {
+      socket = io.connect(config.data.socket);
       logger(socket);
       handleEvents(socket);
       return () => socket.disconnect();
     }
-  }, [config.data.SOCKET_URL]);
+  }, [config.data.socket]);
 
   const handleEvents = (socket) => {
     socket.on("messages", updateMessages);
@@ -59,11 +59,11 @@ const Message = ({ entity, roomId, field }) => {
     });
   };
   useEffect(() => {
-    if (roomId && Object.keys(state[entity].data).length) {
-      updateMessages(state[entity].data.messages || []);
+    if (socket && roomId && Object.keys(state[entity].data).length) {
+      setMessages([...state[entity].data.messages]);
       handleJoin(roomId);
     }
-  }, [roomId, state[entity]]);
+  }, [roomId, state[entity], socket]);
 
   useEffect(() => {
     scrollToButton();
@@ -71,33 +71,36 @@ const Message = ({ entity, roomId, field }) => {
 
   // Refactor this
   useEffect(() => {
-    if (message.length) {
-      if (!typing) {
-        socket.emit("typing", {
-          sender: user.data.username,
-          receiver: state[entity].data[field],
-          active: true,
-        });
-        setTyping(true);
-      }
-    } else {
-      if (typing) {
-        socket.emit("typing", {
-          sender: user.data.username,
-          receiver: state[entity].data[field],
-          active: false,
-        });
-        setTyping(false);
+    if (socket) {
+      if (message.length) {
+        if (!typing) {
+          socket.emit("typing", {
+            sender: user.data.username,
+            receiver: state[entity].data[field],
+            active: true,
+          });
+          setTyping(true);
+        }
+      } else {
+        if (typing) {
+          socket.emit("typing", {
+            sender: user.data.username,
+            receiver: state[entity].data[field],
+            active: false,
+          });
+          setTyping(false);
+        }
       }
     }
-  }, [message]);
+  }, [message, socket]);
 
-  const filterArrayMessages = (prevMessages, msg) => {
-    return [...prevMessages, msg].filter((msg) => msg.length === undefined);
-  };
+  // const filterArrayMessages = (prevMessages, msg) => {
+  //   return [...prevMessages, msg].filter(
+  //     (msg) => msg.length > 0 || msg.length === undefined
+  //   );
+  // };
   const updateMessages = (msg) => {
-    console.log("socket message", msg);
-    setMessages((prevMessages) => filterArrayMessages(prevMessages, msg));
+    setMessages((prevMessages) => [...prevMessages, msg]);
     scrollToButton();
   };
 
@@ -186,9 +189,10 @@ const Message = ({ entity, roomId, field }) => {
 
   const sendMessage = (msg) => {
     //  send message with post action
-    setMessages((prevMessages) =>
-      filterArrayMessages(prevMessages, formatMessageForMyself(msg))
-    );
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      formatMessageForMyself(msg),
+    ]);
     setMessage("");
     socket.emit("message", formatMessage(msg));
   };
