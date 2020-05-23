@@ -46,10 +46,10 @@ const Message = ({ entity, roomId, field }) => {
   const handleEvents = (socket) => {
     socket.on("messages", updateMessages);
     socket.on("typing", handleTypingEvent);
-    // socket.on("welcome", console.log);
-    // socket.on("updateUsers", updateUsers);
-    // socket.on("updateUser", console.log);
-    // socket.on("newUserJoined", console.log);
+    socket.on("welcome", console.log);
+    socket.on("updateUsers", updateUsers);
+    socket.on("updateUser", console.log);
+    socket.on("newUserJoined", console.log);
   };
 
   const handleJoin = (roomId) => {
@@ -60,7 +60,9 @@ const Message = ({ entity, roomId, field }) => {
   };
   useEffect(() => {
     if (socket && roomId && Object.keys(state[entity].data).length) {
-      setMessages([...state[entity].data.messages]);
+      if (state[entity].data.messages) {
+        setMessages([...state[entity].data.messages]);
+      }
       handleJoin(roomId);
     }
   }, [roomId, state[entity], socket]);
@@ -73,23 +75,18 @@ const Message = ({ entity, roomId, field }) => {
   useEffect(() => {
     if (socket) {
       if (message.length) {
-        if (!typing) {
-          socket.emit("typing", {
-            sender: user.data.username,
-            receiver: state[entity].data[field],
-            active: true,
-          });
-          setTyping(true);
-        }
+        socket.emit("typing", {
+          sender: user.data.username,
+          receiver: state[entity].data.id,
+          active: true,
+        });
       } else {
-        if (typing) {
-          socket.emit("typing", {
-            sender: user.data.username,
-            receiver: state[entity].data[field],
-            active: false,
-          });
-          setTyping(false);
-        }
+        socket.emit("typing", {
+          sender: user.data.username,
+          receiver: state[entity].data.id,
+          active: false,
+        });
+        setTyping(null);
       }
     }
   }, [message, socket]);
@@ -277,11 +274,15 @@ const Message = ({ entity, roomId, field }) => {
               >
                 {message.length || file ? <SendOutlined /> : <LikeTwoTone />}
               </button>
-              <div className="typing">
-                {typing &&
-                  typing[entity] === state[entity].data[field] &&
-                  typing.message}
-              </div>
+              <div
+                className="typing"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    typing && typing.receiver === roomId
+                      ? typing.message
+                      : null,
+                }}
+              ></div>
             </div>
           </Fragment>
         )}

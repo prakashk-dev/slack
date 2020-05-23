@@ -17,9 +17,9 @@ function joinMessage(socket, username, room) {
   }
 }
 
-function updateUserList(socket, user, room) {
+function updateUserList(socket, username, room) {
   try {
-    socket.to(room).emit("updateUser", user);
+    socket.to(room).emit("updateUser", username);
   } catch (err) {
     console.log(err);
   }
@@ -37,7 +37,7 @@ function onJoin(socket, { username, room }) {
       const exists = Object.keys(socket.rooms).includes(room);
       if (!exists) {
         socket.join(room, () => {
-          //   updateUserList(socket, user, room);
+          updateUserList(socket, username, room);
           joinMessage(socket, username, room);
           welcomeMessage(socket);
         });
@@ -61,7 +61,7 @@ async function onMessage(socket, msg) {
 function onTyping(socket, msg) {
   try {
     const { active, sender } = msg;
-    const message = active ? `${sender} is typing ...` : null;
+    const message = active ? `<b>${sender}</b> is typing ...` : null;
     socket.to(msg.receiver).emit("typing", { ...msg, message });
   } catch (err) {
     console.log(err);
