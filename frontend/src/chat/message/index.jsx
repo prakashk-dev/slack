@@ -83,13 +83,13 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
       if (message.length) {
         socket.emit("typing", {
           sender: sender.username,
-          receiver: privateChannel ? privateChannel.socketId : receiver.id,
+          receiver: receiver.id,
           active: true,
         });
       } else {
         socket.emit("typing", {
           sender: sender.username,
-          receiver: privateChannel ? privateChannel.socketId : receiver.id,
+          receiver: receiver.id,
           active: false,
         });
         setTyping(null);
@@ -147,7 +147,7 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
   const formatMessage = ({ text = message, type = "text", url = "" }) => {
     return {
       sender: sender.id,
-      receiver: privateChannel ? privateChannel.socketId : receiver.id,
+      receiver: receiver.id,
       onReceiver: entity,
       body: {
         text,
@@ -242,7 +242,9 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
               {messages.length
                 ? messages.map((msg, index) => {
                     // modify msg.to.room
-                    return msg.receiver.id === roomId ? (
+                    return msg.receiver.id === roomId ||
+                      msg.receiver.id === user.data.id ||
+                      msg.receiver.id === receiver.id ? (
                       <Comment by={messageBy(msg)} message={msg} key={index} />
                     ) : null;
                   })

@@ -14,13 +14,13 @@ const User = ({ username }) => {
     setRoomName([state.user.data.username, username].sort().join("-"));
   }, [username]);
 
-  return user ? (
+  return state.user.data.id ? (
     <Message
       entity="user"
       roomId={roomName}
       field="username"
       to={user}
-      privateChannel={{ socketId: user.id }}
+      privateChannel={{ socketId: state.user.data.id }}
     />
   ) : null;
 };

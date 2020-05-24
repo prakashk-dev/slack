@@ -58,7 +58,11 @@ async function onMessage(io, socket, msg) {
       console.log("I am sender", msg.sender);
       console.log("I am receiver", msg.receiver);
       console.log("These are private channels", privateChannels);
-      io.to(privateChannels[msg.sender]).emit("messages", message);
+      console.log(
+        "I am sending to this socketID",
+        privateChannels[msg.receiver]
+      );
+      io.to(privateChannels[msg.receiver]).emit("messages", message);
     } else {
       socket.to(msg.receiver).emit("messages", message);
     }
