@@ -359,12 +359,12 @@ export const AppProvider = ({ children }) => {
     });
   };
 
-  const fetchUserChatInfo = async (currentUserId, friendUserName) => {
+  const fetchUserChatInfo = async (currentUserId, friendUserName, callback) => {
     try {
       const res = await axios.get(
         `/api/users/chat/${currentUserId}?friendUserName=${friendUserName}`
       );
-      console.log("should get user with message property", res.data);
+      callback(res.data);
     } catch (err) {
       console.log(err);
     }

@@ -24,7 +24,7 @@ import {
 import { Upload, Comment } from "src/common";
 
 let socket;
-const Message = ({ entity, roomId, field }) => {
+const Message = ({ entity, roomId, field, to, privateChannel }) => {
   // see backend/src/models/message.model.js
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -33,6 +33,9 @@ const Message = ({ entity, roomId, field }) => {
   const [typing, setTyping] = useState(null);
   const [file, setFile] = useState(null);
   const { user, config, style } = state;
+
+  const sender = user.data,
+    receiver = to || state[entity].data;
 
   useEffect(() => {
     if (config.data.socket) {
@@ -53,13 +56,16 @@ const Message = ({ entity, roomId, field }) => {
   };
 
   const handleJoin = (roomId) => {
-    socket.emit("join", {
+    const joinData = {
       room: roomId,
       username: state.user.data.username,
-    });
+    };
+    privateChannel && (joinData["privateChannel"] = privateChannel);
+
+    socket.emit("join", joinData);
   };
   useEffect(() => {
-    if (socket && roomId && Object.keys(state[entity].data).length) {
+    if (socket && roomId && Object.keys(receiver).length) {
       if (state[entity].data.messages) {
         setMessages([...state[entity].data.messages]);
       }
@@ -76,14 +82,14 @@ const Message = ({ entity, roomId, field }) => {
     if (socket) {
       if (message.length) {
         socket.emit("typing", {
-          sender: user.data.username,
-          receiver: state[entity].data.id,
+          sender: sender.username,
+          receiver: privateChannel ? privateChannel.socketId : receiver.id,
           active: true,
         });
       } else {
         socket.emit("typing", {
-          sender: user.data.username,
-          receiver: state[entity].data.id,
+          sender: sender.username,
+          receiver: privateChannel ? privateChannel.socketId : receiver.id,
           active: false,
         });
         setTyping(null);
@@ -97,6 +103,7 @@ const Message = ({ entity, roomId, field }) => {
   //   );
   // };
   const updateMessages = (msg) => {
+    console.log("Message coming from server", msg);
     setMessages((prevMessages) => [...prevMessages, msg]);
     scrollToButton();
   };
@@ -139,8 +146,8 @@ const Message = ({ entity, roomId, field }) => {
 
   const formatMessage = ({ text = message, type = "text", url = "" }) => {
     return {
-      sender: user.data.id,
-      receiver: state[entity].data.id,
+      sender: sender.id,
+      receiver: privateChannel ? privateChannel.socketId : receiver.id,
       onReceiver: entity,
       body: {
         text,
@@ -156,8 +163,8 @@ const Message = ({ entity, roomId, field }) => {
     url = "",
   }) => {
     return {
-      sender: state.user.data,
-      receiver: state[entity].data,
+      sender: sender,
+      receiver: receiver,
       onReceiver: entity,
       body: {
         text,
@@ -202,9 +209,9 @@ const Message = ({ entity, roomId, field }) => {
   };
 
   const messageBy = (msg) => {
-    return msg.sender.id === state.user.data.id
+    return msg.sender.id === sender.id
       ? "me"
-      : msg.sender.id === state[entity].data.id
+      : msg.sender.id === receiver.id
       ? "admin"
       : "other";
   };

@@ -1,14 +1,28 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Message from "src/chat/message";
 import { AppContext } from "src/context";
 
 const User = ({ username }) => {
   const { state, fetchUserChatInfo } = useContext(AppContext);
+  const [user, setUser] = useState(null);
+
+  const [roomName, setRoomName] = useState(null);
   useEffect(() => {
-    fetchUserChatInfo(state.user.data.id, username);
+    fetchUserChatInfo(state.user.data.id, username, (data) => {
+      setUser(data);
+    });
+    setRoomName([state.user.data.username, username].sort().join("-"));
   }, [username]);
 
-  return <Message entity="user" roomId={username} field="username" />;
+  return user ? (
+    <Message
+      entity="user"
+      roomId={roomName}
+      field="username"
+      to={user}
+      privateChannel={{ socketId: user.id }}
+    />
+  ) : null;
 };
 
 export default User;

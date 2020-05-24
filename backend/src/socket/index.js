@@ -1,6 +1,7 @@
 import { logger, formatMessage } from "../helpers";
 import { saveMessage } from "../controllers/message.controller";
 
+let privateChannels = {};
 function welcomeMessage(socket) {
   try {
     socket.emit("welcome", "Welcome to the room");
@@ -25,21 +26,23 @@ function updateUserList(socket, username, room) {
   }
 }
 
-function onJoin(socket, { username, room }) {
+function onJoin(socket, { username, room, privateChannel }) {
   console.log("*********************************************");
-
   console.log("Join event comming from client", { username, room });
-  console.log("Rooms", Object.keys(socket.rooms));
-
   console.log("*********************************************");
+
   if (room) {
     try {
       const exists = Object.keys(socket.rooms).includes(room);
       if (!exists) {
         socket.join(room, () => {
-          updateUserList(socket, username, room);
-          joinMessage(socket, username, room);
-          welcomeMessage(socket);
+          if (privateChannel) {
+            privateChannels[privateChannel.socketId] = socket.id;
+          } else {
+            updateUserList(socket, username, room);
+            joinMessage(socket, username, room);
+            welcomeMessage(socket);
+          }
         });
       }
     } catch (err) {
@@ -48,10 +51,18 @@ function onJoin(socket, { username, room }) {
   }
 }
 
-async function onMessage(socket, msg) {
+async function onMessage(io, socket, msg) {
   try {
     const message = await saveMessage(msg);
-    socket.to(msg.receiver).emit("messages", message);
+    if (msg.onReceiver === "user") {
+      console.log("I am sender", msg.sender);
+      console.log("I am receiver", msg.receiver);
+      console.log("These are private channels", privateChannels);
+      io.to(privateChannels[msg.sender]).emit("messages", message);
+    } else {
+      socket.to(msg.receiver).emit("messages", message);
+    }
+
     // save this message to the database
   } catch (err) {
     console.log(err);
@@ -83,7 +94,7 @@ function onChat(socket, msg) {
 const handleConnection = (io, socket) => {
   socket.on("chat", (msg) => onChat(socket, msg));
   socket.on("typing", (msg) => onTyping(socket, msg));
-  socket.on("message", (msg) => onMessage(socket, msg));
+  socket.on("message", (msg) => onMessage(io, socket, msg));
   socket.on("join", (msg) => onJoin(socket, msg));
   socket.on("error", onError);
   socket.on("disconnect", onDisconnect);

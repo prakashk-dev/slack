@@ -102,7 +102,6 @@ const fetchUserWithChatHistory = async (req, res) => {
         },
       ],
     }).exec();
-    logger(messages);
     friend = friend.toJSON();
     friend.messages = messages;
     return res.json(friend);
