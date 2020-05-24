@@ -27,8 +27,8 @@ const RoomSchema = new Schema(
 
 RoomSchema.virtual("users", {
   ref: "user",
-  localField: "name",
-  foreignField: "rooms.name",
+  localField: "_id",
+  foreignField: "rooms.room",
   justOne: false,
   // https://mongoosejs.com/docs/api.html#query_Query-setOptions
   // options: { sort: { "room.last_active": 1 } },

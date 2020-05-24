@@ -7,8 +7,8 @@ import mongoose from "mongoose";
 const getAll = async (req, res) => {
   try {
     const rooms = await Room.find({})
-      .populate("members")
-      .populate("conversations")
+      .populate("users")
+      .populate("messages")
       .exec();
     return res.json(rooms);
   } catch (err) {
@@ -91,6 +91,8 @@ async function getOne(req, res) {
     return res.json({ name: "Bhet Ghat", users: [] });
   } else if (!id) {
     return res.json({ error: "Room id is missing." });
+  } else if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.json({ error: "Not a valid room id" });
   } else {
     try {
       const room = await Room.findById(id)

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import moment from "moment";
-import { User, Room } from "../models";
+import { User, Room, Message } from "../models";
 import { getOne } from "./room.controller";
 import { logger } from "../helpers";
 
@@ -41,17 +41,19 @@ const findRoomById = async (req, res) => {
   if (!roomId || !id) {
     return res.json({ error: "Group id and user id needed" });
   } else if (roomId === "welcome") {
-    return res.json({ name: "Bhetghat" });
+    return res.json({ name: "Bhetghat", users: [] });
+  } else if (!mongoose.Types.ObjectId.isValid(roomId)) {
+    return res.json({ error: "Not a valid room id" });
   } else {
     try {
-      const room = await Room.findById(roomId).exec();
       // only push if the room is not exists
+
       await User.updateOne(
-        { _id: id, "rooms.name": { $ne: room.name } },
+        { _id: id, "rooms.room": { $ne: roomId } },
         {
           $push: {
             rooms: {
-              name: room.name,
+              room: roomId,
               last_active: moment.utc().format(),
             },
           },
@@ -75,7 +77,40 @@ const findRoomById = async (req, res) => {
     }
   }
 };
+const fetchUserWithChatHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { friendUserName: username } = req.query;
 
+    let friend = await User.findOne({ username })
+      .populate("friends.friend")
+      .populate("rooms.room")
+      .populate("groups.group")
+      .exec();
+    const messages = await Message.find({
+      $and: [
+        { onReceiver: { $eq: "user" } },
+        {
+          $or: [
+            {
+              $and: [{ sender: { $eq: id } }, { receiver: { $eq: friend.id } }],
+            },
+            {
+              $and: [{ sender: { $eq: friend.id } }, { receiver: { $eq: id } }],
+            },
+          ],
+        },
+      ],
+    }).exec();
+    logger(messages);
+    friend = friend.toJSON();
+    friend.messages = messages;
+    return res.json(friend);
+  } catch (err) {
+    console.log(err);
+    res.json({ error: err.message });
+  }
+};
 const findGroupById = async (req, res) => {};
 
 const updateRoomUser = async (user) => {};
@@ -90,4 +125,11 @@ const deleteOne = async (req, res) => {
   }
 };
 
-export { getAll, findOne, findGroupById, findRoomById, deleteOne };
+export {
+  getAll,
+  findOne,
+  findGroupById,
+  findRoomById,
+  deleteOne,
+  fetchUserWithChatHistory,
+};

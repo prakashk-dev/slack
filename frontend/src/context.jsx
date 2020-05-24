@@ -359,6 +359,16 @@ export const AppProvider = ({ children }) => {
     });
   };
 
+  const fetchUserChatInfo = async (currentUserId, friendUserName) => {
+    try {
+      const res = await axios.get(
+        `/api/users/chat/${currentUserId}?friendUserName=${friendUserName}`
+      );
+      console.log("should get user with message property", res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
   const handleJoin = async (groupId) => {
     dispatch({ type: ROOMS_FETCHING });
 
@@ -458,6 +468,7 @@ export const AppProvider = ({ children }) => {
     fetchRoom,
     fetchRoomById,
     updateUsers,
+    fetchUserChatInfo,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

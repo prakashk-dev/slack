@@ -14,9 +14,8 @@ const Infobar = ({ entity, field }) => {
   const name = state[entity].data[field];
   const users = state[entity].data.users;
 
-  const handleMenuItemClick = ({ key }) => {
-    console.log(key);
-    // navigate(`/chat/u/${id}`);
+  const handleMenuItemClick = (username) => {
+    navigate(`/chat/u/${username}`);
   };
   return (
     <Sider
@@ -36,17 +35,14 @@ const Infobar = ({ entity, field }) => {
         <Avatar src="/assets/kathmandu.png" alt="Group Icon" size={60} />
         {name}
       </div>
-      <Menu
-        mode="inline"
-        defaultOpenKeys={["users"]}
-        onSelect={handleMenuItemClick}
-      >
+      <Menu mode="inline" defaultOpenKeys={["users"]}>
         <SubMenu key="users" icon={<UserOutlined />} title="Users">
           {users && users.length ? (
             users.map((user) => {
               return (
                 <Menu.Item
                   key={user.id}
+                  onClick={() => handleMenuItemClick(user.username)}
                   icon={
                     <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
                   }

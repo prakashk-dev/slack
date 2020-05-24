@@ -38,8 +38,7 @@ const UserSchema = new Schema({
   last_active: "",
   rooms: [
     {
-      // room: { type: Schema.Types.ObjectId, ref: "room" },
-      name: String,
+      room: { type: Schema.Types.ObjectId, ref: "room" },
       last_active: Date,
       favourite: Boolean,
       role: { type: String, enum: ["admin"] },
@@ -47,8 +46,7 @@ const UserSchema = new Schema({
   ],
   groups: [
     {
-      name: String,
-      // group: { type: Schema.Types.ObjectId, ref: "group" },
+      group: { type: Schema.Types.ObjectId, ref: "group" },
       last_active: Date,
       role: { type: String, enum: ["admin"] },
       request: {
@@ -73,6 +71,12 @@ const UserSchema = new Schema({
 // write a hook that will always sort the rooms, groups and friends array
 // UserSchema.pre('findOne', function() {
 //   this.
+// })
+// create a virtual that gets all the private messages for this user
+// either receiver or sender must be this._id and must have onReceiver as user
+// UserSchema.virtual('messages', {
+//   ref: 'message',
+
 // })
 UserSchema.pre("save", function (next) {
   let user = this;
