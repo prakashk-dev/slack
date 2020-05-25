@@ -12,22 +12,14 @@ import {
   UserOutlined,
   CaretDownFilled,
 } from "@ant-design/icons";
-
-import { Wrapper } from "src/common";
+import { Wrapper } from "../../common";
 
 const Sidebar = () => {
   const {
     state: { user, rooms, style, room },
     logout,
-    fetchAuthUser,
-    fetchRooms,
     toggleSidebar,
   } = useContext(AppContext);
-
-  useEffect(() => {
-    fetchAuthUser();
-    fetchRooms();
-  }, []);
 
   const handleLogout = () => {
     logout();
@@ -67,7 +59,7 @@ const Sidebar = () => {
     </Menu>
   );
 
-  return (
+  return room.data ? (
     <Sider
       trigger={null}
       collapsible
@@ -76,60 +68,54 @@ const Sidebar = () => {
       className="left-sidebar"
     >
       <div className={style.showSidebar ? "logo" : "logo-small"}>
-        <Wrapper data={user}>
-          {style.showSidebar && user.data.username}
-          {style.showSidebar && (
+        {style.showSidebar && user.data.username}
+        {style.showSidebar && (
+          <Avatar size={40} icon={<UserOutlined />} alt="" />
+        )}
+        <Dropdown overlay={profile} trigger={["hover", "click"]}>
+          {style.showSidebar ? (
+            <a
+              className="ant-dropdown-link"
+              onClick={(e) => e.preventDefault()}
+            >
+              <CaretDownFilled />
+            </a>
+          ) : (
             <Avatar size={40} icon={<UserOutlined />} alt="" />
           )}
-          <Dropdown overlay={profile} trigger={["hover", "click"]}>
-            {style.showSidebar ? (
-              <a
-                className="ant-dropdown-link"
-                onClick={(e) => e.preventDefault()}
-              >
-                <CaretDownFilled />
-              </a>
-            ) : (
-              <Avatar size={40} icon={<UserOutlined />} alt="" />
-            )}
-          </Dropdown>
-        </Wrapper>
+        </Dropdown>
       </div>
-      <Wrapper data={rooms}>
-        <Menu
-          mode="inline"
-          // onSelect={handleMenuItemClick}
-          defaultOpenKeys={["rooms", "directMessages"]}
-          forceSubMenuRender={true}
-          selectedKeys={[room.data.id]}
+      <Menu
+        mode="inline"
+        // onSelect={handleMenuItemClick}
+        defaultOpenKeys={["rooms", "directMessages"]}
+        forceSubMenuRender={true}
+        selectedKeys={[room.data.id]}
+      >
+        <SubMenu key="rooms" icon={<SlackSquareOutlined />} title="Room">
+          {rooms.data.length
+            ? rooms.data.map((rm) => {
+                return (
+                  <Menu.Item
+                    onClick={() => handleMenuItemClick({ id: rm.id, sub: "r" })}
+                    key={rm.id}
+                  >
+                    # {rm.name}
+                  </Menu.Item>
+                );
+              })
+            : "No Romms"}
+        </SubMenu>
+        <SubMenu
+          key="directMessages"
+          icon={<MessageOutlined />}
+          title="Direct Messages"
         >
-          <SubMenu key="rooms" icon={<SlackSquareOutlined />} title="Room">
-            {rooms.data.length
-              ? rooms.data.map((rm) => {
-                  return (
-                    <Menu.Item
-                      onClick={() =>
-                        handleMenuItemClick({ id: rm.id, sub: "r" })
-                      }
-                      key={rm.id}
-                    >
-                      # {rm.name}
-                    </Menu.Item>
-                  );
-                })
-              : "No Romms"}
-          </SubMenu>
-          <SubMenu
-            key="directMessages"
-            icon={<MessageOutlined />}
-            title="Direct Messages"
-          >
-            <Menu.Item key="6">Team 1</Menu.Item>
-          </SubMenu>
-        </Menu>
-      </Wrapper>
+          <Menu.Item key="6">Team 1</Menu.Item>
+        </SubMenu>
+      </Menu>
     </Sider>
-  );
+  ) : null;
 };
 
 export default Sidebar;

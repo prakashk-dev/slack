@@ -14,8 +14,13 @@ const User = ({ username }) => {
     setRoomName([state.user.data.username, username].sort().join("-"));
   }, [username]);
 
-  return state.user.data.id ? (
+  const isReady = () => {
+    return state.user.data && user;
+  };
+  return isReady() ? (
     <Message
+      receiver={user}
+      onReceiver="user"
       entity="user"
       roomId={roomName}
       field="username"

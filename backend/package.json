@@ -32,7 +32,7 @@
   "dependencies": {
     "@babel/plugin-transform-runtime": "7.9.0",
     "@babel/runtime": "7.9.2",
-    "bcrypt": "^4.0.1",
+    "bcryptjs": "2.4.3",
     "chalk": "^4.0.0",
     "cookie-parser": "^1.4.5",
     "cors": "2.8.5",

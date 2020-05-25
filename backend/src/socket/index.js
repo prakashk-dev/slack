@@ -26,48 +26,45 @@ function updateUserList(socket, username, room) {
   }
 }
 
-function onJoin(socket, { username, room, privateChannel }) {
+function onJoin(socket, { username, room, onReceiver }) {
   console.log("*********************************************");
   console.log("Join event comming from client", { username, room });
   console.log("*********************************************");
-
-  if (room) {
-    try {
+  try {
+    if (onReceiver === "user") {
+      privateChannels[room] = socket.id;
+    } else {
       const exists = Object.keys(socket.rooms).includes(room);
       if (!exists) {
         socket.join(room, () => {
-          if (privateChannel) {
-            privateChannels[privateChannel.socketId] = socket.id;
-          } else {
-            updateUserList(socket, username, room);
-            joinMessage(socket, username, room);
-            welcomeMessage(socket);
-          }
+          updateUserList(socket, username, room);
+          joinMessage(socket, username, room);
+          welcomeMessage(socket);
         });
       }
-    } catch (err) {
-      console.log(err);
     }
+  } catch (err) {
+    console.log(err);
   }
 }
 
 async function onMessage(io, socket, msg) {
+  console.log("message comming from client", msg);
   try {
     const message = await saveMessage(msg);
+    console.log("message", message);
     if (msg.onReceiver === "user") {
-      console.log("I am sender", msg.sender);
-      console.log("I am receiver", msg.receiver);
-      console.log("These are private channels", privateChannels);
-      console.log(
-        "I am sending to this socketID",
-        privateChannels[msg.receiver]
-      );
+      // console.log("I am sender", msg.sender);
+      // console.log("I am receiver", msg.receiver);
+      // console.log("These are private channels", privateChannels);
+      // console.log(
+      //   "I am sending to this socketID",
+      //   privateChannels[msg.receiver]
+      // );
       io.to(privateChannels[msg.receiver]).emit("messages", message);
     } else {
       socket.to(msg.receiver).emit("messages", message);
     }
-
-    // save this message to the database
   } catch (err) {
     console.log(err);
   }

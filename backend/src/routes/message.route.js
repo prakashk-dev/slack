@@ -5,5 +5,6 @@ const router = express.Router();
 router.get("/", Message.getAll);
 router.get("/:user_id", Message.getByUsers);
 router.post("/", Message.saveMessage);
+router.delete("/", Message.deleteAll);
 
 export default router;

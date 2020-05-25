@@ -28,14 +28,16 @@ const DEFAULT_LAYOUT = "DEFAULT_LAYOUT";
 const TOGGLE_SIDEBAR = "TOGGLE_SIDEBAR";
 
 const LOGOUT = "LOGOUT";
+const SET_SOCKET = "SET_SOCKET";
 
 const DEFAULT_STATE = {
-  user: { data: {}, error: null, loading: false },
-  config: { data: { socket: "" }, error: null, loading: false },
-  room: { data: {}, error: null, loading: false },
+  user: { data: null, error: null, loading: false },
+  config: { data: { SOCKET_URL: null }, error: null, loading: false },
+  room: { data: null, error: null, loading: false },
   rooms: { data: [], error: null, loading: false },
   style: { showSidebar: true, showInfobar: false, device: "desktop" },
   globals: { loading: true, error: null },
+  socket: null,
 };
 // Initial state of the application
 export const initialState = () => {
@@ -55,7 +57,7 @@ export const initialState = () => {
         },
         config: {
           ...DEFAULT_STATE.config,
-          data: { socket: decoded.socket },
+          data: { SOCKET_URL: decoded.socket },
         },
       };
     } else {
@@ -73,6 +75,11 @@ export const appReducer = (state, { type, payload }) => {
   // console.log({ type, payload });
   // console.log("state:", state);
   switch (type) {
+    case SET_SOCKET:
+      return {
+        ...state,
+        socket: payload,
+      };
     case USER_AUTHENTICATING:
       return {
         ...state,
@@ -93,7 +100,7 @@ export const appReducer = (state, { type, payload }) => {
           data: payload.user,
         },
         config: {
-          data: payload.socket,
+          data: { SOCKET_URL: payload.socket },
           loading: false,
           error: null,
         },
@@ -189,6 +196,12 @@ export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, INIT_STATE);
 
   // Actions
+  const initialiseSocket = async (socket) => {
+    return dispatch({
+      type: SET_SOCKET,
+      payload: socket,
+    });
+  };
   const saveOrAuthenticateUser = async (user, callback) => {
     dispatch({ type: USER_AUTHENTICATING });
 
@@ -403,7 +416,7 @@ export const AppProvider = ({ children }) => {
     return null;
   };
   const isAuthenticated = () => {
-    return Object.keys(state.user.data).length > 0;
+    return state.user.data;
   };
 
   const isAuthorised = (role) => {
@@ -469,6 +482,7 @@ export const AppProvider = ({ children }) => {
     fetchRoomById,
     updateUsers,
     fetchUserChatInfo,
+    initialiseSocket,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

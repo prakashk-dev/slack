@@ -6,7 +6,6 @@ import React, {
   Fragment,
 } from "react";
 import { AppContext } from "src/context";
-import io from "socket.io-client";
 import Infobar from "src/chat/infobar";
 
 import "./message.scss";
@@ -23,8 +22,15 @@ import {
 } from "@ant-design/icons";
 import { Upload, Comment } from "src/common";
 
-let socket;
-const Message = ({ entity, roomId, field, to, privateChannel }) => {
+const Message = ({
+  entity,
+  roomId,
+  field,
+  to,
+  privateChannel,
+  receiver,
+  onReceiver,
+}) => {
   // see backend/src/models/message.model.js
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -32,21 +38,18 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
   const divRef = useRef(null);
   const [typing, setTyping] = useState(null);
   const [file, setFile] = useState(null);
-  const { user, config, style } = state;
+  const { user, socket, style } = state;
 
   const sender = user.data,
-    receiver = to || state[entity].data;
+    name = receiver.name || receiver.username;
+  // receiver = to || state[entity].data;
 
   useEffect(() => {
-    if (config.data.socket) {
-      socket = io.connect(config.data.socket);
-      logger(socket);
-      handleEvents(socket);
-      return () => socket.disconnect();
-    }
-  }, [config.data.socket]);
+    logger();
+    handleEvents();
+  }, []);
 
-  const handleEvents = (socket) => {
+  const handleEvents = () => {
     socket.on("messages", updateMessages);
     socket.on("typing", handleTypingEvent);
     socket.on("welcome", console.log);
@@ -55,23 +58,33 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
     socket.on("newUserJoined", console.log);
   };
 
-  const handleJoin = (roomId) => {
+  const logger = () => {
+    socket.on("connect", () => console.log("Connected"));
+    socket.on("disconnect", (reason) => console.log("Disconnected: ", reason));
+    socket.on("error", (error) => console.log("Errors:", error));
+    socket.on("reconnect_attempt", () => {
+      console.log("Reconnecting");
+    });
+  };
+
+  const handleJoin = () => {
     const joinData = {
-      room: roomId,
-      username: state.user.data.username,
+      // if onReceiver is user, we use currect user id to store currect user socket
+      room: onReceiver === "user" ? sender.id : receiver.id,
+      username: sender.username,
+      onReceiver,
     };
-    privateChannel && (joinData["privateChannel"] = privateChannel);
+    // privateChannel && (joinData["privateChannel"] = privateChannel);
 
     socket.emit("join", joinData);
   };
+
   useEffect(() => {
-    if (socket && roomId && Object.keys(receiver).length) {
-      if (state[entity].data.messages) {
-        setMessages([...state[entity].data.messages]);
-      }
-      handleJoin(roomId);
+    if (receiver.messages) {
+      setMessages([...receiver.messages]);
     }
-  }, [roomId, state[entity], socket]);
+    handleJoin();
+  }, []);
 
   useEffect(() => {
     scrollToButton();
@@ -79,29 +92,22 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
 
   // Refactor this
   useEffect(() => {
-    if (socket) {
-      if (message.length) {
-        socket.emit("typing", {
-          sender: sender.username,
-          receiver: receiver.id,
-          active: true,
-        });
-      } else {
-        socket.emit("typing", {
-          sender: sender.username,
-          receiver: receiver.id,
-          active: false,
-        });
-        setTyping(null);
-      }
+    if (message.length) {
+      socket.emit("typing", {
+        sender: sender.username,
+        receiver: receiver.id,
+        active: true,
+      });
+    } else {
+      socket.emit("typing", {
+        sender: sender.username,
+        receiver: receiver.id,
+        active: false,
+      });
+      setTyping(null);
     }
-  }, [message, socket]);
+  }, [message]);
 
-  // const filterArrayMessages = (prevMessages, msg) => {
-  //   return [...prevMessages, msg].filter(
-  //     (msg) => msg.length > 0 || msg.length === undefined
-  //   );
-  // };
   const updateMessages = (msg) => {
     console.log("Message coming from server", msg);
     setMessages((prevMessages) => [...prevMessages, msg]);
@@ -116,14 +122,6 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
     divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
   };
 
-  const logger = (socket) => {
-    socket.on("connect", () => console.log("Connected"));
-    socket.on("disconnect", (reason) => console.log("Disconnected: ", reason));
-    socket.on("error", (error) => console.log("Errors:", error));
-    socket.on("reconnect_attempt", () => {
-      console.log("Reconnecting");
-    });
-  };
   const ToggleIcon = (props) => {
     return style.showSidebar ? (
       <MenuFoldOutlined {...props} />
@@ -148,7 +146,7 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
     return {
       sender: sender.id,
       receiver: receiver.id,
-      onReceiver: entity,
+      onReceiver,
       body: {
         text,
         type,
@@ -165,7 +163,7 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
     return {
       sender: sender,
       receiver: receiver,
-      onReceiver: entity,
+      onReceiver,
       body: {
         text,
         type,
@@ -176,7 +174,7 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
 
   const sendMessageWithFile = () => {
     const formData = new FormData();
-    formData.append(entity, state[entity].data[field]);
+    formData.append(entity, name);
     formData.append("file", file);
     Axios.post("/api/upload", formData)
       .then((res) => {
@@ -198,6 +196,7 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
       formatMessageForMyself(msg),
     ]);
     setMessage("");
+    console.log(formatMessage(msg));
     socket.emit("message", formatMessage(msg));
   };
 
@@ -209,10 +208,11 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
   };
 
   const messageBy = (msg) => {
-    return msg.sender.id === sender.id
-      ? "me"
-      : msg.sender.id === receiver.id
+    return msg.sender.id === msg.receiver.id // if msg sender and receiver are same
       ? "admin"
+      : // this happens when room sends an notification, at that case room send message to itself
+      msg.sender.id === sender.id // if msg sender is current user
+      ? "me"
       : "other";
   };
 
@@ -222,7 +222,7 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
         <ToggleIcon
           onClick={() => toggleSidebar({ showSidebar: !style.showSidebar })}
         />
-        <div className="chat-title">{state[entity].data[field]}</div>
+        <div className="chat-title">{name}</div>
         {style.device === "mobile" && style.showSidebar ? null : (
           <InfoCircleOutlined
             onClick={() => toggleSidebar({ showInfobar: !style.showInfobar })}
@@ -230,7 +230,7 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
         )}
       </Header>
       <Content className="chat-content">
-        {roomId === "welcome" ? (
+        {receiver.id === "welcome" ? (
           <div style={{ color: "white", justifySelf: "center" }}>
             <h1>
               <pre>{JSON.stringify(state.style, null, 4)}</pre>
@@ -241,10 +241,8 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
             <div className="message-container">
               {messages.length
                 ? messages.map((msg, index) => {
-                    // modify msg.to.room
-                    return msg.receiver.id === roomId ||
-                      msg.receiver.id === user.data.id ||
-                      msg.receiver.id === receiver.id ? (
+                    return msg.receiver.id === receiver.id || // for room and groups
+                      msg.receiver.id === sender.id ? ( // for individual messages
                       <Comment by={messageBy(msg)} message={msg} key={index} />
                     ) : null;
                   })
@@ -287,7 +285,7 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
                 className="typing"
                 dangerouslySetInnerHTML={{
                   __html:
-                    typing && typing.receiver === roomId
+                    typing && typing.receiver === receiver.id
                       ? typing.message
                       : null,
                 }}
@@ -296,7 +294,7 @@ const Message = ({ entity, roomId, field, to, privateChannel }) => {
           </Fragment>
         )}
       </Content>
-      <Infobar entity={entity} field={field} />
+      <Infobar entity={receiver} />
     </Layout>
   );
 };

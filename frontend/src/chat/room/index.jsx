@@ -3,13 +3,21 @@ import Message from "src/chat/message";
 import { AppContext } from "src/context";
 
 const Room = ({ roomId }) => {
-  const { fetchRoomById } = useContext(AppContext);
+  const { state, fetchRoomById } = useContext(AppContext);
 
   useEffect(() => {
     fetchRoomById(roomId);
   }, [roomId]);
 
-  return <Message entity="room" roomId={roomId} field="name" />;
+  return state.room.data ? (
+    <Message
+      entity="room"
+      roomId={roomId}
+      field="name"
+      receiver={state.room.data}
+      onReceiver="room"
+    />
+  ) : null;
 };
 
 export default Room;
