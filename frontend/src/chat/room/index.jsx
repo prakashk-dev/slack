@@ -10,13 +10,7 @@ const Room = ({ roomId }) => {
   }, [roomId]);
 
   return state.room.data ? (
-    <Message
-      entity="room"
-      roomId={roomId}
-      field="name"
-      receiver={state.room.data}
-      onReceiver="room"
-    />
+    <Message receiver={state.room.data} onReceiver="room" />
   ) : null;
 };
 

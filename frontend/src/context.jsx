@@ -20,6 +20,11 @@ const GROUP_FETCHING_SUCCESS = "GROUP_FETCHING_SUCCESS";
 const USER_FETCHING = "USER_FETCHING";
 const USER_FETCHING_ERROR = "USER_FETCHING_ERROR";
 const USER_FETCHING_SUCCESS = "USER_FETCHING_SUCCESS";
+
+const FRIEND_FETCHING = "FRIEND_FETCHING";
+const FRIEND_FETCHING_ERROR = "FRIEND_FETCHING_ERROR";
+const FRIEND_FETCHING_SUCCESS = "FRIEND_FETCHING_SUCCESS";
+
 const ROOMS_FETCHING = "ROOMS_FETCHING";
 const ROOMS_FETCHING_ERROR = "ROOMS_FETCHING_ERROR";
 const ROOMS_FETCH_SUCCESS = "ROOMS_FETCHING_SUCCESS";
@@ -34,6 +39,7 @@ const DEFAULT_STATE = {
   user: { data: null, error: null, loading: false },
   config: { data: { SOCKET_URL: null }, error: null, loading: false },
   room: { data: null, error: null, loading: false },
+  friend: { data: null, error: null, loading: false },
   rooms: { data: [], error: null, loading: false },
   style: { showSidebar: true, showInfobar: false, device: "desktop" },
   globals: { loading: true, error: null },
@@ -48,13 +54,6 @@ export const initialState = () => {
     if (decoded) {
       return {
         ...DEFAULT_STATE,
-        user: {
-          ...DEFAULT_STATE.user,
-          data: {
-            username: decoded.username,
-            id: decoded.id,
-          },
-        },
         config: {
           ...DEFAULT_STATE.config,
           data: { SOCKET_URL: decoded.socket },
@@ -72,8 +71,8 @@ const INIT_STATE = initialState();
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {
-  // console.log({ type, payload });
-  // console.log("state:", state);
+  console.log({ type, payload });
+  console.log("state:", state);
   switch (type) {
     case SET_SOCKET:
       return {
@@ -119,16 +118,41 @@ export const appReducer = (state, { type, payload }) => {
         room: { data: payload, loading: false, error: null },
       };
     case USER_FETCHING:
-      return { ...state, user: { ...state.user, error: null, loading: true } };
+      return {
+        ...state,
+        user: { ...state.user, error: null, loading: true },
+        loading: true,
+        error: null,
+      };
     case USER_FETCHING_ERROR:
       return {
         ...state,
         user: { ...state.user, loading: false, error: payload },
+        loading: false,
+        error: payload,
       };
     case USER_FETCHING_SUCCESS:
       return {
         ...state,
         user: { data: payload, loading: false, error: null },
+        loading: false,
+        error: null,
+      };
+    case FRIEND_FETCHING:
+      return {
+        ...state,
+        friend: { ...state.friend, error: null, loading: true },
+      };
+    case FRIEND_FETCHING_ERROR:
+      return {
+        ...state,
+        friend: { ...state.friend, loading: false, error: payload },
+      };
+    case FRIEND_FETCHING_SUCCESS:
+      return {
+        ...state,
+        friend: { data: payload.friend, loading: false, error: null },
+        user: { data: payload.user },
       };
     case UPDATE_USERS_LIST:
       const { entity, user } = payload;
@@ -194,7 +218,6 @@ export const appReducer = (state, { type, payload }) => {
 
 export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, INIT_STATE);
-
   // Actions
   const initialiseSocket = async (socket) => {
     return dispatch({
@@ -338,7 +361,7 @@ export const AppProvider = ({ children }) => {
     }
     return dispatch({
       type: USER_FETCHING_ERROR,
-      payload: "Cookie expired or invalid",
+      payload: "No cookies found",
     });
   };
 
@@ -373,13 +396,26 @@ export const AppProvider = ({ children }) => {
   };
 
   const fetchUserChatInfo = async (currentUserId, friendUserName, callback) => {
+    dispatch({ type: FRIEND_FETCHING });
     try {
       const res = await axios.get(
         `/api/users/chat/${currentUserId}?friendUserName=${friendUserName}`
       );
-      callback(res.data);
+      if (res.data.error) {
+        return dispatch({
+          type: FRIEND_FETCHING_ERROR,
+          payload: res.data.error,
+        });
+      }
+      return dispatch({
+        type: FRIEND_FETCHING_SUCCESS,
+        payload: res.data,
+      });
     } catch (err) {
-      console.log(err);
+      return dispatch({
+        type: FRIEND_FETCHING_ERROR,
+        payload: err.message,
+      });
     }
   };
   const handleJoin = async (groupId) => {

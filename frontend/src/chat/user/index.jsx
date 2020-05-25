@@ -4,29 +4,16 @@ import { AppContext } from "src/context";
 
 const User = ({ username }) => {
   const { state, fetchUserChatInfo } = useContext(AppContext);
-  const [user, setUser] = useState(null);
 
-  const [roomName, setRoomName] = useState(null);
   useEffect(() => {
-    fetchUserChatInfo(state.user.data.id, username, (data) => {
-      setUser(data);
-    });
-    setRoomName([state.user.data.username, username].sort().join("-"));
+    fetchUserChatInfo(state.user.data.id, username);
   }, [username]);
 
   const isReady = () => {
-    return state.user.data && user;
+    return state.user.data && state.friend.data;
   };
   return isReady() ? (
-    <Message
-      receiver={user}
-      onReceiver="user"
-      entity="user"
-      roomId={roomName}
-      field="username"
-      to={user}
-      privateChannel={{ socketId: state.user.data.id }}
-    />
+    <Message receiver={state.friend.data} onReceiver="user" />
   ) : null;
 };
 

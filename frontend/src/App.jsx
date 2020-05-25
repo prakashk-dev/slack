@@ -30,13 +30,20 @@ const useWindowSize = () => {
 
 const Root = () => {
   const [width, height] = useWindowSize();
-  const { changeLayout } = useContext(AppContext);
+  const { state, changeLayout, fetchAuthUser } = useContext(AppContext);
   useEffect(() => {
     if (width !== 0 || height !== 0) {
       changeLayout({ width, height });
     }
   }, [width, height]);
 
+  useEffect(() => {
+    fetchAuthUser();
+  }, []);
+
+  const isReady = () => {
+    return !state.loading;
+  };
   return (
     <div className="app">
       <Router>

@@ -6,9 +6,9 @@ const uploadOne = async (req, res, next) => {
   const imageDir = () => path.join(__dirname, `../../static/images`);
   let storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      const dest = req.body.room
-        ? `${imageDir()}/${req.body.room}`
-        : `${imageDir()}/undefined-room`;
+      const dest = req.body.folder
+        ? `${imageDir()}/${req.body.folder}`
+        : `${imageDir()}/undefined-folder`;
 
       !fs.existsSync(dest) && fs.mkdirSync(dest);
       cb(null, dest);

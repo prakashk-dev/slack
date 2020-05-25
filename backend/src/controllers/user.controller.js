@@ -87,6 +87,27 @@ const fetchUserWithChatHistory = async (req, res) => {
       .populate("rooms.room")
       .populate("groups.group")
       .exec();
+
+    // update friend list
+    await User.updateOne(
+      { _id: id, "friends.friend": { $ne: friend.id } },
+      {
+        $push: {
+          friends: {
+            friend: friend.id,
+            last_active: moment.utc().format(),
+          },
+        },
+      },
+      { new: true }
+    ).exec();
+
+    const user = await User.findById(id)
+      .populate("friends.friend")
+      .populate("rooms.room")
+      .populate("groups.group")
+      .exec();
+
     const messages = await Message.find({
       $and: [
         { onReceiver: { $eq: "user" } },
@@ -104,11 +125,15 @@ const fetchUserWithChatHistory = async (req, res) => {
     }).exec();
     friend = friend.toJSON();
     friend.messages = messages;
-    return res.json(friend);
+    return res.json({ user, friend });
   } catch (err) {
     console.log(err);
     res.json({ error: err.message });
   }
+};
+
+const acceptFriendRequest = async (req, res) => {
+  const { userId, friendId } = req.params;
 };
 const findGroupById = async (req, res) => {};
 

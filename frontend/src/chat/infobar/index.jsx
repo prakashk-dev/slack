@@ -14,7 +14,6 @@ const Infobar = ({ entity }) => {
   const users = entity.users; // for room and group
   const user = entity; // for individual, entity itself a single user
   const title = entity.name || entity.username; // for room and group use name, for user, username
-
   const handleMenuItemClick = (username) => {
     navigate(`/chat/u/${username}`);
   };

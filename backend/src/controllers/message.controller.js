@@ -33,7 +33,6 @@ const getByUsers = async (req, res) => {
 
 const saveMessage = async (data) => {
   let message = await Message.create(data);
-  console.log("From Database", message);
   const msg = await Message.findOne({ _id: message._id })
     .populate("receiver")
     .populate("sender")

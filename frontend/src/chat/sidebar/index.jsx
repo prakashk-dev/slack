@@ -12,11 +12,10 @@ import {
   UserOutlined,
   CaretDownFilled,
 } from "@ant-design/icons";
-import { Wrapper } from "../../common";
 
 const Sidebar = () => {
   const {
-    state: { user, rooms, style, room },
+    state: { user, rooms, style, room, friend },
     logout,
     toggleSidebar,
   } = useContext(AppContext);
@@ -58,8 +57,18 @@ const Sidebar = () => {
       </Menu.Item>
     </Menu>
   );
+  const getSelectedKeys = () => {
+    return room.data
+      ? [room.data.id]
+      : friend.data
+      ? [friend.data.username]
+      : [];
+  };
 
-  return room.data ? (
+  const isReady = () => {
+    return user.data && (room.data || friend.data);
+  };
+  return isReady() ? (
     <Sider
       trigger={null}
       collapsible
@@ -90,7 +99,7 @@ const Sidebar = () => {
         // onSelect={handleMenuItemClick}
         defaultOpenKeys={["rooms", "directMessages"]}
         forceSubMenuRender={true}
-        selectedKeys={[room.data.id]}
+        selectedKeys={getSelectedKeys()}
       >
         <SubMenu key="rooms" icon={<SlackSquareOutlined />} title="Room">
           {rooms.data.length
@@ -111,7 +120,20 @@ const Sidebar = () => {
           icon={<MessageOutlined />}
           title="Direct Messages"
         >
-          <Menu.Item key="6">Team 1</Menu.Item>
+          {user.data.friends.length
+            ? user.data.friends.map(({ friend }) => {
+                return (
+                  <Menu.Item
+                    onClick={() =>
+                      handleMenuItemClick({ id: friend.username, sub: "u" })
+                    }
+                    key={friend.username}
+                  >
+                    # {friend.username}
+                  </Menu.Item>
+                );
+              })
+            : "No friends"}
         </SubMenu>
       </Menu>
     </Sider>

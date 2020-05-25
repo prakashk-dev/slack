@@ -22,15 +22,7 @@ import {
 } from "@ant-design/icons";
 import { Upload, Comment } from "src/common";
 
-const Message = ({
-  entity,
-  roomId,
-  field,
-  to,
-  privateChannel,
-  receiver,
-  onReceiver,
-}) => {
+const Message = ({ receiver, onReceiver }) => {
   // see backend/src/models/message.model.js
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -42,7 +34,6 @@ const Message = ({
 
   const sender = user.data,
     name = receiver.name || receiver.username;
-  // receiver = to || state[entity].data;
 
   useEffect(() => {
     logger();
@@ -174,7 +165,7 @@ const Message = ({
 
   const sendMessageWithFile = () => {
     const formData = new FormData();
-    formData.append(entity, name);
+    formData.append("folder", name);
     formData.append("file", file);
     Axios.post("/api/upload", formData)
       .then((res) => {
@@ -216,6 +207,16 @@ const Message = ({
       : "other";
   };
 
+  const isCurrentRoom = (msg) => {
+    msg.receiver.id === receiver.id;
+  };
+  const isCurrentFriend = (msg) => {
+    msg.sender.id === receiver.id && message.receiver.id === sender.id;
+  };
+
+  const isCurrent = (msg) => {
+    return isCurrentRoom(msg) || isCurrentFriend(msg);
+  };
   return (
     <Layout className="chat-body">
       <Header className="chat-header">
@@ -241,8 +242,7 @@ const Message = ({
             <div className="message-container">
               {messages.length
                 ? messages.map((msg, index) => {
-                    return msg.receiver.id === receiver.id || // for room and groups
-                      msg.receiver.id === sender.id ? ( // for individual messages
+                    return isCurrent(msg) ? (
                       <Comment by={messageBy(msg)} message={msg} key={index} />
                     ) : null;
                   })
