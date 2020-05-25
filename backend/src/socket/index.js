@@ -26,14 +26,15 @@ function updateUserList(socket, username, room) {
   }
 }
 
-function onJoin(socket, { username, room, onReceiver }) {
+function onJoin(socket, { username, room, onReceiver, id }) {
   console.log("*********************************************");
   console.log("Join event comming from client", { username, room });
   console.log("*********************************************");
   try {
-    if (onReceiver === "user") {
-      privateChannels[room] = socket.id;
-    } else {
+    // store { currentUserId: currentUserSocketId }
+    privateChannels[id] = socket.id;
+    // join to room and group if it is not individual chat message
+    if (onReceiver !== "user") {
       const exists = Object.keys(socket.rooms).includes(room);
       if (!exists) {
         socket.join(room, () => {

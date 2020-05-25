@@ -60,8 +60,8 @@ const Message = ({ receiver, onReceiver }) => {
 
   const handleJoin = () => {
     const joinData = {
-      // if onReceiver is user, we use currect user id to store currect user socket
-      room: onReceiver === "user" ? sender.id : receiver.id,
+      room: receiver.id,
+      id: sender.id,
       username: sender.username,
       onReceiver,
     };

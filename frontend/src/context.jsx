@@ -116,6 +116,7 @@ export const appReducer = (state, { type, payload }) => {
       return {
         ...state,
         room: { data: payload, loading: false, error: null },
+        friend: { ...state.room, data: null },
       };
     case USER_FETCHING:
       return {
@@ -152,7 +153,8 @@ export const appReducer = (state, { type, payload }) => {
       return {
         ...state,
         friend: { data: payload.friend, loading: false, error: null },
-        user: { data: payload.user },
+        user: { ...state.user, data: payload.user },
+        room: { ...state.room, data: null },
       };
     case UPDATE_USERS_LIST:
       const { entity, user } = payload;
