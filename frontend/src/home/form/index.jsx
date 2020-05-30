@@ -8,9 +8,7 @@ import moment from "moment";
 import "./form.scss";
 const PIN = /[0-9]/;
 const HomeForm = () => {
-  const { saveOrAuthenticateUser, isAuthenticated, state } = useContext(
-    AppContext
-  );
+  const { saveOrAuthenticateUser, state } = useContext(AppContext);
 
   const [form] = Form.useForm();
   const [httpError, setHttpError] = useState(null);
@@ -20,7 +18,6 @@ const HomeForm = () => {
     type: "primary",
     htmlType: "submit",
   });
-  const [url, setUrl] = useState("/chat/r/welcome");
 
   useEffect(() => {
     if (state.user.data) {
@@ -28,12 +25,12 @@ const HomeForm = () => {
       const isReturningUser =
         user.rooms.length || user.friends.length || user.groups.length;
       if (isReturningUser) {
-        setLastActiveUrl(user);
+        navigate(getLastActiveUrl(user));
       }
     }
-  }, [state.user]);
+  }, [state.user.data]);
 
-  const setLastActiveUrl = (user) => {
+  const getLastActiveUrl = (user) => {
     const { rooms, groups, friends } = user;
     let compareArrays = [rooms[0], groups[0], friends[0]];
     compareArrays = compareArrays.filter((arr) => arr !== undefined);
@@ -47,8 +44,7 @@ const HomeForm = () => {
     const sub = friend ? "u" : room ? "r" : "g";
     const id =
       (friend && friend.id) || (room && room.id) || (group && group.id);
-    console.log(id);
-    setUrl(`/chat/${sub}/${id}`);
+    return `/chat/${sub}/${id}`;
   };
 
   const handleSubmit = async (values) => {
@@ -66,8 +62,7 @@ const HomeForm = () => {
           ...user.groups.map((group) => group.group.id),
         ];
         state.socket.emit("joinUserToAllRoomsAndGroups", rg);
-        setLastActiveUrl(user);
-        navigate(url);
+        navigate(getLastActiveUrl(user));
       } else {
         navigate(`/chat/r/welcome`);
       }
@@ -122,9 +117,7 @@ const HomeForm = () => {
     onFinishFailed: handleSubmitError,
   };
 
-  return isAuthenticated() ? (
-    <Redirect to={url} noThrow />
-  ) : (
+  return (
     <div className="form">
       <Form {...formConfig}>
         <InfoBar />

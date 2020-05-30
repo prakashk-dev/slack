@@ -23,7 +23,11 @@ async function findOne(req, res) {
     });
   }
   try {
-    const user = await User.findById(id).populate("friends.friend").exec();
+    const user = await User.findById(id)
+      .populate("rooms.room")
+      .populate("groups.group")
+      .populate("friends.friend")
+      .exec();
     if (user) {
       return res.json(user);
     }
@@ -53,17 +57,22 @@ const findRoomById = async (req, res) => {
         .populate("friends.friend")
         .exec();
 
-      let { rooms } = user;
-      const exists = rooms.find((room) => room.room.id === roomId);
+      let foundAt;
+      const exists = user.rooms.find((room, index) => {
+        foundAt = index;
+        return room.room.id === roomId;
+      });
       if (exists) {
-        const index = rooms.indexOf(exists);
-        user.rooms = [
-          rooms[index],
-          ...rooms.splice(0, index),
-          ...rooms.splice(index, rooms.length - 1),
-        ];
+        user.rooms.splice(foundAt, 1);
+        user.rooms.unshift({
+          room: exists.room,
+          last_active: moment.utc().format(),
+        });
       } else {
-        user.rooms.unshift({ room: roomId });
+        user.rooms.unshift({
+          room: roomId,
+          last_active: moment.utc().format(),
+        });
       }
       await user.save();
 

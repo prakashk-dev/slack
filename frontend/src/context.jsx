@@ -77,7 +77,7 @@ const INIT_STATE = initialState();
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {
-  // console.log({ type, payload });
+  console.log({ type, payload });
   // console.log("state:", state);
   switch (type) {
     case SET_SOCKET:
@@ -139,6 +139,7 @@ export const appReducer = (state, { type, payload }) => {
         error: null,
       };
     case USER_FETCHING_ERROR:
+      Cookies.remove("token");
       return {
         ...state,
         user: { ...state.user, loading: false, error: payload },

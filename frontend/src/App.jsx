@@ -1,5 +1,11 @@
-import React, { useContext, useLayoutEffect, useEffect, useState } from "react";
-import { Router } from "@reach/router";
+import React, {
+  useContext,
+  useLayoutEffect,
+  useEffect,
+  useState,
+  Component,
+} from "react";
+import { Router, navigate, Redirect } from "@reach/router";
 import io from "socket.io-client";
 
 import { AppProvider } from "src/context";
@@ -10,6 +16,7 @@ import Home from "src/home";
 import UserMessage from "src/chat/user";
 import GroupMessage from "src/chat/group";
 import RoomMessage from "src/chat/room";
+import Loading from "src/common/loading";
 
 import "antd/dist/antd.css";
 import "./style.scss";
@@ -35,8 +42,8 @@ const Root = () => {
   const {
     state,
     changeLayout,
-    fetchAuthUser,
     initialiseSocket,
+    fetchAuthUser,
     fetchConfig,
   } = useContext(AppContext);
   useEffect(() => {
@@ -46,20 +53,20 @@ const Root = () => {
   }, [width, height]);
 
   useEffect(() => {
-    fetchConfig();
-  }, []);
+    !state.config.data.SOCKET_URL && fetchConfig();
+    !state.user.data && fetchAuthUser();
+  }, [state.config.data.SOCKET_URL, state.user.data]);
 
   useEffect(() => {
     const socket = io.connect(state.config.data.SOCKET_URL);
     initialiseSocket(socket);
     logger(socket);
-    fetchAuthUser();
 
     return () => {
       initialiseSocket(null);
       socket.disconnect();
     };
-  }, [state.config.data]);
+  }, [state.config.data.SOCKET_URL]);
 
   const logger = (socket) => {
     socket.on("connect", () => console.log("Connected"));
@@ -69,9 +76,11 @@ const Root = () => {
       console.log("Reconnecting");
     });
   };
-  const isReady = () => {
-    return !state.loading;
-  };
+
+  if (state.loading) {
+    return <Loading />;
+  }
+
   return (
     <div className="app">
       <Router>
