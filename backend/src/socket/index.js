@@ -1,7 +1,7 @@
 import { logger, formatMessage } from "../helpers";
 import { saveMessage } from "../controllers/message.controller";
+import { setSocket, getSocket, setIO } from "./data";
 
-let privateChannels = {};
 function welcomeMessage(socket) {
   try {
     socket.emit("welcome", "Welcome to the room");
@@ -27,18 +27,19 @@ function updateUserList(socket, username, room) {
 }
 
 function onJoin(socket, { username, room, onReceiver, id }) {
-  console.log("*********************************************");
-  console.log("Join event comming from client", { username, room });
-  console.log("*********************************************");
+  // console.log("*********************************************");
+  // console.log("Join event comming from client", { username, room });
+  // console.log("*********************************************");
   try {
-    // store { currentUserId: currentUserSocketId }
-    privateChannels[id] = socket.id;
+    setSocket(id, socket);
     // join to room and group if it is not individual chat message
+    console.log("All the rooms of this socket", Object.keys(socket.rooms));
     if (onReceiver !== "user") {
       const exists = Object.keys(socket.rooms).includes(room);
       if (!exists) {
         socket.join(room, () => {
-          updateUserList(socket, username, room);
+          // update user list is done from the controller
+          // updateUserList(socket, username, room);
           joinMessage(socket, username, room);
           welcomeMessage(socket);
         });
@@ -62,7 +63,8 @@ async function onMessage(io, socket, msg) {
       //   "I am sending to this socketID",
       //   privateChannels[msg.receiver]
       // );
-      io.to(privateChannels[msg.receiver]).emit("messages", message);
+      const socketId = getSocket(msg.receiver).id;
+      io.to(socketId).emit("messages", message);
     } else {
       socket.to(msg.receiver).emit("messages", message);
     }
@@ -93,11 +95,23 @@ function onChat(socket, msg) {
   socket.emit("chat", msg);
 }
 
+function joinUserToAllRoomsAndGroups(socket, roomsAndGroups) {
+  roomsAndGroups.forEach((rg) => {
+    socket.join(rg);
+  });
+}
+
 const handleConnection = (io, socket) => {
+  // everytime new user joins update the global io as well
+  setIO(io);
+
   socket.on("chat", (msg) => onChat(socket, msg));
   socket.on("typing", (msg) => onTyping(socket, msg));
   socket.on("message", (msg) => onMessage(io, socket, msg));
   socket.on("join", (msg) => onJoin(socket, msg));
+  socket.on("joinUserToAllRoomsAndGroups", (msg) =>
+    joinUserToAllRoomsAndGroups(socket, msg)
+  );
   socket.on("error", onError);
   socket.on("disconnect", onDisconnect);
 };

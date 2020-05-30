@@ -38,6 +38,7 @@ const TOGGLE_SIDEBAR = "TOGGLE_SIDEBAR";
 
 const LOGOUT = "LOGOUT";
 const SET_SOCKET = "SET_SOCKET";
+const FETCH_CONFIG_SUCCESS = " FETCH_CONFIG_SUCCESS";
 
 const DEFAULT_STATE = {
   user: { data: null, error: null, loading: false },
@@ -76,8 +77,8 @@ const INIT_STATE = initialState();
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {
-  console.log({ type, payload });
-  console.log("state:", state);
+  // console.log({ type, payload });
+  // console.log("state:", state);
   switch (type) {
     case SET_SOCKET:
       return {
@@ -109,7 +110,14 @@ export const appReducer = (state, { type, payload }) => {
           error: null,
         },
       };
-
+    case FETCH_CONFIG_SUCCESS:
+      return {
+        ...state,
+        config: {
+          ...state.config,
+          data: payload,
+        },
+      };
     case ROOM_FETCHING:
       return { ...state, room: { ...state.room, error: null, loading: true } };
     case ROOM_FETCHING_ERROR:
@@ -199,6 +207,10 @@ export const appReducer = (state, { type, payload }) => {
         style: {
           ...state.style,
         },
+        config: {
+          ...state.config,
+        },
+        socket: state.socket,
       };
     case SMALL_SCREEN_LAYOUT:
       return {
@@ -339,6 +351,13 @@ export const AppProvider = ({ children }) => {
         payload: error.message,
       });
     }
+  };
+
+  const fetchConfig = () => {
+    return dispatch({
+      type: FETCH_CONFIG_SUCCESS,
+      payload: { SOCKET_URL: "http://localhost:3001" },
+    });
   };
 
   const fetchAuthUser = async () => {
@@ -542,6 +561,7 @@ export const AppProvider = ({ children }) => {
     fetchUserChatInfo,
     initialiseSocket,
     receivedMessage,
+    fetchConfig,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

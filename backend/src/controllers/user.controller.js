@@ -3,6 +3,7 @@ import moment from "moment";
 import { User, Room, Message } from "../models";
 import { getOne } from "./room.controller";
 import { logger } from "../helpers";
+import { getIO } from "../socket/data";
 
 // get all users
 const getAll = async (req, res) => {
@@ -46,33 +47,39 @@ const findRoomById = async (req, res) => {
     return res.json({ error: "Not a valid room id" });
   } else {
     try {
-      // only push if the room is not exists
-
-      await User.updateOne(
-        { _id: id, "rooms.room": { $ne: roomId } },
-        {
-          $push: {
-            rooms: {
-              room: roomId,
-              last_active: moment.utc().format(),
-            },
-          },
-        },
-        { new: true }
-      ).exec();
-
-      const usr = await User.findById(id)
+      const user = await User.findById(id)
         .populate("rooms.room")
         .populate("groups.group")
         .populate("friends.friend")
         .exec();
+
+      let { rooms } = user;
+      const exists = rooms.find((room) => room.room.id === roomId);
+      if (exists) {
+        const index = rooms.indexOf(exists);
+        user.rooms = [
+          rooms[index],
+          ...rooms.splice(0, index),
+          ...rooms.splice(index, rooms.length - 1),
+        ];
+      } else {
+        user.rooms.unshift({ room: roomId });
+      }
+      await user.save();
+
       res.locals = {
         id: roomId,
-        user: usr,
+        user,
       };
+
+      // room has been added to the user's room list
+      // if (user.nModified === 1) {
+      //   const io = getIO();
+      //   io.in(roomId).emit("updateUser", usr);
+      // }
       getOne(req, res);
     } catch (err) {
-      logger(err);
+      console.log("Error Message", err);
       return res.json({ error: err.message });
     }
   }
@@ -183,4 +190,5 @@ export {
   findRoomById,
   deleteOne,
   fetchUserWithChatHistory,
+  updateRoomUser,
 };

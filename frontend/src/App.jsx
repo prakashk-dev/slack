@@ -1,5 +1,7 @@
 import React, { useContext, useLayoutEffect, useEffect, useState } from "react";
 import { Router } from "@reach/router";
+import io from "socket.io-client";
+
 import { AppProvider } from "src/context";
 import Chat from "src/chat";
 // import GroupMessage from "src/chat/message";
@@ -30,7 +32,13 @@ const useWindowSize = () => {
 
 const Root = () => {
   const [width, height] = useWindowSize();
-  const { state, changeLayout, fetchAuthUser } = useContext(AppContext);
+  const {
+    state,
+    changeLayout,
+    fetchAuthUser,
+    initialiseSocket,
+    fetchConfig,
+  } = useContext(AppContext);
   useEffect(() => {
     if (width !== 0 || height !== 0) {
       changeLayout({ width, height });
@@ -38,9 +46,29 @@ const Root = () => {
   }, [width, height]);
 
   useEffect(() => {
-    fetchAuthUser();
+    fetchConfig();
   }, []);
 
+  useEffect(() => {
+    const socket = io.connect(state.config.data.SOCKET_URL);
+    initialiseSocket(socket);
+    logger(socket);
+    fetchAuthUser();
+
+    return () => {
+      initialiseSocket(null);
+      socket.disconnect();
+    };
+  }, [state.config.data]);
+
+  const logger = (socket) => {
+    socket.on("connect", () => console.log("Connected"));
+    socket.on("disconnect", (reason) => console.log("Disconnected: ", reason));
+    socket.on("error", (error) => console.log("Errors:", error));
+    socket.on("reconnect_attempt", () => {
+      console.log("Reconnecting");
+    });
+  };
   const isReady = () => {
     return !state.loading;
   };

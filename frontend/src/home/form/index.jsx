@@ -8,7 +8,9 @@ import moment from "moment";
 import "./form.scss";
 const PIN = /[0-9]/;
 const HomeForm = () => {
-  const { saveOrAuthenticateUser, isAuthenticated } = useContext(AppContext);
+  const { saveOrAuthenticateUser, isAuthenticated, state } = useContext(
+    AppContext
+  );
 
   const [form] = Form.useForm();
   const [httpError, setHttpError] = useState(null);
@@ -18,25 +20,35 @@ const HomeForm = () => {
     type: "primary",
     htmlType: "submit",
   });
+  const [url, setUrl] = useState("/chat/r/welcome");
 
-  // refactor this
-  const getLastActiveEntityId = (user) => {
+  useEffect(() => {
+    if (state.user.data) {
+      const { data: user } = state.user;
+      const isReturningUser =
+        user.rooms.length || user.friends.length || user.groups.length;
+      if (isReturningUser) {
+        setLastActiveUrl(user);
+      }
+    }
+  }, [state.user]);
+
+  const setLastActiveUrl = (user) => {
     const { rooms, groups, friends } = user;
     let compareArrays = [rooms[0], groups[0], friends[0]];
-    if (compareArrays.length) {
-      compareArrays = compareArrays.filter((arr) => arr !== undefined);
-      let lastActive = compareArrays.reduce(
-        (lastActive, current) =>
-          moment(lastActive).isAfter(current) ? lastActive : current,
-        compareArrays[0].last_active
-      );
-      const { friend, room, group } = lastActive;
-      const sub = friend ? "u" : room ? "r" : "g";
-      const id =
-        (friend && friend.id) || (room && room.id) || (group && group.id);
-      return { sub, id };
-    }
-    return false;
+    compareArrays = compareArrays.filter((arr) => arr !== undefined);
+    let lastActive = compareArrays.reduce(
+      (lastActive, current) =>
+        moment(lastActive).isAfter(current) ? lastActive : current,
+      compareArrays[0]
+    );
+
+    const { friend, room, group } = lastActive;
+    const sub = friend ? "u" : room ? "r" : "g";
+    const id =
+      (friend && friend.id) || (room && room.id) || (group && group.id);
+    console.log(id);
+    setUrl(`/chat/${sub}/${id}`);
   };
 
   const handleSubmit = async (values) => {
@@ -48,8 +60,14 @@ const HomeForm = () => {
       const isReturningUser =
         user.rooms.length || user.friends.length || user.groups.length;
       if (isReturningUser) {
-        const { sub, id } = getLastActiveEntityId(user);
-        navigate(`/chat/${sub}/${id}`);
+        // join user to all the rooms and blah blah blah
+        const rg = [
+          ...user.rooms.map((room) => room.room.id),
+          ...user.groups.map((group) => group.group.id),
+        ];
+        state.socket.emit("joinUserToAllRoomsAndGroups", rg);
+        setLastActiveUrl(user);
+        navigate(url);
       } else {
         navigate(`/chat/r/welcome`);
       }
@@ -105,7 +123,7 @@ const HomeForm = () => {
   };
 
   return isAuthenticated() ? (
-    <Redirect to="/chat/r/welcome" noThrow />
+    <Redirect to={url} noThrow />
   ) : (
     <div className="form">
       <Form {...formConfig}>

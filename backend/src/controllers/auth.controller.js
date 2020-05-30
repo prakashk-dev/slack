@@ -16,6 +16,7 @@ async function loginOrRegisterUser(req, res) {
       .populate("rooms.room")
       .populate("groups.group")
       .exec();
+
     if (user) {
       user.comparePassword(req.body.pin, function (err, isMatch) {
         if (isMatch && !err) {
@@ -25,6 +26,7 @@ async function loginOrRegisterUser(req, res) {
           // set cookie to the frontend
           let token = createToken(user);
           res.cookie(createCookie(token));
+
           return res.status(200).json({
             user,
             token,

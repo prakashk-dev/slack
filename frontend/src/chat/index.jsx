@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Layout } from "antd";
 import { Redirect } from "@reach/router";
-import io from "socket.io-client";
 
 import Sidebar from "src/chat/sidebar";
 import Loading from "src/common/loading";
@@ -11,25 +10,13 @@ import "./chat.scss";
 const { Content } = Layout;
 
 const Chat = ({ children }) => {
-  const {
-    state,
-    isAuthenticated,
-    initialiseSocket,
-    fetchAuthUser,
-    fetchRooms,
-  } = useContext(AppContext);
+  const { state, isAuthenticated, fetchAuthUser, fetchRooms } = useContext(
+    AppContext
+  );
 
   useEffect(() => {
-    const socket = io.connect(state.config.data.SOCKET_URL);
-    initialiseSocket(socket);
-
     fetchAuthUser();
     fetchRooms();
-
-    return () => {
-      initialiseSocket(null);
-      socket.disconnect();
-    };
   }, []);
 
   const isReady = () => {

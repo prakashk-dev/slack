@@ -38,7 +38,6 @@ const Message = ({ receiver, onReceiver }) => {
     name = receiver.name || receiver.username;
 
   useEffect(() => {
-    logger();
     handleEvents();
   }, []);
 
@@ -47,17 +46,10 @@ const Message = ({ receiver, onReceiver }) => {
     socket.on("typing", handleTypingEvent);
     socket.on("welcome", console.log);
     socket.on("updateUsers", updateUsers);
-    socket.on("updateUser", console.log);
+    socket.on("updateUser", (msg) =>
+      console.log("This user has recently joined the room", msg)
+    );
     socket.on("newUserJoined", console.log);
-  };
-
-  const logger = () => {
-    socket.on("connect", () => console.log("Connected"));
-    socket.on("disconnect", (reason) => console.log("Disconnected: ", reason));
-    socket.on("error", (error) => console.log("Errors:", error));
-    socket.on("reconnect_attempt", () => {
-      console.log("Reconnecting");
-    });
   };
 
   const handleJoin = () => {
@@ -76,7 +68,7 @@ const Message = ({ receiver, onReceiver }) => {
     if (receiver.messages && receiver.messages.length) {
       receivedMessage(...receiver.messages);
     }
-    handleJoin();
+    receiver.name !== "Bhetghat" && handleJoin();
   }, [receiver]);
 
   useEffect(() => {

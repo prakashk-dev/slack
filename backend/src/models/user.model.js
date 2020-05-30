@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 import bcrypt from "bcryptjs";
+import moment from "moment";
 import { logger } from "../helpers";
 
 const UserSchema = new Schema({
@@ -39,7 +40,7 @@ const UserSchema = new Schema({
   rooms: [
     {
       room: { type: Schema.Types.ObjectId, ref: "room" },
-      last_active: Date,
+      last_active: { type: Date, default: moment.utc().format() },
       favourite: Boolean,
       role: { type: String, enum: ["admin"] },
     },
@@ -47,7 +48,8 @@ const UserSchema = new Schema({
   groups: [
     {
       group: { type: Schema.Types.ObjectId, ref: "group" },
-      last_active: Date,
+      last_active: { type: Date, default: moment.utc().format() },
+
       role: { type: String, enum: ["admin"] },
       request: {
         status: { type: String, enum: ["pending", "approved", "rejected"] },
@@ -58,7 +60,8 @@ const UserSchema = new Schema({
   friends: [
     {
       friend: { type: Schema.Types.ObjectId, ref: "user" },
-      last_active: Date,
+      last_active: { type: Date, default: moment.utc().format() },
+
       status: {
         type: String,
         enum: ["pending", "approved", "rejected"],
