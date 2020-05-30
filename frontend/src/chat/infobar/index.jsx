@@ -18,41 +18,6 @@ const Infobar = ({ entity }) => {
     navigate(`/chat/u/${username}`);
   };
 
-  const RoomUsers = () => {
-    return users.length ? (
-      users.map((usr) => {
-        return (
-          <Menu.Item
-            key={usr.id}
-            onClick={() => handleMenuItemClick(usr.username)}
-            icon={
-              <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
-            }
-          >
-            {usr.username}
-          </Menu.Item>
-        );
-      })
-    ) : (
-      <li className="no-users">No Users</li>
-    );
-  };
-
-  const IndividualUser = () => {
-    return (
-      <Menu.Item
-        key={user.id}
-        // this should take to the profile page of the user once profile is implemented
-        onClick={() => handleMenuItemClick(user.username)}
-        icon={
-          <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
-        }
-      >
-        {user.username}
-      </Menu.Item>
-    );
-  };
-
   return (
     <Sider
       collapsible
@@ -73,7 +38,36 @@ const Infobar = ({ entity }) => {
       </div>
       <Menu mode="inline" defaultOpenKeys={["users"]}>
         <SubMenu key="users" icon={<UserOutlined />} title="Users">
-          {users ? <RoomUsers /> : <IndividualUser />}
+          {users ? (
+            users.length ? (
+              users.map((usr) => {
+                return (
+                  <Menu.Item
+                    key={usr.id}
+                    onClick={() => handleMenuItemClick(usr.username)}
+                    icon={
+                      <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
+                    }
+                  >
+                    {usr.username}
+                  </Menu.Item>
+                );
+              })
+            ) : (
+              <li className="no-users">No Users</li>
+            )
+          ) : (
+            <Menu.Item
+              key={user.id}
+              // this should take to the profile page of the user once profile is implemented
+              onClick={() => handleMenuItemClick(user.username)}
+              icon={
+                <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
+              }
+            >
+              {user.username}
+            </Menu.Item>
+          )}
         </SubMenu>
       </Menu>
     </Sider>

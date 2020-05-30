@@ -65,7 +65,7 @@ const UserSchema = new Schema({
       },
     },
   ],
-  notification: [{ receiver: String, count: Number }], // this contains only those messages that are not seen
+  notification: [{ sender: Schema.Types.ObjectId, count: Number }], // this contains only those messages that are not seen
 });
 
 // write a hook that will always sort the rooms, groups and friends array

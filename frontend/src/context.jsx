@@ -28,6 +28,10 @@ const FRIEND_FETCHING_SUCCESS = "FRIEND_FETCHING_SUCCESS";
 const ROOMS_FETCHING = "ROOMS_FETCHING";
 const ROOMS_FETCHING_ERROR = "ROOMS_FETCHING_ERROR";
 const ROOMS_FETCH_SUCCESS = "ROOMS_FETCHING_SUCCESS";
+
+const MESSAGE_RECEIVED = "MESSAGE_RECEIVED";
+const MESSAGE_SENT = "MESSAGE_SENT";
+
 const SMALL_SCREEN_LAYOUT = "SMALL_SCREEN_LAYOUT";
 const DEFAULT_LAYOUT = "DEFAULT_LAYOUT";
 const TOGGLE_SIDEBAR = "TOGGLE_SIDEBAR";
@@ -37,6 +41,7 @@ const SET_SOCKET = "SET_SOCKET";
 
 const DEFAULT_STATE = {
   user: { data: null, error: null, loading: false },
+  messages: [],
   config: { data: { SOCKET_URL: null }, error: null, loading: false },
   room: { data: null, error: null, loading: false },
   friend: { data: null, error: null, loading: false },
@@ -181,6 +186,11 @@ export const appReducer = (state, { type, payload }) => {
       return {
         ...state,
         rooms: { data: payload, loading: false, error: null },
+      };
+    case MESSAGE_RECEIVED:
+      return {
+        ...state,
+        messages: [...state.messages, payload],
       };
     case LOGOUT:
       Cookies.remove("token");
@@ -444,6 +454,16 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const receivedMessage = (msg) => {
+    return dispatch({
+      type: MESSAGE_RECEIVED,
+      payload: msg,
+    });
+  };
+
+  const sendMessage = (msg) => {
+    // do api request to the messsage
+  };
   // helper functions
   const decodeToken = () => {
     const token = Cookies.get("token");
@@ -521,6 +541,7 @@ export const AppProvider = ({ children }) => {
     updateUsers,
     fetchUserChatInfo,
     initialiseSocket,
+    receivedMessage,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

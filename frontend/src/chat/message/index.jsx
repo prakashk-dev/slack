@@ -25,12 +25,14 @@ import { Upload, Comment } from "src/common";
 const Message = ({ receiver, onReceiver }) => {
   // see backend/src/models/message.model.js
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([]);
-  const { state, toggleSidebar, updateUsers } = useContext(AppContext);
+  // const [messages, setMessages] = useState([]);
+  const { state, toggleSidebar, updateUsers, receivedMessage } = useContext(
+    AppContext
+  );
   const divRef = useRef(null);
   const [typing, setTyping] = useState(null);
   const [file, setFile] = useState(null);
-  const { user, socket, style } = state;
+  const { user, socket, style, messages } = state;
 
   const sender = user.data,
     name = receiver.name || receiver.username;
@@ -71,11 +73,11 @@ const Message = ({ receiver, onReceiver }) => {
   };
 
   useEffect(() => {
-    if (receiver.messages) {
-      setMessages([...receiver.messages]);
+    if (receiver.messages && receiver.messages.length) {
+      receivedMessage(...receiver.messages);
     }
     handleJoin();
-  }, []);
+  }, [receiver]);
 
   useEffect(() => {
     scrollToButton();
@@ -101,7 +103,8 @@ const Message = ({ receiver, onReceiver }) => {
 
   const updateMessages = (msg) => {
     console.log("Message coming from server", msg);
-    setMessages((prevMessages) => [...prevMessages, msg]);
+    receivedMessage(msg);
+    // setMessages((prevMessages) => [...prevMessages, msg]);
     scrollToButton();
   };
 
@@ -182,12 +185,8 @@ const Message = ({ receiver, onReceiver }) => {
 
   const sendMessage = (msg) => {
     //  send message with post action
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      formatMessageForMyself(msg),
-    ]);
     setMessage("");
-    console.log(formatMessage(msg));
+    updateMessages(formatMessageForMyself(msg));
     socket.emit("message", formatMessage(msg));
   };
 
@@ -208,14 +207,14 @@ const Message = ({ receiver, onReceiver }) => {
   };
 
   const isCurrentRoom = (msg) => {
-    msg.receiver.id === receiver.id;
+    return msg.receiver.id === receiver.id;
   };
   const isCurrentFriend = (msg) => {
-    msg.sender.id === receiver.id && message.receiver.id === sender.id;
+    return msg.sender.id === receiver.id && msg.receiver.id === sender.id;
   };
 
   const isCurrent = (msg) => {
-    return isCurrentRoom(msg) || isCurrentFriend(msg);
+    return msg && (isCurrentRoom(msg) || isCurrentFriend(msg));
   };
   return (
     <Layout className="chat-body">
@@ -240,13 +239,15 @@ const Message = ({ receiver, onReceiver }) => {
         ) : (
           <Fragment>
             <div className="message-container">
-              {messages.length
-                ? messages.map((msg, index) => {
-                    return isCurrent(msg) ? (
-                      <Comment by={messageBy(msg)} message={msg} key={index} />
-                    ) : null;
-                  })
-                : null}
+              {messages.length ? (
+                messages.map((msg, index) => {
+                  return isCurrent(msg) ? (
+                    <Comment by={messageBy(msg)} message={msg} key={index} />
+                  ) : null;
+                })
+              ) : (
+                <pre> {JSON.stringify(messages, null, 4)}</pre>
+              )}
               <div ref={divRef} id="recentMessage"></div>
             </div>
             <div className="message-footer">

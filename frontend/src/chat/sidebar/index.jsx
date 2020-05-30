@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { navigate } from "@reach/router";
 import { AppContext } from "src/context";
 import "./sidebar.scss";
-import { Layout, Menu, Dropdown, Progress, Avatar } from "antd";
+import { Layout, Menu, Dropdown, Progress, Avatar, Badge } from "antd";
 const { Sider } = Layout;
 const { SubMenu } = Menu;
 import {
@@ -11,6 +11,7 @@ import {
   MessageOutlined,
   UserOutlined,
   CaretDownFilled,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 
 const Sidebar = () => {
@@ -68,6 +69,15 @@ const Sidebar = () => {
   const isReady = () => {
     return user.data && (room.data || friend.data);
   };
+
+  const getNotificationCount = (notifications, id) => {
+    console.log(notifications, id);
+    const ns = notifications.filter(
+      (notification) => notification.sender === id
+    )[0];
+    return ns.length ? ns[0].count : 0;
+  };
+
   return isReady() ? (
     <Sider
       trigger={null}
@@ -113,7 +123,7 @@ const Sidebar = () => {
                   </Menu.Item>
                 );
               })
-            : "No Romms"}
+            : null}
         </SubMenu>
         <SubMenu
           key="directMessages"
@@ -121,19 +131,38 @@ const Sidebar = () => {
           title="Direct Messages"
         >
           {user.data.friends.length
-            ? user.data.friends.map(({ friend }) => {
+            ? user.data.friends.map(({ status, friend }) => {
                 return (
                   <Menu.Item
                     onClick={() =>
                       handleMenuItemClick({ id: friend.username, sub: "u" })
                     }
                     key={friend.username}
+                    icon={
+                      status === "pending" ? (
+                        <Badge status="processing" />
+                      ) : null
+                    }
                   >
-                    # {friend.username}
+                    <span className={status}>{friend.username}</span>uiop
+                    {user.data.notification.length &&
+                    getNotificationCount(user.data.notification, friend.id) >
+                      0 ? (
+                      <Badge
+                        count={getNotificationCount(
+                          user.data.notification,
+                          friend.id
+                        )}
+                        style={{
+                          backgroundColor: "#52c41a",
+                          marginLeft: 10,
+                        }}
+                      />
+                    ) : null}
                   </Menu.Item>
                 );
               })
-            : "No friends"}
+            : null}
         </SubMenu>
       </Menu>
     </Sider>

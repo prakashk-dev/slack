@@ -82,31 +82,57 @@ const fetchUserWithChatHistory = async (req, res) => {
     const { id } = req.params;
     const { friendUserName: username } = req.query;
 
-    let friend = await User.findOne({ username })
-      .populate("friends.friend")
-      .populate("rooms.room")
-      .populate("groups.group")
-      .exec();
-
-    // update friend list
-    await User.updateOne(
-      { _id: id, "friends.friend": { $ne: friend.id } },
-      {
-        $push: {
-          friends: {
-            friend: friend.id,
-            last_active: moment.utc().format(),
+    // update friend's friendlist with current user and status pending
+    let user, friend;
+    let friendExists = await User.findOne({
+      username,
+      "friends.friend": { $eq: id },
+    }).exec();
+    if (!friendExists) {
+      friend = await User.findOneAndUpdate(
+        { username, "friends.friend": { $ne: id } },
+        {
+          $push: {
+            friends: {
+              friend: id,
+              last_active: moment.utc().format(),
+              status: "pending",
+            },
           },
         },
-      },
-      { new: true }
-    ).exec();
+        { returnOriginal: false }
+      )
+        .populate("friends.friend")
+        .populate("rooms.room")
+        .populate("groups.group")
+        .exec();
 
-    const user = await User.findById(id)
-      .populate("friends.friend")
-      .populate("rooms.room")
-      .populate("groups.group")
-      .exec();
+      // Add friend to the current user's friend list
+      user = await User.findOneAndUpdate(
+        { _id: id, "friends.friend": { $ne: friend.id } },
+        {
+          $push: {
+            friends: {
+              friend: friend.id,
+              last_active: moment.utc().format(),
+              status: "approved",
+            },
+          },
+        },
+        { returnOriginal: false }
+      ).exec();
+    } else {
+      user = await User.findById(id)
+        .populate("friends.friend")
+        .populate("rooms.room")
+        .populate("groups.group")
+        .exec();
+      friend = await User.findOne({ username })
+        .populate("friends.friend")
+        .populate("rooms.room")
+        .populate("groups.group")
+        .exec();
+    }
 
     const messages = await Message.find({
       $and: [
@@ -123,6 +149,7 @@ const fetchUserWithChatHistory = async (req, res) => {
         },
       ],
     }).exec();
+
     friend = friend.toJSON();
     friend.messages = messages;
     return res.json({ user, friend });

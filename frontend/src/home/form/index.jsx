@@ -22,17 +22,21 @@ const HomeForm = () => {
   // refactor this
   const getLastActiveEntityId = (user) => {
     const { rooms, groups, friends } = user;
-    const compareArrays = [rooms[0], groups[0], friends[0]];
-    let lastActive = compareArrays.reduce(
-      (lastActive, current) =>
-        moment(lastActive).isAfter(current) ? lastActive : current,
-      compareArrays[0].last_active
-    );
-    const { friend, room, group } = lastActive;
-    const sub = friend ? "u" : room ? "r" : "g";
-    const id =
-      (friend && friend.id) || (room && room.id) || (group && group.id);
-    return { sub, id };
+    let compareArrays = [rooms[0], groups[0], friends[0]];
+    if (compareArrays.length) {
+      compareArrays = compareArrays.filter((arr) => arr !== undefined);
+      let lastActive = compareArrays.reduce(
+        (lastActive, current) =>
+          moment(lastActive).isAfter(current) ? lastActive : current,
+        compareArrays[0].last_active
+      );
+      const { friend, room, group } = lastActive;
+      const sub = friend ? "u" : room ? "r" : "g";
+      const id =
+        (friend && friend.id) || (room && room.id) || (group && group.id);
+      return { sub, id };
+    }
+    return false;
   };
 
   const handleSubmit = async (values) => {
