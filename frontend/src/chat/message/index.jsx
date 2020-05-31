@@ -26,14 +26,17 @@ const Message = ({ receiver, onReceiver }) => {
   // see backend/src/models/message.model.js
   const [message, setMessage] = useState("");
   // const [messages, setMessages] = useState([]);
-  const { state, toggleSidebar, updateUsers, receivedMessage } = useContext(
-    AppContext
-  );
+  const {
+    state,
+    toggleSidebar,
+    updateUsers,
+    receivedMessage,
+    updateNotification,
+  } = useContext(AppContext);
   const divRef = useRef(null);
   const [typing, setTyping] = useState(null);
   const [file, setFile] = useState(null);
   const { user, socket, style, messages } = state;
-
   const sender = user.data,
     name = receiver.name || receiver.username;
 
@@ -66,7 +69,9 @@ const Message = ({ receiver, onReceiver }) => {
 
   useEffect(() => {
     if (receiver.messages && receiver.messages.length) {
+      // here update that notifaction to be zero
       receivedMessage(receiver.messages);
+      updateNotification({ count: 0, sender: receiver.id, id: user.data.id });
     }
     receiver.name !== "Bhetghat" && handleJoin();
   }, [receiver]);
@@ -94,9 +99,13 @@ const Message = ({ receiver, onReceiver }) => {
   }, [message]);
 
   const updateMessages = (msg) => {
-    console.log("Message coming from server", msg);
+    // console.log("Message coming from server", msg);
     receivedMessage(msg);
-    // setMessages((prevMessages) => [...prevMessages, msg]);
+    // the other room is receiving message, at this point user has already joined that room to receive the message
+    if (msg.receiver.id !== receiver.id) {
+      // send to the backend to update the notification on the user
+      updateNotification({ sender: msg.receiver.id, id: user.data.id });
+    }
     scrollToButton();
   };
 

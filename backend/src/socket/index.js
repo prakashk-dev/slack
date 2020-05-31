@@ -33,7 +33,7 @@ function onJoin(socket, { username, room, onReceiver, id }) {
   try {
     setSocket(id, socket);
     // join to room and group if it is not individual chat message
-    console.log("All the rooms of this socket", Object.keys(socket.rooms));
+    // console.log("All the rooms of this socket", Object.keys(socket.rooms));
     if (onReceiver !== "user") {
       const exists = Object.keys(socket.rooms).includes(room);
       if (!exists) {
@@ -51,7 +51,7 @@ function onJoin(socket, { username, room, onReceiver, id }) {
 }
 
 async function onMessage(io, socket, msg) {
-  console.log("message comming from client", msg);
+  // console.log("message comming from client", msg);
   try {
     const message = await saveMessage(msg);
     console.log("message", message);

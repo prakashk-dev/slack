@@ -192,6 +192,69 @@ const deleteOne = async (req, res) => {
   }
 };
 
+// helper functions
+const updateNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { sender, count } = req.body;
+    console.log("body", sender, count);
+    let user;
+    if (count !== undefined) {
+      user = await User.findByIdAndUpdate(
+        id,
+        {
+          $pull: {
+            notification: {
+              sender: { $eq: sender },
+            },
+          },
+        },
+        {
+          new: true,
+        }
+      ).exec();
+    } else {
+      const userWithNotification = await User.findOne({
+        _id: id,
+        "notification.sender": { $eq: sender },
+      }).exec();
+
+      console.log("UserWithNotification", userWithNotification);
+      // if found increment the count else add one
+      if (userWithNotification) {
+        user = await User.findOneAndUpdate(
+          { _id: id, "notification.sender": { $eq: sender } },
+          {
+            $inc: {
+              "notification.$.count": 1,
+            },
+          },
+          { new: true }
+        ).exec();
+      } else {
+        user = await User.findByIdAndUpdate(
+          id,
+          {
+            $push: {
+              notification: {
+                sender: sender,
+                count: 1,
+              },
+            },
+          },
+          {
+            new: true,
+          }
+        ).exec();
+      }
+    }
+    console.log("user", user);
+    return res.json(user);
+  } catch (err) {
+    return res.json({ error: err.message });
+  }
+};
+
 export {
   getAll,
   findOne,
@@ -200,4 +263,5 @@ export {
   deleteOne,
   fetchUserWithChatHistory,
   updateRoomUser,
+  updateNotification,
 };

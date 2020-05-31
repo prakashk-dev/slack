@@ -71,11 +71,9 @@ const Sidebar = () => {
   };
 
   const getNotificationCount = (notifications, id) => {
-    console.log(notifications, id);
-    const ns = notifications.filter(
-      (notification) => notification.sender === id
-    )[0];
-    return ns.length ? ns[0].count : 0;
+    const ns = notifications.find((notification) => notification.sender === id);
+    console.log("id", notifications, ns);
+    return ns ? ns.count : 0;
   };
 
   return isReady() ? (
@@ -120,6 +118,19 @@ const Sidebar = () => {
                     key={rm.id}
                   >
                     # {rm.name}
+                    {user.data.notification.length &&
+                    getNotificationCount(user.data.notification, rm.id) > 0 ? (
+                      <Badge
+                        count={getNotificationCount(
+                          user.data.notification,
+                          rm.id
+                        )}
+                        style={{
+                          backgroundColor: "#52c41a",
+                          marginLeft: 10,
+                        }}
+                      />
+                    ) : null}
                   </Menu.Item>
                 );
               })

@@ -20,6 +20,8 @@ const GROUP_FETCHING_SUCCESS = "GROUP_FETCHING_SUCCESS";
 const USER_FETCHING = "USER_FETCHING";
 const USER_FETCHING_ERROR = "USER_FETCHING_ERROR";
 const USER_FETCHING_SUCCESS = "USER_FETCHING_SUCCESS";
+const RESET_NOTIFICATION = "RESET_NOTIFICATION";
+const ADD_NOTIFICATION = "ADD_NOTIFICATION";
 
 const FRIEND_FETCHING = "FRIEND_FETCHING";
 const FRIEND_FETCHING_ERROR = "FRIEND_FETCHING_ERROR";
@@ -148,6 +150,14 @@ export const appReducer = (state, { type, payload }) => {
         error: payload,
       };
     case USER_FETCHING_SUCCESS:
+      return {
+        ...state,
+        user: { data: payload, loading: false, error: null },
+        loading: false,
+        error: null,
+      };
+    case RESET_NOTIFICATION:
+    case ADD_NOTIFICATION:
       return {
         ...state,
         user: { data: payload, loading: false, error: null },
@@ -488,6 +498,18 @@ export const AppProvider = ({ children }) => {
     });
   };
 
+  const updateNotification = async (data) => {
+    const type = data.count ? RESET_NOTIFICATION : ADD_NOTIFICATION;
+    try {
+      const res = await axios.patch(`/api/users/${data.id}/notification`, data);
+      return dispatch({
+        type,
+        payload: res.data,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const sendMessage = (msg) => {
     // do api request to the messsage
   };
@@ -570,6 +592,7 @@ export const AppProvider = ({ children }) => {
     initialiseSocket,
     receivedMessage,
     fetchConfig,
+    updateNotification,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
