@@ -34,3 +34,14 @@
     }
   }
 }
+
+@media screen and (max-width: 450px),
+screen and (max-height: 555px) {
+  .form {
+    form {
+      .ant-row {
+        display: block;
+      }
+    }
+  }
+}

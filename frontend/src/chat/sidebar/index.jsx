@@ -28,8 +28,8 @@ const Sidebar = () => {
 
   const handleMenuItemClick = ({ id, sub }) => {
     navigate(`/chat/${sub}/${id}`);
-    //   style.device === "mobile" &&
-    //     toggleSidebar({ showSidebar: !style.showSidebar });
+    style.device === "mobile" &&
+      toggleSidebar({ showSidebar: !style.showSidebar });
   };
 
   const profile = (

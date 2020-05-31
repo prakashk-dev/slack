@@ -73,7 +73,7 @@ const findRoomById = async (req, res) => {
           room: roomId,
           last_active: moment.utc().format(),
         });
-        getIO().in(roomId).emit("updateRoomUsers", user);
+        updateRoomUsers(roomId, user);
       }
       await user.save();
 
@@ -119,9 +119,9 @@ const fetchUserWithChatHistory = async (req, res) => {
         .populate("rooms.room")
         .populate("groups.group")
         .exec();
+
       // todo only send current friend
-      const socketId = getSocket(friend.id).id;
-      getIO().to(socketId).emit("updateFriendList", friend);
+      updateFriendList(friend);
 
       // Add friend to the current user's friend list
       user = await User.findOneAndUpdate(
@@ -219,8 +219,8 @@ const updateNotification = async (req, res) => {
         )
           .populate("friends.friend")
           .exec();
-        const socketId = getSocket(user.id).id;
-        getIO().to(socketId).emit("updateFriendList", user);
+        // todo only send update friend from user.friends
+        updateFriendList(user);
       }
       user = await User.findByIdAndUpdate(
         id,
@@ -275,6 +275,23 @@ const updateNotification = async (req, res) => {
   }
 };
 
+// helpers function
+const updateFriendList = (user) => {
+  try {
+    const socketId = getSocket(user._id);
+    getIO().to(socketId).emit("updateFriendList", user);
+  } catch (err) {
+    console.log("Error updateFriendList", err);
+  }
+};
+
+const updateRoomUsers = (roomId, user) => {
+  try {
+    getIO().in(roomId).emit("updateRoomUsers", user);
+  } catch (err) {
+    console.log("Error updateRoomUsers", err);
+  }
+};
 export {
   getAll,
   findOne,
