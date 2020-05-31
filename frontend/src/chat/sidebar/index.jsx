@@ -65,7 +65,6 @@ const Sidebar = () => {
       ? [friend.data.username]
       : [];
   };
-  console.log("Selected Keys", getSelectedKeys());
 
   const isReady = () => {
     return user.data && (room.data || friend.data);
@@ -73,7 +72,6 @@ const Sidebar = () => {
 
   const getNotificationCount = (notifications, id) => {
     const ns = notifications.find((notification) => notification.sender === id);
-    console.log("id", notifications, ns);
     return ns ? ns.count : 0;
   };
 
@@ -156,7 +154,7 @@ const Sidebar = () => {
                       ) : null
                     }
                   >
-                    <span className={status}>{friend.username}</span>uiop
+                    {friend.username}
                     {user.data.notification.length &&
                     getNotificationCount(user.data.notification, friend.id) >
                       0 ? (

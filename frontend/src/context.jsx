@@ -160,7 +160,11 @@ export const appReducer = (state, { type, payload }) => {
     case ADD_NOTIFICATION:
       return {
         ...state,
-        user: { data: payload, loading: false, error: null },
+        user: {
+          data: { ...state.user.data, notification: payload },
+          loading: false,
+          error: null,
+        },
         loading: false,
         error: null,
       };
@@ -450,7 +454,6 @@ export const AppProvider = ({ children }) => {
         `/api/users/${currentUserId}/chat?friendUserName=${friendUserName}`
       );
       if (res.data.error) {
-        console.log(res.data);
         return dispatch({
           type: FRIEND_FETCHING_ERROR,
           payload: res.data.error,
@@ -505,7 +508,7 @@ export const AppProvider = ({ children }) => {
       const res = await axios.patch(`/api/users/${data.id}/notification`, data);
       return dispatch({
         type,
-        payload: res.data,
+        payload: res.data.notification,
       });
     } catch (err) {
       console.error(err);

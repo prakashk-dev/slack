@@ -106,7 +106,6 @@ const fetchUserWithChatHistory = async (req, res) => {
     }).exec();
 
     if (!friendExists) {
-      console.log("Username", username);
       friend = await User.findOneAndUpdate(
         { username },
         {
@@ -124,9 +123,6 @@ const fetchUserWithChatHistory = async (req, res) => {
         .populate("rooms.room")
         .populate("groups.group")
         .exec();
-      console.log("****************");
-      console.log("Friend", friend);
-      console.log("****************");
 
       // Add friend to the current user's friend list
       user = await User.findOneAndUpdate(
@@ -141,7 +137,11 @@ const fetchUserWithChatHistory = async (req, res) => {
           },
         },
         { new: true }
-      ).exec();
+      )
+        .populate("friends.friend")
+        .populate("rooms.room")
+        .populate("groups.group")
+        .exec();
     } else {
       user = await User.findById(id)
         .populate("friends.friend")
@@ -201,10 +201,24 @@ const deleteOne = async (req, res) => {
 const updateNotification = async (req, res) => {
   try {
     const { id } = req.params;
-    const { sender, count } = req.body;
-    console.log("body", sender, count);
+    const { sender, count, onReceiver } = req.body;
     let user;
     if (count !== undefined) {
+      // user has seen the message, so change status to accepted
+      if (onReceiver === "user") {
+        user = await User.findOneAndUpdate(
+          { _id: id, "friends.friend": sender },
+          {
+            $set: {
+              "friends.$.status": "approved",
+              "friends.$.last_active": moment.utc().format(),
+            },
+          },
+          {
+            new: true,
+          }
+        ).exec();
+      }
       user = await User.findByIdAndUpdate(
         id,
         {
@@ -224,7 +238,6 @@ const updateNotification = async (req, res) => {
         "notification.sender": { $eq: sender },
       }).exec();
 
-      console.log("UserWithNotification", userWithNotification);
       // if found increment the count else add one
       if (userWithNotification) {
         user = await User.findOneAndUpdate(
@@ -253,7 +266,6 @@ const updateNotification = async (req, res) => {
         ).exec();
       }
     }
-    console.log("user", user);
     return res.json(user);
   } catch (err) {
     return res.json({ error: err.message });

@@ -43,7 +43,7 @@ const Message = ({ receiver, onReceiver }) => {
   useEffect(() => {
     handleEvents();
   }, []);
-
+  console.log("Message");
   const handleEvents = () => {
     socket.on("messages", updateMessages);
     socket.on("typing", handleTypingEvent);
@@ -71,7 +71,12 @@ const Message = ({ receiver, onReceiver }) => {
     if (receiver.messages && receiver.messages.length) {
       // here update that notifaction to be zero
       receivedMessage(receiver.messages);
-      updateNotification({ count: 0, sender: receiver.id, id: user.data.id });
+      updateNotification({
+        count: 0,
+        sender: receiver.id,
+        id: user.data.id,
+        onReceiver,
+      });
     }
     receiver.name !== "Bhetghat" && handleJoin();
   }, [receiver]);
@@ -99,12 +104,15 @@ const Message = ({ receiver, onReceiver }) => {
   }, [message]);
 
   const updateMessages = (msg) => {
-    // console.log("Message coming from server", msg);
+    console.log("Message coming from server", msg);
     receivedMessage(msg);
     // the other room is receiving message, at this point user has already joined that room to receive the message
     if (msg.receiver.id !== receiver.id) {
       // send to the backend to update the notification on the user
-      updateNotification({ sender: msg.receiver.id, id: user.data.id });
+      updateNotification({
+        sender: msg.onReceiver === "user" ? msg.sender.id : msg.receiver.id,
+        id: user.data.id,
+      });
     }
     scrollToButton();
   };

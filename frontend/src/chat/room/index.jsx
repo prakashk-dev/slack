@@ -8,7 +8,7 @@ const Room = ({ roomId }) => {
   useEffect(() => {
     fetchRoomById(roomId);
   }, [roomId]);
-
+  console.log("Room");
   return state.room.data ? (
     <Message receiver={state.room.data} onReceiver="room" />
   ) : null;

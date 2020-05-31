@@ -80,7 +80,7 @@ const Root = () => {
   if (state.loading) {
     return <Loading />;
   }
-
+  console.log("App");
   return (
     <div className="app">
       <Router>
