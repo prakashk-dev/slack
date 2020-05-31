@@ -389,7 +389,7 @@ export const AppProvider = ({ children }) => {
   const fetchConfig = () => {
     return dispatch({
       type: FETCH_CONFIG_SUCCESS,
-      payload: { SOCKET_URL: "http://localhost:3001" },
+      payload: { SOCKET_URL: "https://socket.bhet-ghat.com" },
     });
   };
 
