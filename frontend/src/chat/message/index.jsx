@@ -107,10 +107,12 @@ const Message = ({ receiver, onReceiver }) => {
     console.log("Message coming from server", msg);
     receivedMessage(msg);
     // the other room is receiving message, at this point user has already joined that room to receive the message
-    if (msg.receiver.id !== receiver.id) {
+    const receiverId =
+      msg.onReceiver === "user" ? msg.sender.id : msg.receiver.id;
+    if (receiverId !== receiver.id) {
       // send to the backend to update the notification on the user
       updateNotification({
-        sender: msg.onReceiver === "user" ? msg.sender.id : msg.receiver.id,
+        sender: receiverId,
         id: user.data.id,
       });
     }
