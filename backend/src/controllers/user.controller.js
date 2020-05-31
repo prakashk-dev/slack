@@ -73,6 +73,7 @@ const findRoomById = async (req, res) => {
           room: roomId,
           last_active: moment.utc().format(),
         });
+        getIO().in(roomId).emit("updateRoomUsers", user);
       }
       await user.save();
 
@@ -81,11 +82,6 @@ const findRoomById = async (req, res) => {
         user,
       };
 
-      // room has been added to the user's room list
-      // if (user.nModified === 1) {
-      //   const io = getIO();
-      //   io.in(roomId).emit("updateUser", usr);
-      // }
       getOne(req, res);
     } catch (err) {
       console.log("Error Message", err);

@@ -49,8 +49,8 @@ const Message = ({ receiver, onReceiver }) => {
     socket.on("messages", updateMessages);
     socket.on("typing", handleTypingEvent);
     socket.on("welcome", console.log);
-    socket.on("updateUsers", updateUsers);
-    socket.on("updateUser", (msg) =>
+    socket.on("updateRoomUsers", updateUsers);
+    socket.on("updateFriendList", (msg) =>
       console.log("This user has recently joined the room", msg)
     );
     socket.on("newUserJoined", console.log);

@@ -13,7 +13,7 @@ const USER_AUTHENTICATING_SUCCESS = "USER_AUTHENTICATING_SUCCESS";
 const ROOM_FETCHING = "ROOM_FETCHING";
 const ROOM_FETCHING_ERROR = "ROOM_FETCHING_ERROR";
 const ROOM_FETCHING_SUCCESS = "ROOM_FETCHING_SUCCESS";
-const UPDATE_USERS_LIST = "UPDATE_USERS_LIST";
+const UPDATE_ROOM_USERS = "UPDATE_ROOM_USERS";
 const GROUP_FETCHING = "GROUP_FETCHING";
 const GROUP_FETCHING_ERROR = "GROUP_FETCHING_ERROR";
 const GROUP_FETCHING_SUCCESS = "GROUP_FETCHING_SUCCESS";
@@ -185,14 +185,13 @@ export const appReducer = (state, { type, payload }) => {
         user: { ...state.user, data: payload.user },
         room: { ...state.room, data: null },
       };
-    case UPDATE_USERS_LIST:
-      const { entity, user } = payload;
+    case UPDATE_ROOM_USERS:
       return {
         ...state,
-        [entity]: {
-          ...state[entity],
+        room: {
+          ...state.room,
           data: {
-            users: [...state[entity].data.users, user],
+            users: [payload, ...state.room.data.users],
           },
         },
       };
@@ -442,7 +441,7 @@ export const AppProvider = ({ children }) => {
   };
   const updateUsers = (payload) => {
     return dispatch({
-      type: UPDATE_USERS_LIST,
+      type: UPDATE_ROOM_USERS,
       payload,
     });
   };
