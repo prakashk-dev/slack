@@ -14,7 +14,6 @@ const Chat = ({ children }) => {
   useEffect(() => {
     fetchRooms();
   }, []);
-  console.log("Chat");
   return isAuthenticated() ? (
     <Layout theme="dark">
       <Sidebar />

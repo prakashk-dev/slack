@@ -27,13 +27,8 @@ function updateUserList(socket, username, room) {
 }
 
 function onJoin(socket, { username, room, onReceiver, id }) {
-  // console.log("*********************************************");
-  // console.log("Join event comming from client", { username, room });
-  // console.log("*********************************************");
   try {
     setSocket(id, socket);
-    // join to room and group if it is not individual chat message
-    // console.log("All the rooms of this socket", Object.keys(socket.rooms));
     if (onReceiver !== "user") {
       const exists = Object.keys(socket.rooms).includes(room);
       if (!exists) {
@@ -51,18 +46,10 @@ function onJoin(socket, { username, room, onReceiver, id }) {
 }
 
 async function onMessage(io, socket, msg) {
-  // console.log("message comming from client", msg);
   try {
     const message = await saveMessage(msg);
-    console.log("message", message);
+    logger("How many times");
     if (msg.onReceiver === "user") {
-      // console.log("I am sender", msg.sender);
-      // console.log("I am receiver", msg.receiver);
-      // console.log("These are private channels", privateChannels);
-      // console.log(
-      //   "I am sending to this socketID",
-      //   privateChannels[msg.receiver]
-      // );
       const socketId = getSocket(msg.receiver).id;
       io.to(socketId).emit("messages", message);
     } else {

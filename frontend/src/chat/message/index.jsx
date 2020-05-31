@@ -37,13 +37,14 @@ const Message = ({ receiver, onReceiver }) => {
   const [typing, setTyping] = useState(null);
   const [file, setFile] = useState(null);
   const { user, socket, style, messages } = state;
+  const [notification, setNotification] = useState(null);
   const sender = user.data,
     name = receiver.name || receiver.username;
 
   useEffect(() => {
     handleEvents();
   }, []);
-  console.log("Message");
+
   const handleEvents = () => {
     socket.on("messages", updateMessages);
     socket.on("typing", handleTypingEvent);
@@ -67,6 +68,22 @@ const Message = ({ receiver, onReceiver }) => {
     socket.emit("join", joinData);
   };
 
+  useEffect(() => {
+    if (notification) {
+      const receiverId =
+        notification.onReceiver === "user"
+          ? notification.sender.id
+          : notification.receiver.id;
+      if (receiverId !== receiver.id) {
+        // send to the backend to update the notification on the user
+        updateNotification({
+          receiver: receiverId,
+          id: user.data.id,
+        });
+      }
+      setNotification(null);
+    }
+  }, [receiver, notification]);
   useEffect(() => {
     if (receiver.messages && receiver.messages.length) {
       // here update that notifaction to be zero
@@ -106,18 +123,10 @@ const Message = ({ receiver, onReceiver }) => {
   }, [message]);
 
   const updateMessages = (msg) => {
-    // console.log("Message coming from server", msg);
+    console.log("Message coming from server", msg);
     receivedMessage(msg);
     // the other room is receiving message, at this point user has already joined that room to receive the message
-    const receiverId =
-      msg.onReceiver === "user" ? msg.sender.id : msg.receiver.id;
-    if (receiverId !== receiver.id) {
-      // send to the backend to update the notification on the user
-      updateNotification({
-        receiver: receiverId,
-        id: user.data.id,
-      });
-    }
+    setNotification(msg);
     scrollToButton();
   };
 
@@ -199,7 +208,7 @@ const Message = ({ receiver, onReceiver }) => {
   const sendMessage = (msg) => {
     //  send message with post action
     setMessage("");
-    updateMessages(formatMessageForMyself(msg));
+    receivedMessage(formatMessageForMyself(msg));
     socket.emit("message", formatMessage(msg));
   };
 
