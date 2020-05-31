@@ -25,6 +25,12 @@ const HomeForm = () => {
       const isReturningUser =
         user.rooms.length || user.friends.length || user.groups.length;
       if (isReturningUser) {
+        // join user to all the rooms and blah blah blah
+        const rg = [
+          ...user.rooms.map((room) => room.room.id),
+          ...user.groups.map((group) => group.group.id),
+        ];
+        state.socket.emit("joinUserToAllRoomsAndGroups", rg);
         navigate(getLastActiveUrl(user));
       }
     }
