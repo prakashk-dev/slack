@@ -30,6 +30,7 @@ const ROOMS_FETCHING_ERROR = "ROOMS_FETCHING_ERROR";
 const ROOMS_FETCH_SUCCESS = "ROOMS_FETCHING_SUCCESS";
 
 const MESSAGE_RECEIVED = "MESSAGE_RECEIVED";
+const MESSAGE_UPDATED = "MESSAGE_UPDATED";
 const MESSAGE_SENT = "MESSAGE_SENT";
 
 const SMALL_SCREEN_LAYOUT = "SMALL_SCREEN_LAYOUT";
@@ -197,6 +198,11 @@ export const appReducer = (state, { type, payload }) => {
         rooms: { data: payload, loading: false, error: null },
       };
     case MESSAGE_RECEIVED:
+      return {
+        ...state,
+        messages: payload,
+      };
+    case MESSAGE_UPDATED:
       return {
         ...state,
         messages: [...state.messages, payload],
@@ -475,8 +481,9 @@ export const AppProvider = ({ children }) => {
   };
 
   const receivedMessage = (msg) => {
+    let type = msg.length ? MESSAGE_RECEIVED : MESSAGE_UPDATED;
     return dispatch({
-      type: MESSAGE_RECEIVED,
+      type,
       payload: msg,
     });
   };

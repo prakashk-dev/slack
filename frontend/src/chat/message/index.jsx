@@ -66,7 +66,7 @@ const Message = ({ receiver, onReceiver }) => {
 
   useEffect(() => {
     if (receiver.messages && receiver.messages.length) {
-      receivedMessage(...receiver.messages);
+      receivedMessage(receiver.messages);
     }
     receiver.name !== "Bhetghat" && handleJoin();
   }, [receiver]);
