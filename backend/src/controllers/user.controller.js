@@ -201,13 +201,13 @@ const deleteOne = async (req, res) => {
 const updateNotification = async (req, res) => {
   try {
     const { id } = req.params;
-    const { sender, count, onReceiver } = req.body;
+    const { receiver, count, onReceiver } = req.body;
     let user;
     if (count !== undefined) {
       // user has seen the message, so change status to accepted
       if (onReceiver === "user") {
         user = await User.findOneAndUpdate(
-          { _id: id, "friends.friend": sender },
+          { _id: id, "friends.friend": receiver },
           {
             $set: {
               "friends.$.status": "approved",
@@ -224,7 +224,7 @@ const updateNotification = async (req, res) => {
         {
           $pull: {
             notification: {
-              sender: { $eq: sender },
+              receiver: { $eq: receiver },
             },
           },
         },
@@ -235,13 +235,13 @@ const updateNotification = async (req, res) => {
     } else {
       const userWithNotification = await User.findOne({
         _id: id,
-        "notification.sender": { $eq: sender },
+        "notification.receiver": { $eq: receiver },
       }).exec();
 
       // if found increment the count else add one
       if (userWithNotification) {
         user = await User.findOneAndUpdate(
-          { _id: id, "notification.sender": { $eq: sender } },
+          { _id: id, "notification.receiver": { $eq: receiver } },
           {
             $inc: {
               "notification.$.count": 1,
@@ -255,7 +255,7 @@ const updateNotification = async (req, res) => {
           {
             $push: {
               notification: {
-                sender: sender,
+                receiver: receiver,
                 count: 1,
               },
             },

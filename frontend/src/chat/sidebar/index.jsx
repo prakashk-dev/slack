@@ -71,7 +71,9 @@ const Sidebar = () => {
   };
 
   const getNotificationCount = (notifications, id) => {
-    const ns = notifications.find((notification) => notification.sender === id);
+    const ns = notifications.find(
+      (notification) => notification.receiver === id
+    );
     return ns ? ns.count : 0;
   };
 
