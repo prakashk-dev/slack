@@ -43,7 +43,7 @@ const HomeForm = () => {
     const { friend, room, group } = lastActive;
     const sub = friend ? "u" : room ? "r" : "g";
     const id =
-      (friend && friend.id) || (room && room.id) || (group && group.id);
+      (friend && friend.username) || (room && room.id) || (group && group.id);
     return `/chat/${sub}/${id}`;
   };
 

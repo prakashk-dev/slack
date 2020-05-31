@@ -65,6 +65,7 @@ const Sidebar = () => {
       ? [friend.data.username]
       : [];
   };
+  console.log("Selected Keys", getSelectedKeys());
 
   const isReady = () => {
     return user.data && (room.data || friend.data);

@@ -80,7 +80,7 @@ const INIT_STATE = initialState();
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {
-  console.log({ type, payload });
+  // console.log({ type, payload });
   // console.log("state:", state);
   switch (type) {
     case SET_SOCKET:
@@ -447,9 +447,10 @@ export const AppProvider = ({ children }) => {
     dispatch({ type: FRIEND_FETCHING });
     try {
       const res = await axios.get(
-        `/api/users/chat/${currentUserId}?friendUserName=${friendUserName}`
+        `/api/users/${currentUserId}/chat?friendUserName=${friendUserName}`
       );
       if (res.data.error) {
+        console.log(res.data);
         return dispatch({
           type: FRIEND_FETCHING_ERROR,
           payload: res.data.error,

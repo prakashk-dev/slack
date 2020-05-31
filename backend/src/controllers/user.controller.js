@@ -104,9 +104,11 @@ const fetchUserWithChatHistory = async (req, res) => {
       username,
       "friends.friend": { $eq: id },
     }).exec();
+
     if (!friendExists) {
+      console.log("Username", username);
       friend = await User.findOneAndUpdate(
-        { username, "friends.friend": { $ne: id } },
+        { username },
         {
           $push: {
             friends: {
@@ -116,16 +118,19 @@ const fetchUserWithChatHistory = async (req, res) => {
             },
           },
         },
-        { returnOriginal: false }
+        { new: true }
       )
         .populate("friends.friend")
         .populate("rooms.room")
         .populate("groups.group")
         .exec();
+      console.log("****************");
+      console.log("Friend", friend);
+      console.log("****************");
 
       // Add friend to the current user's friend list
       user = await User.findOneAndUpdate(
-        { _id: id, "friends.friend": { $ne: friend.id } },
+        { _id: id },
         {
           $push: {
             friends: {
@@ -135,7 +140,7 @@ const fetchUserWithChatHistory = async (req, res) => {
             },
           },
         },
-        { returnOriginal: false }
+        { new: true }
       ).exec();
     } else {
       user = await User.findById(id)
