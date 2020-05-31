@@ -14,6 +14,7 @@ const ROOM_FETCHING = "ROOM_FETCHING";
 const ROOM_FETCHING_ERROR = "ROOM_FETCHING_ERROR";
 const ROOM_FETCHING_SUCCESS = "ROOM_FETCHING_SUCCESS";
 const UPDATE_ROOM_USERS = "UPDATE_ROOM_USERS";
+const UPDATE_FRIEND_LIST = "UPDATE_FRIEND_LIST";
 const GROUP_FETCHING = "GROUP_FETCHING";
 const GROUP_FETCHING_ERROR = "GROUP_FETCHING_ERROR";
 const GROUP_FETCHING_SUCCESS = "GROUP_FETCHING_SUCCESS";
@@ -80,7 +81,7 @@ const INIT_STATE = initialState();
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {
-  // console.log({ type, payload });
+  console.log({ type, payload });
   // console.log("state:", state);
   switch (type) {
     case SET_SOCKET:
@@ -191,7 +192,19 @@ export const appReducer = (state, { type, payload }) => {
         room: {
           ...state.room,
           data: {
+            ...state.room.data,
             users: [payload, ...state.room.data.users],
+          },
+        },
+      };
+    case UPDATE_FRIEND_LIST:
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          data: {
+            ...state.user.data,
+            friends: payload.friends,
           },
         },
       };
@@ -439,13 +452,19 @@ export const AppProvider = ({ children }) => {
       });
     }
   };
-  const updateUsers = (payload) => {
+  const updateRoomUsers = (payload) => {
     return dispatch({
       type: UPDATE_ROOM_USERS,
       payload,
     });
   };
 
+  const updateFriendList = (payload) => {
+    return dispatch({
+      type: UPDATE_FRIEND_LIST,
+      payload,
+    });
+  };
   const fetchUserChatInfo = async (currentUserId, friendUserName, callback) => {
     dispatch({ type: FRIEND_FETCHING });
     try {
@@ -590,12 +609,13 @@ export const AppProvider = ({ children }) => {
     toggleSidebar,
     fetchRoom,
     fetchRoomById,
-    updateUsers,
+    updateRoomUsers,
     fetchUserChatInfo,
     initialiseSocket,
     receivedMessage,
     fetchConfig,
     updateNotification,
+    updateFriendList,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

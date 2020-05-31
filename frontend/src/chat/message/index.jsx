@@ -29,9 +29,10 @@ const Message = ({ receiver, onReceiver }) => {
   const {
     state,
     toggleSidebar,
-    updateUsers,
+    updateRoomUsers,
     receivedMessage,
     updateNotification,
+    updateFriendList,
   } = useContext(AppContext);
   const divRef = useRef(null);
   const [typing, setTyping] = useState(null);
@@ -49,10 +50,8 @@ const Message = ({ receiver, onReceiver }) => {
     socket.on("messages", updateMessages);
     socket.on("typing", handleTypingEvent);
     socket.on("welcome", console.log);
-    socket.on("updateRoomUsers", updateUsers);
-    socket.on("updateFriendList", (msg) =>
-      console.log("This user has recently joined the room", msg)
-    );
+    socket.on("updateRoomUsers", updateRoomUsers);
+    socket.on("updateFriendList", updateFriendList);
     socket.on("newUserJoined", console.log);
   };
 

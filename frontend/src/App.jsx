@@ -62,10 +62,7 @@ const Root = () => {
     initialiseSocket(socket);
     logger(socket);
 
-    return () => {
-      initialiseSocket(null);
-      socket.disconnect();
-    };
+    return () => socket.disconnect();
   }, [state.config.data.SOCKET_URL]);
 
   const logger = (socket) => {

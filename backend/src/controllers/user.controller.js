@@ -3,7 +3,7 @@ import moment from "moment";
 import { User, Room, Message } from "../models";
 import { getOne } from "./room.controller";
 import { logger } from "../helpers";
-import { getIO } from "../socket/data";
+import { getIO, getSocket } from "../socket/data";
 
 // get all users
 const getAll = async (req, res) => {
@@ -119,6 +119,9 @@ const fetchUserWithChatHistory = async (req, res) => {
         .populate("rooms.room")
         .populate("groups.group")
         .exec();
+      // todo only send current friend
+      const socketId = getSocket(friend.id).id;
+      getIO().to(socketId).emit("updateFriendList", friend);
 
       // Add friend to the current user's friend list
       user = await User.findOneAndUpdate(
@@ -213,7 +216,11 @@ const updateNotification = async (req, res) => {
           {
             new: true,
           }
-        ).exec();
+        )
+          .populate("friends.friend")
+          .exec();
+        const socketId = getSocket(user.id).id;
+        getIO().to(socketId).emit("updateFriendList", user);
       }
       user = await User.findByIdAndUpdate(
         id,
