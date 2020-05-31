@@ -229,9 +229,15 @@ export const appReducer = (state, { type, payload }) => {
         messages: payload,
       };
     case MESSAGE_UPDATED:
+      // temp fix, somehow message is receiving multiple times
+      let messages =
+        payload.id &&
+        state.messages.find((message) => message.id === payload.id)
+          ? [...state.messages]
+          : [...state.messages, payload];
       return {
         ...state,
-        messages: [...state.messages, payload],
+        messages,
       };
     case LOGOUT:
       Cookies.remove("token");
@@ -338,28 +344,32 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const fetchRoomById = async (roomId) => {
+  const fetchRoomById = async (roomId, source) => {
     dispatch({ type: ROOM_FETCHING });
     try {
       const res = await axios.get(
-        `/api/users/${state.user.data.id}/rooms/${roomId}`
+        `/api/users/${state.user.data.id}/rooms/${roomId}`,
+        { cancelToken: source.token }
       );
-      if (res.data.error) {
+      if (!axios.isCancel()) {
+        if (res.data.error) {
+          return dispatch({
+            type: ROOM_FETCHING_ERROR,
+            payload: res.data.error,
+          });
+        }
+        const room = res.data;
         return dispatch({
-          type: ROOM_FETCHING_ERROR,
-          payload: res.data.error,
+          type: ROOM_FETCHING_SUCCESS,
+          payload: room,
         });
       }
-      const room = res.data;
-      return dispatch({
-        type: ROOM_FETCHING_SUCCESS,
-        payload: room,
-      });
     } catch (error) {
-      return dispatch({
-        type: ROOM_FETCHING_ERROR,
-        payload: error.message,
-      });
+      if (!axios.isCancel())
+        return dispatch({
+          type: ROOM_FETCHING_ERROR,
+          payload: error.message,
+        });
     }
   };
   const fetchRoom = async (roomId) => {
@@ -466,27 +476,32 @@ export const AppProvider = ({ children }) => {
       payload,
     });
   };
-  const fetchUserChatInfo = async (currentUserId, friendUserName, callback) => {
+  const fetchUserChatInfo = async (currentUserId, friendUserName, source) => {
     dispatch({ type: FRIEND_FETCHING });
     try {
       const res = await axios.get(
-        `/api/users/${currentUserId}/chat?friendUserName=${friendUserName}`
+        `/api/users/${currentUserId}/chat?friendUserName=${friendUserName}`,
+        { cancelToken: source.token }
       );
-      if (res.data.error) {
+      if (!axios.isCancel()) {
+        if (res.data.error) {
+          return dispatch({
+            type: FRIEND_FETCHING_ERROR,
+            payload: res.data.error,
+          });
+        }
         return dispatch({
-          type: FRIEND_FETCHING_ERROR,
-          payload: res.data.error,
+          type: FRIEND_FETCHING_SUCCESS,
+          payload: res.data,
         });
       }
-      return dispatch({
-        type: FRIEND_FETCHING_SUCCESS,
-        payload: res.data,
-      });
     } catch (err) {
-      return dispatch({
-        type: FRIEND_FETCHING_ERROR,
-        payload: err.message,
-      });
+      if (!axios.isCancel()) {
+        return dispatch({
+          type: FRIEND_FETCHING_ERROR,
+          payload: err.message,
+        });
+      }
     }
   };
   const handleJoin = async (groupId) => {

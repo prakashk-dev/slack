@@ -62,8 +62,6 @@ const Message = ({ receiver, onReceiver }) => {
       username: sender.username,
       onReceiver,
     };
-    // privateChannel && (joinData["privateChannel"] = privateChannel);
-
     socket.emit("join", joinData);
   };
 
@@ -87,8 +85,6 @@ const Message = ({ receiver, onReceiver }) => {
     if (receiver.messages && receiver.messages.length) {
       // here update that notifaction to be zero
       receivedMessage(receiver.messages);
-      console.log("sender", sender);
-      console.log("receiver", receiver);
       updateNotification({
         count: 0,
         receiver: receiver.id,
