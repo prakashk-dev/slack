@@ -278,7 +278,7 @@ const updateNotification = async (req, res) => {
 // helpers function
 const updateFriendList = (user) => {
   try {
-    const socketId = getSocket(user._id);
+    const socketId = getSocket(user._id).id;
     getIO().to(socketId).emit("updateFriendList", user);
   } catch (err) {
     console.log("Error updateFriendList", err);

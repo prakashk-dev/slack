@@ -81,7 +81,7 @@ const INIT_STATE = initialState();
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {
-  // console.log({ type, payload });
+  console.log({ type, payload });
   // console.log("state:", state);
   switch (type) {
     case SET_SOCKET:
@@ -386,10 +386,11 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const fetchConfig = () => {
+  const fetchConfig = async () => {
+    const res = await axios.get("/api/config");
     return dispatch({
       type: FETCH_CONFIG_SUCCESS,
-      payload: { SOCKET_URL: "https://socket.bhet-ghat.com" },
+      payload: res.data,
     });
   };
 

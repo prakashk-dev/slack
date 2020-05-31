@@ -1,6 +1,6 @@
-// if (process.env.NODE_ENV !== "production") {
-// }
-require("source-map-support/register");
+if (process.env.NODE_ENV !== "production") {
+  require("source-map-support/register");
+}
 
 import connect from "./db";
 import http from "http";
@@ -10,7 +10,6 @@ import cookieParser from "cookie-parser";
 import logger from "morgan";
 import cors from "cors";
 import config from "./config";
-import handleSocketIO from "./socket";
 import routes from "./routes";
 import socketio from "socket.io";
 import socketIO from "./socket";

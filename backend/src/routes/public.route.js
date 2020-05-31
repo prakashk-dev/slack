@@ -1,7 +1,7 @@
 import express from "express";
 
 const router = express.Router();
-router.get("/api/config", (req, res) => {
+router.get("/config", (req, res) => {
   return res.json({
     SOCKET_URL:
       process.env.NODE_ENV === "production"
