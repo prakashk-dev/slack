@@ -31,6 +31,7 @@ const Infobar = ({ entity }) => {
       }
       collapsedWidth={0}
       defaultCollapsed={false}
+      theme="light"
     >
       <div className="profile">
         <Avatar src="/assets/kathmandu.png" alt="Group Icon" size={60} />

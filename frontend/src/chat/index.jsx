@@ -15,7 +15,7 @@ const Chat = ({ children }) => {
     fetchRooms();
   }, []);
   return isAuthenticated() ? (
-    <Layout theme="dark">
+    <Layout theme="light">
       <Sidebar />
       <Content>{children}</Content>
     </Layout>

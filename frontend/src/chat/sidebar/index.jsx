@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, Fragment } from "react";
 import { navigate } from "@reach/router";
 import { AppContext } from "src/context";
 import "./sidebar.scss";
@@ -6,12 +6,11 @@ import { Layout, Menu, Dropdown, Progress, Avatar, Badge } from "antd";
 const { Sider } = Layout;
 const { SubMenu } = Menu;
 import {
-  DownOutlined,
   SlackSquareOutlined,
   MessageOutlined,
   UserOutlined,
   CaretDownFilled,
-  ExclamationCircleOutlined,
+  CloseCircleOutlined,
 } from "@ant-design/icons";
 
 const Sidebar = () => {
@@ -83,25 +82,50 @@ const Sidebar = () => {
       collapsible
       collapsed={!style.showSidebar}
       collapsedWidth={style.device === "mobile" ? 0 : 80}
-      className="left-sidebar"
+      className={
+        style.device === "mobile" && style.showSidebar
+          ? "small-left-sidebar"
+          : "left-sidebar"
+      }
     >
       <div className={style.showSidebar ? "logo" : "logo-small"}>
-        {style.showSidebar && user.data.username}
-        {style.showSidebar && (
-          <Avatar size={40} icon={<UserOutlined />} alt="" />
-        )}
-        <Dropdown overlay={profile} trigger={["hover", "click"]}>
-          {style.showSidebar ? (
-            <a
-              className="ant-dropdown-link"
-              onClick={(e) => e.preventDefault()}
-            >
-              <CaretDownFilled />
-            </a>
+        {style.device === "desktop" ? (
+          style.showSidebar ? (
+            <Fragment>
+              {user.data.username}
+              <Avatar size={40} icon={<UserOutlined />} alt="" />
+              <Dropdown overlay={profile} trigger={["hover", "click"]}>
+                <a
+                  className="ant-dropdown-link"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <CaretDownFilled />
+                </a>
+              </Dropdown>
+            </Fragment>
           ) : (
+            <Dropdown overlay={profile} trigger={["hover", "click"]}>
+              <Avatar size={40} icon={<UserOutlined />} alt="" />
+            </Dropdown>
+          )
+        ) : (
+          <Fragment>
+            <CloseCircleOutlined
+              style={{ fontSize: "1.5em" }}
+              onClick={() => toggleSidebar({ showSidebar: !style.showSidebar })}
+            />
+            {user.data.username}
             <Avatar size={40} icon={<UserOutlined />} alt="" />
-          )}
-        </Dropdown>
+            <Dropdown overlay={profile} trigger={["hover", "click"]}>
+              <a
+                className="ant-dropdown-link"
+                onClick={(e) => e.preventDefault()}
+              >
+                <CaretDownFilled />
+              </a>
+            </Dropdown>
+          </Fragment>
+        )}
       </div>
       <Menu
         mode="inline"

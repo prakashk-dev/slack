@@ -14,6 +14,7 @@
     color: white;
     justify-items: center;
     align-items: center;
+    background: dodgerblue;
 
     .anticon-caret-down {
       svg {
@@ -42,6 +43,18 @@
     }
   }
 
+}
+
+.small-left-sidebar {
+  @extend .left-sidebar;
+  width: 100vw !important;
+  min-width: 100vw !important;
+  max-width: 100vw !important;
+
+  .logo {
+    grid-template-columns: 60px 1fr 40px 40px;
+
+  }
 }
 
 ul.menu-item {

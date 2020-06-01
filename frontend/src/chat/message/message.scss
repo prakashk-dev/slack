@@ -10,38 +10,51 @@
     flex: 0 0 100%;
     display: grid;
     padding: 0px;
-    grid-template-columns: 60px auto 60px;
+    grid-template-columns: 60px auto 100px;
     grid-template-areas: "menu header info";
-    color: white;
     justify-items: center;
     align-items: center;
     text-overflow: ellipsis;
     white-space: nowrap;
+    background: white;
+    color: #2a2a2a;
+    box-shadow: 0px 1px 0px 0px #ccc;
 
-    .chat-heading {
-      color: white;
+    .chat-title {
+      font-size: 1.5em;
       grid-area: header;
     }
 
     svg {
-      color: white;
       font-size: 1.2em;
     }
 
     .anticon-menu-fold {
       grid-area: menu;
+
+      &:hover {
+        color: dodgerblue;
+      }
     }
 
-    .anticon-info-circle {
-      margin-left: 8px;
-      font-size: 1.2em;
+    .info-circle {
       cursor: pointer;
+
+      .anticon-info-circle {
+        margin-right: 8px;
+        font-size: 1.2em;
+      }
+
+      &:hover {
+        color: dodgerblue;
+      }
     }
   }
 
   .chat-header-small {
     @extend .chat-header;
-    grid-template-areas: "menu header header";
+    grid-template-columns: 60px auto 60px;
+
   }
 
   .chat-content {
@@ -87,6 +100,7 @@
         position: relative;
 
         .ant-upload-picture-card-wrapper {
+
           .ant-upload,
           .ant-upload-select,
           .ant-upload-select-picture-card {
@@ -109,6 +123,7 @@
 
       .disabled {
         .ant-upload-picture-card-wrapper {
+
           .ant-upload .ant-upload-select,
           .ant-upload-select-picture-card {
             pointer-events: none;

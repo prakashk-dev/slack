@@ -1,6 +1,23 @@
+@import "src/style.scss";
+
 .right-sidebar {
     height: calc(100vh - 64px);
     height: calc(calc(var(--vh, 1vh) * 100) - 64px);
+    box-shadow: 0px 1px 2px 1px #aaa;
+
+    li.ant-menu-submenu {
+
+        div.ant-menu-submenu-title {
+            box-shadow: 0px 1px 1px 1px $box-shadow;
+        }
+
+        ul {
+            height: calc(50vh - 265px);
+            height: calc(calc(var(--vh, 1vh) * 100) - 265px);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+    }
 
     .profile {
         height: 150px;
