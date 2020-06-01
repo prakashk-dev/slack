@@ -21,6 +21,7 @@ const Infobar = ({ entity }) => {
   return (
     <Sider
       collapsible
+      trigger={null}
       collapsed={!style.showInfobar}
       className={
         style.device === "mobile"
