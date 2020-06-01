@@ -131,7 +131,9 @@ const Message = ({ receiver, onReceiver }) => {
   };
 
   const scrollToButton = () => {
-    divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      divRef.current && divRef.current.scrollIntoView({ behavior: "smooth" });
+    }, 200);
   };
 
   const ToggleIcon = (props) => {
