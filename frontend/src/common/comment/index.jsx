@@ -47,9 +47,11 @@ export default function Comment({ by, message, ...props }) {
       content={<Content />}
       datetime={
         <Tooltip
-          title={moment(message.timeStamp).format("YYYY-MM-DD HH:mm:ss")}
+          title={moment(message.createt_at)
+            .local()
+            .format("YYYY-MM-DD HH:mm:ss")}
         >
-          <span>{moment(message.timeStamp).fromNow()}</span>
+          <span>{moment(message.created_at).local().fromNow()}</span>
         </Tooltip>
       }
     />

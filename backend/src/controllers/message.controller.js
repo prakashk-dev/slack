@@ -1,4 +1,5 @@
 import { Message, User } from "../models";
+import moment from "moment";
 import { logger } from "../helpers";
 
 const getAll = async (_, res) => {
@@ -32,7 +33,10 @@ const getByUsers = async (req, res) => {
 };
 
 const saveMessage = async (data) => {
-  let message = await Message.create(data);
+  let message = await Message.create({
+    ...data,
+    created_at: moment.utc().format(),
+  });
   const msg = await Message.findOne({ _id: message._id })
     .populate("receiver")
     .populate("sender")

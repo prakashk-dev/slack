@@ -5,6 +5,7 @@ import React, {
   useRef,
   Fragment,
 } from "react";
+import moment from "moment";
 import { AppContext } from "src/context";
 import Infobar from "src/chat/infobar";
 
@@ -180,6 +181,7 @@ const Message = ({ receiver, onReceiver }) => {
         type,
         url,
       },
+      created_at: moment.utc().format(),
     };
   };
 
