@@ -36,6 +36,7 @@ const Message = ({ receiver, onReceiver }) => {
     updateFriendList,
   } = useContext(AppContext);
   const divRef = useRef(null);
+  const inputRef = useRef(null);
   const [typing, setTyping] = useState(null);
   const [file, setFile] = useState(null);
   const { user, socket, style, messages } = state;
@@ -94,6 +95,7 @@ const Message = ({ receiver, onReceiver }) => {
       });
     }
     receiver.name !== "Bhetghat" && handleJoin();
+    inputRef.current && inputRef.current.focus();
   }, [receiver]);
 
   useEffect(() => {
@@ -146,6 +148,7 @@ const Message = ({ receiver, onReceiver }) => {
 
   const handleFileUpload = (uploads) => {
     setFile(uploads[0].originFileObj);
+    inputRef.current && inputRef.current.focus();
   };
   const handleSendLike = () => {
     const msg = {
@@ -291,12 +294,15 @@ const Message = ({ receiver, onReceiver }) => {
                 value={message}
                 type="text"
                 name="message"
+                ref={inputRef}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={(e) =>
                   e.key === "Enter"
                     ? file
                       ? sendMessageWithFile()
-                      : handleSend()
+                      : message.length
+                      ? handleSend()
+                      : handleSendLike()
                     : null
                 }
                 placeholder="Type a message ..."
