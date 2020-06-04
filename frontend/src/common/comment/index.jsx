@@ -43,20 +43,23 @@ const Comment = ({ by, message, ...props }) => {
       </Fragment>
     );
   };
-  return useMemo(
-    () => (
-      <AntComment
-        {...Config}
-        {...props}
-        content={<Content />}
-        datetime={
-          <Tooltip title={localTimeTooltip}>
-            <span>{fromNow}</span>
-          </Tooltip>
-        }
-      />
-    ),
-    [message]
+
+  return (
+    <AntComment
+      {...Config}
+      {...props}
+      content={useMemo(
+        () => (
+          <Content />
+        ),
+        [message]
+      )}
+      datetime={
+        <Tooltip title={localTimeTooltip}>
+          <span>{fromNow}</span>
+        </Tooltip>
+      }
+    />
   );
 };
 export default Comment;
