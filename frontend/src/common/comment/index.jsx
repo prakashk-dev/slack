@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useMemo } from "react";
 
 import { Comment as AntComment, Tooltip, Avatar } from "antd";
 import moment from "moment";
@@ -6,7 +6,10 @@ import moment from "moment";
 import "./comment.scss";
 import { LikeTwoTone } from "@ant-design/icons";
 
-export default function Comment({ by, message, ...props }) {
+const Comment = ({ by, message, ...props }) => {
+  const getLocal = moment(message.created_at).local();
+  const fromNow = getLocal.fromNow();
+  const localTimeTooltip = getLocal.format("YYYY-MM-DD HH:mm:ss");
   const Config =
     by === "other"
       ? {
@@ -40,20 +43,20 @@ export default function Comment({ by, message, ...props }) {
       </Fragment>
     );
   };
-  return (
-    <AntComment
-      {...Config}
-      {...props}
-      content={<Content />}
-      datetime={
-        <Tooltip
-          title={moment(message.createt_at)
-            .local()
-            .format("YYYY-MM-DD HH:mm:ss")}
-        >
-          <span>{moment(message.created_at).local().fromNow()}</span>
-        </Tooltip>
-      }
-    />
+  return useMemo(
+    () => (
+      <AntComment
+        {...Config}
+        {...props}
+        content={<Content />}
+        datetime={
+          <Tooltip title={localTimeTooltip}>
+            <span>{fromNow}</span>
+          </Tooltip>
+        }
+      />
+    ),
+    [message]
   );
-}
+};
+export default Comment;

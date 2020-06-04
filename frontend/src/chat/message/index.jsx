@@ -47,6 +47,7 @@ const Message = ({ receiver, onReceiver }) => {
   useEffect(() => {
     handleEvents();
   }, []);
+
   const handleEvents = () => {
     socket.on("messages", updateMessages);
     socket.on("typing", handleTypingEvent);
