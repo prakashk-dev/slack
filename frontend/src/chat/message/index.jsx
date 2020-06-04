@@ -47,7 +47,6 @@ const Message = ({ receiver, onReceiver }) => {
   useEffect(() => {
     handleEvents();
   }, []);
-
   const handleEvents = () => {
     socket.on("messages", updateMessages);
     socket.on("typing", handleTypingEvent);
@@ -262,76 +261,77 @@ const Message = ({ receiver, onReceiver }) => {
           </div>
         )}
       </Header>
-      <Content className="chat-content">
-        {receiver.id === "welcome" ? (
-          <div style={{ color: "white", justifySelf: "center" }}>
-            <h1>
-              <pre>{JSON.stringify(state.style, null, 4)}</pre>
-            </h1>
-          </div>
-        ) : (
-          <Fragment>
-            <div className="message-container">
-              {messages.length ? (
-                messages.map((msg, index) => {
-                  return isCurrent(msg) ? (
-                    <Comment by={messageBy(msg)} message={msg} key={index} />
-                  ) : null;
-                })
-              ) : (
-                <pre> {JSON.stringify(messages, null, 4)}</pre>
-              )}
-              <div ref={divRef} id="recentMessage"></div>
-            </div>
-            <div className="message-footer">
-              <Upload
-                className="upload-icon"
-                onChange={handleFileUpload}
-                uploaded={!file}
-              />
+      <div
+        className="container"
+        style={{ display: "flex", height: "100%", width: "100%" }}
+      >
+        <Content className="chat-content">
+          {receiver.name === "Bhetghat" ? null : (
+            <Fragment>
+              <div className="message-container">
+                {messages.length
+                  ? messages.map((msg, index) => {
+                      return isCurrent(msg) ? (
+                        <Comment
+                          by={messageBy(msg)}
+                          message={msg}
+                          key={index}
+                        />
+                      ) : null;
+                    })
+                  : null}
+                <div ref={divRef} id="recentMessage"></div>
+              </div>
+              <div className="message-footer">
+                <Upload
+                  className="upload-icon"
+                  onChange={handleFileUpload}
+                  uploaded={!file}
+                />
 
-              <Input
-                value={message}
-                type="text"
-                name="message"
-                ref={inputRef}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={(e) =>
-                  e.key === "Enter"
-                    ? file
+                <Input
+                  value={message}
+                  type="text"
+                  name="message"
+                  ref={inputRef}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={(e) =>
+                    e.key === "Enter"
+                      ? file
+                        ? sendMessageWithFile()
+                        : message.length
+                        ? handleSend()
+                        : handleSendLike()
+                      : null
+                  }
+                  placeholder="Type a message ..."
+                />
+                <button
+                  onClick={() =>
+                    file
                       ? sendMessageWithFile()
                       : message.length
                       ? handleSend()
                       : handleSendLike()
-                    : null
-                }
-                placeholder="Type a message ..."
-              />
-              <button
-                onClick={() =>
-                  file
-                    ? sendMessageWithFile()
-                    : message.length
-                    ? handleSend()
-                    : handleSendLike()
-                }
-              >
-                {message.length || file ? <SendOutlined /> : <LikeTwoTone />}
-              </button>
-              <div
-                className="typing"
-                dangerouslySetInnerHTML={{
-                  __html:
-                    typing && typing.receiver === receiver.id
-                      ? typing.message
-                      : null,
-                }}
-              ></div>
-            </div>
-          </Fragment>
-        )}
-      </Content>
-      <Infobar entity={receiver} />
+                  }
+                >
+                  {message.length || file ? <SendOutlined /> : <LikeTwoTone />}
+                </button>
+                <div
+                  className="typing"
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      typing && typing.receiver === receiver.id
+                        ? typing.message
+                        : null,
+                  }}
+                ></div>
+              </div>
+            </Fragment>
+          )}
+        </Content>
+        <Infobar entity={receiver} />
+      </div>
     </Layout>
   );
 };
