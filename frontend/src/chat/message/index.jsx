@@ -41,6 +41,7 @@ const Message = ({ receiver, onReceiver }) => {
   const [file, setFile] = useState(null);
   const { user, socket, style, messages } = state;
   const [notification, setNotification] = useState(null);
+  const [uploads, setUploads] = useState([]);
   const sender = user.data,
     name = receiver.name || receiver.username;
 
@@ -147,7 +148,7 @@ const Message = ({ receiver, onReceiver }) => {
   };
 
   const handleFileUpload = (uploads) => {
-    setFile(uploads[0].originFileObj);
+    uploads.length ? setFile(uploads[0].originFileObj) : setFile(null);
     inputRef.current && inputRef.current.focus();
   };
   const handleSendLike = () => {
