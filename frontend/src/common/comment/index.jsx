@@ -39,7 +39,7 @@ const Comment = ({ by, message, ...props }) => {
       ? {
           author: <a>{message.sender.username}</a>,
           avatar: (
-            <Popover trigger="click" content={more}>
+            <Popover trigger="click" content={more} placement="buttomLeft">
               <Avatar
                 src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
                 alt="Han Solo"

@@ -130,8 +130,7 @@ const Sidebar = () => {
       <Menu
         mode="inline"
         // onSelect={handleMenuItemClick}
-        defaultOpenKeys={["rooms", "directMessages"]}
-        forceSubMenuRender={true}
+        openKeys={["rooms", "directMessages"]}
         selectedKeys={getSelectedKeys()}
       >
         <SubMenu key="rooms" icon={<SlackSquareOutlined />} title="Room">

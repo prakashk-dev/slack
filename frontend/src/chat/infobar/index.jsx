@@ -3,20 +3,30 @@ import { AppContext } from "src/context";
 import { navigate } from "@reach/router";
 
 import "./infobar.scss";
-import { Layout, Menu, Dropdown, Avatar } from "antd";
+import { Layout, Menu, Popover, Avatar, Button } from "antd";
 const { Sider } = Layout;
 const { SubMenu } = Menu;
-import { UserOutlined } from "@ant-design/icons";
+import { UserOutlined, MoreOutlined } from "@ant-design/icons";
 
 const Infobar = ({ entity }) => {
-  const { state } = useContext(AppContext);
+  const { state, toggleSidebar } = useContext(AppContext);
   const { style } = state;
+  const [moreVisible, setMoreVisible] = useState({});
   const users = entity.users; // for room and group
   const user = entity; // for individual, entity itself a single user
   const title = entity.name || entity.username; // for room and group use name, for user, username
   const handleMenuItemClick = (username) => {
+    style.device === "mobile" &&
+      toggleSidebar({ showInfobar: !style.showInfobar });
     navigate(`/chat/u/${username}`);
   };
+
+  const more = (username) => (
+    <div className="more_options">
+      <p onClick={() => handleMenuItemClick(username)}>Direct Message</p>
+      <p>View Profile</p>
+    </div>
+  );
 
   return (
     <Sider
@@ -38,21 +48,48 @@ const Infobar = ({ entity }) => {
         <Avatar src="/assets/kathmandu.png" alt="Group Icon" size={60} />
         {title}
       </div>
-      <Menu mode="inline" defaultOpenKeys={["users"]}>
+      <Menu mode="inline" openKeys={["users"]} defaultActiveFirst>
         <SubMenu key="users" icon={<UserOutlined />} title="Users">
           {users ? (
             users.length ? (
               users.map((usr) => {
                 return (
-                  <Menu.Item
+                  <div
+                    className="menu-item"
                     key={usr.id}
-                    onClick={() => handleMenuItemClick(usr.username)}
-                    icon={
-                      <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
+                    onMouseEnter={() =>
+                      setMoreVisible({
+                        [usr.id]: true,
+                      })
+                    }
+                    onMouseLeave={() =>
+                      setMoreVisible({
+                        [usr.id]: false,
+                      })
                     }
                   >
-                    {usr.username}
-                  </Menu.Item>
+                    <Menu.Item
+                      onClick={() => handleMenuItemClick(usr.username)}
+                      onItemHover={() => console.log()}
+                      icon={
+                        <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
+                      }
+                    >
+                      {usr.username}
+                    </Menu.Item>
+                    {moreVisible[usr.id] && (
+                      <Popover
+                        trigger="click"
+                        content={() => more(usr.username)}
+                        placement="bottomRight"
+                      >
+                        <Button
+                          icon={<MoreOutlined />}
+                          onItemHover={() => console.log()}
+                        />
+                      </Popover>
+                    )}
+                  </div>
                 );
               })
             ) : (
