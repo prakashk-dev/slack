@@ -1,6 +1,6 @@
 import React, { Fragment, useMemo } from "react";
-
-import { Comment as AntComment, Tooltip, Avatar } from "antd";
+import { navigate } from "@reach/router";
+import { Comment as AntComment, Tooltip, Avatar, Popover } from "antd";
 import moment from "moment";
 
 import "./comment.scss";
@@ -26,15 +26,25 @@ const Comment = ({ by, message, ...props }) => {
   const getLocal = moment(message.created_at).local();
   const fromNow = getLocal.fromNow();
   const localTimeTooltip = getLocal.format("YYYY-MM-DD HH:mm:ss");
+  const more = () => (
+    <div className="more_options">
+      <p onClick={() => navigate(`/chat/u/${message.sender.username}`)}>
+        Direct Message
+      </p>
+      <p>View Profile</p>
+    </div>
+  );
   const Config =
     by === "other"
       ? {
           author: <a>{message.sender.username}</a>,
           avatar: (
-            <Avatar
-              src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-              alt="Han Solo"
-            />
+            <Popover trigger="click" content={more}>
+              <Avatar
+                src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+                alt="Han Solo"
+              />
+            </Popover>
           ),
           className:
             message.body.type === "icon" ? "icon-receiver" : "receiver",
