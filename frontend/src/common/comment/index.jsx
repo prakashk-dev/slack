@@ -1,6 +1,6 @@
-import React, { Fragment, useMemo } from "react";
+import React, { Fragment, useState } from "react";
 import { navigate } from "@reach/router";
-import { Comment as AntComment, Tooltip, Avatar, Popover } from "antd";
+import { Comment as AntComment, Tooltip, Avatar, Popover, Modal } from "antd";
 import moment from "moment";
 
 import "./comment.scss";
@@ -8,10 +8,25 @@ import { LikeTwoTone } from "@ant-design/icons";
 
 // Do not re render message content, only re render time, see below
 const Content = React.memo(({ message }) => {
+  const [isVisible, setIsVisible] = useState(false);
   return (
     <Fragment>
       {message.body.type === "image" && (
-        <img src={message.body.url} alt="No image found" />
+        <Fragment>
+          <img
+            src={message.body.url}
+            alt="No image found"
+            onClick={() => setIsVisible(true)}
+          />
+          <Modal
+            title="Preview Image"
+            visible={isVisible}
+            footer={null}
+            onCancel={() => setIsVisible(false)}
+          >
+            <img src={message.body.url} alt="No image found" />
+          </Modal>
+        </Fragment>
       )}
       {message.body.type === "icon" ? (
         <LikeTwoTone />

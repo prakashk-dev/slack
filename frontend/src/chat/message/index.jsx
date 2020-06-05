@@ -41,7 +41,6 @@ const Message = ({ receiver, onReceiver }) => {
   const [file, setFile] = useState(null);
   const { user, socket, style, messages } = state;
   const [notification, setNotification] = useState(null);
-  const [uploads, setUploads] = useState([]);
   const sender = user.data,
     name = receiver.name || receiver.username;
 
