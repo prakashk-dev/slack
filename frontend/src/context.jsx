@@ -81,7 +81,7 @@ const INIT_STATE = initialState();
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {
-  // console.log({ type, payload });
+  console.log({ type, payload });
   // console.log("state:", state);
   switch (type) {
     case SET_SOCKET:

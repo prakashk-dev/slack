@@ -6,6 +6,22 @@ import moment from "moment";
 import "./comment.scss";
 import { LikeTwoTone } from "@ant-design/icons";
 
+// Do not re render message content, only re render time, see below
+const Content = React.memo(({ message }) => {
+  return (
+    <Fragment>
+      {message.body.type === "image" && (
+        <img src={message.body.url} alt="No image found" />
+      )}
+      {message.body.type === "icon" ? (
+        <LikeTwoTone />
+      ) : (
+        <p>{message.body.text}</p>
+      )}
+    </Fragment>
+  );
+});
+
 const Comment = ({ by, message, ...props }) => {
   const getLocal = moment(message.created_at).local();
   const fromNow = getLocal.fromNow();
@@ -29,31 +45,11 @@ const Comment = ({ by, message, ...props }) => {
         }
       : { className: "admin" };
 
-  const Content = () => {
-    return (
-      <Fragment>
-        {message.body.type === "image" && (
-          <img src={message.body.url} alt="No image found" />
-        )}
-        {message.body.type === "icon" ? (
-          <LikeTwoTone />
-        ) : (
-          <p>{message.body.text}</p>
-        )}
-      </Fragment>
-    );
-  };
-
   return (
     <AntComment
       {...Config}
       {...props}
-      content={useMemo(
-        () => (
-          <Content />
-        ),
-        [message]
-      )}
+      content={<Content message={message} />}
       datetime={
         <Tooltip title={localTimeTooltip}>
           <span>{fromNow}</span>
