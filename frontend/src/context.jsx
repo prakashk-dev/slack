@@ -285,6 +285,7 @@ export const appReducer = (state, { type, payload }) => {
         style: {
           ...state.style,
           layout: "desktop",
+          showSidebar: true,
         },
       };
     case TOGGLE_SIDEBAR:

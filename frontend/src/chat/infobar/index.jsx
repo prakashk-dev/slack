@@ -18,7 +18,14 @@ const Infobar = ({ entity }) => {
   const users = entity.users; // for room and group
   const user = entity; // for individual, entity itself a single user
   const title = entity.name || entity.username; // for room and group use name, for user, username
+
+  const isMe = (username) => {
+    const loggedInUser = state.user.data && state.user.data.username;
+    return loggedInUser === username;
+  };
+
   const handleMenuItemClick = (username) => {
+    if (isMe(username)) return;
     style.layout === "mobile" &&
       toggleSidebar({ showInfobar: !style.showInfobar });
     navigate(`/chat/u/${username}`);
@@ -101,9 +108,9 @@ const Infobar = ({ entity }) => {
                         <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
                       }
                     >
-                      {usr.username}
+                      {isMe(usr.username) ? "Me" : usr.username}
                     </Menu.Item>
-                    {moreVisible[usr.id] && (
+                    {moreVisible[usr.id] && !isMe(usr.username) && (
                       <Popover
                         trigger="click"
                         content={() => more(usr.username)}
