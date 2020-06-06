@@ -12,6 +12,7 @@ const Infobar = ({ entity }) => {
   const { state, toggleSidebar } = useContext(AppContext);
   const { style } = state;
   const [moreVisible, setMoreVisible] = useState({});
+  const [openKeys, setOpenKeys] = useState(["users"]);
   const users = entity.users; // for room and group
   const user = entity; // for individual, entity itself a single user
   const title = entity.name || entity.username; // for room and group use name, for user, username
@@ -27,7 +28,9 @@ const Infobar = ({ entity }) => {
       <p>View Profile</p>
     </div>
   );
-
+  const toggleSelectKeys = () => {
+    setOpenKeys(openKeys.length ? [] : ["users"]);
+  };
   return (
     <Sider
       collapsible
@@ -48,7 +51,12 @@ const Infobar = ({ entity }) => {
         <Avatar src="/assets/kathmandu.png" alt="Group Icon" size={60} />
         {title}
       </div>
-      <Menu mode="inline" defaultOpenKeys={["users"]} defaultActiveFirst>
+      <Menu
+        mode="inline"
+        openKeys={openKeys}
+        defaultActiveFirst
+        onOpenChange={toggleSelectKeys}
+      >
         <SubMenu key="users" icon={<UserOutlined />} title="Users">
           {users ? (
             users.length ? (

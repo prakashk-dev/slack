@@ -39,7 +39,6 @@
 
       li.ant-menu-submenu {
         div.ant-menu-submenu-title {
-          font-weight: bold;
           box-shadow: 0px 1px 1px 1px $box-shadow;
           padding-left: 16px !important;
         }
@@ -47,6 +46,7 @@
         .sub-topic {
           div.ant-menu-submenu-title {
             font-weight: 600;
+            font-size: 0.9em;
             box-shadow: none;
             padding-left: 32px !important;
           }
@@ -57,14 +57,6 @@
             }
           }
         }
-
-        // ul {
-        //     height: calc(50vh - 80px);
-        //     height: calc(calc(var(--vh, 1vh) * 50) - 80px);
-        //     overflow-y: auto;
-        //     overflow-x: hidden;
-
-        // }
       }
     }
   }

@@ -1,7 +1,7 @@
 export default {
   rooms: [
     {
-      name: "Kathmandu - Kools",
+      name: "KTM - Kools",
       image: "/api/static/images/kathmandu.png",
       category: "Region",
     },

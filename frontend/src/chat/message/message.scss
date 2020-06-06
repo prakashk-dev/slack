@@ -1,8 +1,7 @@
 @import "src/style.scss";
 
 .chat-body {
-  height: calc(100vh - 65px);
-  height: calc(calc(var(--vh, 1vh) * 100) - 65px);
+  height: 100%;
   display: flex;
   flex-wrap: wrap;
 
@@ -39,10 +38,14 @@
 
     .info-circle {
       cursor: pointer;
+      display: grid;
+      grid-template-columns: 24px auto;
+      align-items: center;
 
       .anticon-info-circle {
-        margin-right: 8px;
+        margin-right: 4px;
         font-size: 1.2em;
+        font-weight: bold;
       }
 
       &:hover {
@@ -58,7 +61,8 @@
   }
 
   .chat-content {
-    height: 100%;
+    height: calc(100vh - 65px);
+    height: calc(calc(var(--vh, 1vh) * 100) - 65px);
     display: grid;
     grid-template-rows: 1fr 60px;
 
@@ -153,4 +157,17 @@
       }
     }
   }
+}
+
+.chat-body-rooms {
+  @extend .chat-body;
+
+  .chat-header {
+    grid-template-areas: "menu header header";
+
+    .info-circle {
+      display: none;
+    }
+  }
+
 }

@@ -241,7 +241,7 @@ const Message = ({ receiver, onReceiver }) => {
     return msg && (isCurrentRoom(msg) || isCurrentFriend(msg));
   };
   return (
-    <Layout className="chat-body">
+    <Layout className={onReceiver !== "user" ? "chat-body" : "chat-body-rooms"}>
       <Header
         className={
           style.device === "mobile" ? "chat-header-small" : "chat-header"
@@ -258,7 +258,7 @@ const Message = ({ receiver, onReceiver }) => {
             onClick={() => toggleSidebar({ showInfobar: !style.showInfobar })}
           >
             <InfoCircleOutlined />
-            {style.device !== "mobile" ? "Details" : null}
+            {style.device !== "mobile" ? <span>Details</span> : null}
           </div>
         )}
       </Header>
@@ -331,7 +331,7 @@ const Message = ({ receiver, onReceiver }) => {
             </Fragment>
           )}
         </Content>
-        <Infobar entity={receiver} />
+        {onReceiver !== "user" && <Infobar entity={receiver} />}
       </div>
     </Layout>
   );

@@ -132,11 +132,11 @@ const Sidebar = () => {
       </div>
       <Menu
         mode="inline"
-        defaultOpenKeys={["rooms", "directMessages"]}
+        defaultOpenKeys={["rooms", "byTopics", "byRegions", "directMessages"]}
         selectedKeys={[selectedKey]}
         className="sidebar-topic"
       >
-        <SubMenu key="rooms" icon={<SlackSquareOutlined />} title="Room">
+        <SubMenu key="rooms" icon={<SlackSquareOutlined />} title="Rooms">
           <SubMenu key="byRegions" title="By Region" className="sub-topic">
             {rooms.data.length
               ? rooms.data.map((rm) => {
