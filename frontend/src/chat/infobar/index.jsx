@@ -83,10 +83,7 @@ const Infobar = ({ entity }) => {
                         content={() => more(usr.username)}
                         placement="bottomRight"
                       >
-                        <Button
-                          icon={<MoreOutlined />}
-                          onItemHover={() => console.log()}
-                        />
+                        <Button icon={<MoreOutlined />} />
                       </Popover>
                     )}
                   </div>
