@@ -12,7 +12,7 @@ import Infobar from "src/chat/infobar";
 import "./message.scss";
 import Axios from "axios";
 
-import { Layout, Input } from "antd";
+import { Layout, Input, Tooltip, Button, Divider } from "antd";
 const { Header, Content } = Layout;
 import {
   LikeTwoTone,
@@ -20,6 +20,8 @@ import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
   InfoCircleOutlined,
+  UserOutlined,
+  PushpinOutlined,
 } from "@ant-design/icons";
 import { Upload, Comment } from "src/common";
 
@@ -240,6 +242,31 @@ const Message = ({ receiver, onReceiver }) => {
   const isCurrent = (msg) => {
     return msg && (isCurrentRoom(msg) || isCurrentFriend(msg));
   };
+
+  const chatHeading = () => {
+    return onReceiver === user ? (
+      name
+    ) : (
+      <Fragment>
+        {name}
+        {receiver.users.length && (
+          <small className="chat-title-extra-info">
+            <Tooltip title="view users list" placement="bottom">
+              <Button onClick={() => toggleSidebar({ showInfobar: true })}>
+                <UserOutlined /> {receiver.users.length}
+              </Button>
+            </Tooltip>
+            <Divider type="vertical" />
+            <Tooltip title="view pinned items" placement="bottom">
+              <Button>
+                <PushpinOutlined /> 4
+              </Button>
+            </Tooltip>
+          </small>
+        )}
+      </Fragment>
+    );
+  };
   return (
     <Layout className={onReceiver !== "user" ? "chat-body" : "chat-body-rooms"}>
       <Header
@@ -251,7 +278,7 @@ const Message = ({ receiver, onReceiver }) => {
         <ToggleIcon
           onClick={() => toggleSidebar({ showSidebar: !style.showSidebar })}
         />
-        <div className="chat-title">{name}</div>
+        <div className="chat-title">{chatHeading()}</div>
         {style.layout === "mobile" && style.showSidebar ? null : (
           <div
             className="info-circle"

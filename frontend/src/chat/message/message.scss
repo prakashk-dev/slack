@@ -22,6 +22,22 @@
     .chat-title {
       font-size: 1.5em;
       grid-area: header;
+      position: relative;
+
+      .chat-title-extra-info {
+        position: absolute;
+        top: 31%;
+        left: 10px;
+        cursor: pointer;
+
+        button {
+          background: none;
+          border: none;
+          padding: 0px;
+          font-size: 0.7rem;
+          margin: 0px 4px;
+        }
+      }
     }
 
     svg {

@@ -19,6 +19,13 @@ const Infobar = ({ entity }) => {
   const user = entity; // for individual, entity itself a single user
   const title = entity.name || entity.username; // for room and group use name, for user, username
 
+  useEffect(() => {
+    if (!style.showInfobar) {
+      console.log("change this");
+      setOpenKeys(["users"]);
+    }
+  }, [style.showInfobar]);
+
   const isMe = (username) => {
     const loggedInUser = state.user.data && state.user.data.username;
     return loggedInUser === username;
@@ -38,6 +45,7 @@ const Infobar = ({ entity }) => {
     </div>
   );
   const toggleSelectKeys = () => {
+    console.log("openKeys", openKeys);
     setOpenKeys(openKeys.length ? [] : ["users"]);
   };
 
