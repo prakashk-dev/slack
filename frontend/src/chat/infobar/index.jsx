@@ -48,7 +48,7 @@ const Infobar = ({ entity }) => {
         <Avatar src="/assets/kathmandu.png" alt="Group Icon" size={60} />
         {title}
       </div>
-      <Menu mode="inline" openKeys={["users"]} defaultActiveFirst>
+      <Menu mode="inline" defaultOpenKeys={["users"]} defaultActiveFirst>
         <SubMenu key="users" icon={<UserOutlined />} title="Users">
           {users ? (
             users.length ? (

@@ -12,6 +12,7 @@ const RoomSchema = new Schema(
     },
     description: String,
     image: String,
+    category: String,
   },
   {
     timestamps: {

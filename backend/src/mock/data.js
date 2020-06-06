@@ -1,48 +1,64 @@
 export default {
   rooms: [
     {
-      name: "Kathmandu",
+      name: "Kathmandu - Kools",
       image: "/api/static/images/kathmandu.png",
+      category: "Region",
+    },
+    {
+      name: "Pokhreli - People",
+      image: "/api/static/images/kathmandu.png",
+      category: "Region",
+    },
+    {
+      name: "Jhapali - Guff",
+      image: "/api/static/images/kathmandu.png",
+      category: "Region",
     },
     {
       name: "Chitwan",
       image: "/api/static/images/kathmandu.png",
+      category: "Region",
     },
     {
-      name: "Pokhara",
+      name: "Aussie Land",
       image: "/api/static/images/kathmandu.png",
+      category: "Region",
     },
     {
-      name: "Lumbini",
+      name: "USA & Canada",
       image: "/api/static/images/kathmandu.png",
+      category: "Region",
     },
     {
-      name: "Hetauda",
+      name: "Covid - 19",
       image: "/api/static/images/kathmandu.png",
+      category: "Topic",
     },
     {
-      name: "Baglung",
+      name: "Study Abroad",
       image: "/api/static/images/kathmandu.png",
+      category: "Topic",
     },
     {
-      name: "Biratnagar",
+      name: "Tech-Talks",
       image: "/api/static/images/kathmandu.png",
+      category: "Topic",
     },
     {
-      name: "Janakpur",
+      name: "Travel Ideas",
       image: "/api/static/images/kathmandu.png",
+      category: "Topic",
     },
     {
-      name: "Mechi",
+      name: "Entertainment",
       image: "/api/static/images/kathmandu.png",
+      category: "Topic",
     },
     {
-      name: "Mahakali",
+      name: "Politics",
       image: "/api/static/images/kathmandu.png",
-    },
-    {
-      name: "Bhaktapur",
-      image: "/api/static/images/kathmandu.png",
+      category: "Topic",
     },
   ],
   users: [],

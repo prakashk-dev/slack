@@ -19,11 +19,18 @@ const Sidebar = () => {
     logout,
     toggleSidebar,
   } = useContext(AppContext);
+  const [selectedKey, setSelectedKey] = useState("");
 
   const handleLogout = () => {
     logout();
     navigate("/");
   };
+
+  useEffect(() => {
+    setSelectedKey(
+      room.data ? room.data.id : friend.data ? friend.data.username : ""
+    );
+  }, [room.data, friend.data]);
 
   const handleMenuItemClick = ({ id, sub }) => {
     navigate(`/chat/${sub}/${id}`);
@@ -57,13 +64,6 @@ const Sidebar = () => {
       </Menu.Item>
     </Menu>
   );
-  const getSelectedKeys = () => {
-    return room.data
-      ? [room.data.id]
-      : friend.data
-      ? [friend.data.username]
-      : [];
-  };
 
   const isReady = () => {
     return user.data && (room.data || friend.data);
@@ -81,33 +81,28 @@ const Sidebar = () => {
       trigger={null}
       collapsible
       collapsed={!style.showSidebar}
-      collapsedWidth={style.device === "mobile" ? 0 : 80}
+      width="240"
+      collapsedWidth={0}
       className={
         style.device === "mobile" && style.showSidebar
           ? "small-left-sidebar"
           : "left-sidebar"
       }
     >
-      <div className={style.showSidebar ? "logo" : "logo-small"}>
+      <div className="logo">
         {style.device === "desktop" ? (
-          style.showSidebar ? (
-            <Fragment>
-              {user.data.username}
-              <Avatar size={40} icon={<UserOutlined />} alt="" />
-              <Dropdown overlay={profile} trigger={["hover", "click"]}>
-                <a
-                  className="ant-dropdown-link"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <CaretDownFilled />
-                </a>
-              </Dropdown>
-            </Fragment>
-          ) : (
+          <Fragment>
+            {user.data.username}
+            <Avatar size={40} icon={<UserOutlined />} alt="" />
             <Dropdown overlay={profile} trigger={["hover", "click"]}>
-              <Avatar size={40} icon={<UserOutlined />} alt="" />
+              <a
+                className="ant-dropdown-link"
+                onClick={(e) => e.preventDefault()}
+              >
+                <CaretDownFilled />
+              </a>
             </Dropdown>
-          )
+          </Fragment>
         ) : (
           <Fragment>
             <CloseCircleOutlined
@@ -129,14 +124,45 @@ const Sidebar = () => {
       </div>
       <Menu
         mode="inline"
-        // onSelect={handleMenuItemClick}
-        openKeys={["rooms", "directMessages"]}
-        selectedKeys={getSelectedKeys()}
+        defaultOpenKeys={["rooms", "directMessages"]}
+        selectedKeys={[selectedKey]}
+        className="sidebar-topic"
       >
         <SubMenu key="rooms" icon={<SlackSquareOutlined />} title="Room">
-          {rooms.data.length
-            ? rooms.data.map((rm) => {
-                return (
+          <SubMenu key="byRegions" title="By Region" className="sub-topic">
+            {rooms.data.length
+              ? rooms.data.map((rm) => {
+                  return rm.category === "Region" ? (
+                    <Menu.Item
+                      onClick={() =>
+                        handleMenuItemClick({ id: rm.id, sub: "r" })
+                      }
+                      key={rm.id}
+                    >
+                      # {rm.name}
+                      {user.data.notification.length &&
+                      getNotificationCount(user.data.notification, rm.id) >
+                        0 ? (
+                        <Badge
+                          count={getNotificationCount(
+                            user.data.notification,
+                            rm.id
+                          )}
+                          style={{
+                            backgroundColor: "#52c41a",
+                            marginLeft: 10,
+                          }}
+                        />
+                      ) : null}
+                    </Menu.Item>
+                  ) : null;
+                })
+              : null}
+          </SubMenu>
+          <SubMenu key="byTopics" title="By Topic" className="sub-topic">
+            {rooms.data.length ? (
+              rooms.data.map((rm) => {
+                return rm.category === "Topic" ? (
                   <Menu.Item
                     onClick={() => handleMenuItemClick({ id: rm.id, sub: "r" })}
                     key={rm.id}
@@ -156,9 +182,12 @@ const Sidebar = () => {
                       />
                     ) : null}
                   </Menu.Item>
-                );
+                ) : null;
               })
-            : null}
+            ) : (
+              <li> Your Inbox </li>
+            )}
+          </SubMenu>
         </SubMenu>
         <SubMenu
           key="directMessages"
