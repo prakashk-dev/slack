@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import ReactDOM from "react-dom";
 import { AppContext } from "src/context";
 import { navigate } from "@reach/router";
 
@@ -11,6 +12,7 @@ import { UserOutlined, MoreOutlined } from "@ant-design/icons";
 const Infobar = ({ entity }) => {
   const { state, toggleSidebar } = useContext(AppContext);
   const { style } = state;
+  const infobarRef = useRef(null);
   const [moreVisible, setMoreVisible] = useState({});
   const [openKeys, setOpenKeys] = useState(["users"]);
   const users = entity.users; // for room and group
@@ -31,6 +33,21 @@ const Infobar = ({ entity }) => {
   const toggleSelectKeys = () => {
     setOpenKeys(openKeys.length ? [] : ["users"]);
   };
+
+  const handleOutsideClick = (e) => {
+    const infobarDOM = ReactDOM.findDOMNode(infobarRef.current);
+    if (!infobarDOM.contains(e.target)) {
+      toggleSidebar({ showInfobar: false });
+    }
+  };
+  useEffect(() => {
+    if (style.device === "mobile" && style.showInfobar) {
+      document.addEventListener("click", handleOutsideClick, false);
+    }
+    return () =>
+      document.removeEventListener("click", handleOutsideClick, false);
+  }, [style]);
+
   return (
     <Sider
       collapsible
@@ -46,6 +63,7 @@ const Infobar = ({ entity }) => {
       collapsedWidth={0}
       defaultCollapsed={false}
       theme="light"
+      ref={infobarRef}
     >
       <div className="profile">
         <Avatar src="/assets/kathmandu.png" alt="Group Icon" size={60} />
