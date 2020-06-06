@@ -3,7 +3,7 @@ import moment from "moment";
 import { User, Room, Message } from "../models";
 import { getOne } from "./room.controller";
 import { logger } from "../helpers";
-import { getIO, getSocket } from "../socket/data";
+import { getIO, getSocket, isOnline } from "../socket/data";
 
 // get all users
 const getAll = async (req, res) => {
@@ -14,7 +14,7 @@ const getAll = async (req, res) => {
     return res.status(400).json({ error: "Error Fetching User" });
   }
 };
-
+// /:id
 async function findOne(req, res) {
   const { id } = req.params;
   if (!id || !mongoose.Types.ObjectId.isValid(id)) {
@@ -23,11 +23,15 @@ async function findOne(req, res) {
     });
   }
   try {
-    const user = await User.findById(id)
+    let user = await User.findById(id)
       .populate("rooms.room")
       .populate("groups.group")
       .populate("friends.friend")
       .exec();
+
+    user.status = "online";
+    await user.save();
+    sendOnlineStatus(user);
     if (user) {
       return res.json(user);
     }
@@ -275,11 +279,28 @@ const updateNotification = async (req, res) => {
   }
 };
 
+const updateOneById = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    }).exec();
+    if (req.body.status) {
+      sendOnlineStatus(user);
+      return res.json({ message: "Successfully updated" });
+    }
+    return res.json(user);
+  } catch (err) {
+    return res.json({ error: err.message });
+  }
+};
+
 // helpers function
 const updateFriendList = (user) => {
   try {
-    const socketId = getSocket(user._id).id;
-    getIO().to(socketId).emit("updateFriendList", user);
+    const socket = getSocket(user._id);
+    if (socket) {
+      getIO().to(socket.id).emit("updateFriendList", user);
+    }
   } catch (err) {
     console.log("Error updateFriendList", err);
   }
@@ -292,6 +313,24 @@ const updateRoomUsers = (roomId, user) => {
     console.log("Error updateRoomUsers", err);
   }
 };
+
+const sendOnlineStatus = (user) => {
+  try {
+    if (user.friends.length) {
+      user.friends.forEach(({ friend }) => {
+        const friendSocket = getSocket(friend._id);
+        if (friendSocket) {
+          getIO()
+            .to(friendSocket.id)
+            .emit("userOnline", { id: user._id, status: user.status });
+        }
+      });
+    }
+  } catch (err) {
+    console.log("Error updateRoomUsers", err);
+  }
+};
+
 export {
   getAll,
   findOne,
@@ -301,4 +340,6 @@ export {
   fetchUserWithChatHistory,
   updateRoomUser,
   updateNotification,
+  sendOnlineStatus,
+  updateOneById,
 };

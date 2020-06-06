@@ -21,7 +21,6 @@ const Infobar = ({ entity }) => {
 
   useEffect(() => {
     if (!style.showInfobar) {
-      console.log("change this");
       setOpenKeys(["users"]);
     }
   }, [style.showInfobar]);

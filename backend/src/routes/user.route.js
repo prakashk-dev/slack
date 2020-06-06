@@ -8,6 +8,7 @@ router.patch("/:id/notification", User.updateNotification); // rethink the updat
 router.get("/:id/rooms/:roomId", User.findRoomById);
 router.delete("/:id", User.deleteOne);
 router.get("/:id", User.findOne);
+router.patch("/:id", User.updateOneById);
 router.get("/", User.getAll);
 
 export default router;

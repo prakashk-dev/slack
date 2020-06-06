@@ -20,4 +20,8 @@ const setSocket = (id, socket) => {
   data.sockets[id] = socket;
 };
 
-export { getIO, setIO, getSocket, setSocket };
+const isOnline = (id) => {
+  return data.sockets[id] != undefined;
+};
+
+export { getIO, setIO, getSocket, setSocket, isOnline };

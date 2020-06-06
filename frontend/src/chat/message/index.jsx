@@ -22,6 +22,7 @@ import {
   InfoCircleOutlined,
   UserOutlined,
   PushpinOutlined,
+  StarOutlined,
 } from "@ant-design/icons";
 import { Upload, Comment } from "src/common";
 
@@ -36,6 +37,7 @@ const Message = ({ receiver, onReceiver }) => {
     receivedMessage,
     updateNotification,
     updateFriendList,
+    updateOnlineStatus,
   } = useContext(AppContext);
   const divRef = useRef(null);
   const inputRef = useRef(null);
@@ -57,6 +59,7 @@ const Message = ({ receiver, onReceiver }) => {
     socket.on("updateRoomUsers", updateRoomUsers);
     socket.on("updateFriendList", updateFriendList);
     socket.on("newUserJoined", console.log);
+    socket.on("userOnline", updateOnlineStatus);
   };
 
   const handleJoin = () => {
@@ -244,11 +247,14 @@ const Message = ({ receiver, onReceiver }) => {
   };
 
   const chatHeading = () => {
-    return onReceiver === user ? (
+    return onReceiver === "user" ? (
       name
     ) : (
       <Fragment>
         {name}
+        <Tooltip title="Add to your favourite room" placement="bottom">
+          <Button icon={<StarOutlined />} size="small"></Button>
+        </Tooltip>
         {receiver.users.length && (
           <small className="chat-title-extra-info">
             <Tooltip title="view users list" placement="bottom">

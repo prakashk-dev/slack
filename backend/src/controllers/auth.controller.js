@@ -1,5 +1,6 @@
 import User from "../models/user.model";
 import { createCookie, createToken, logger } from "../helpers";
+import { sendOnlineStatus } from "../controllers/user.controller";
 
 async function loginOrRegisterUser(req, res) {
   if (!req.body.username || !req.body.pin) {
@@ -20,16 +21,26 @@ async function loginOrRegisterUser(req, res) {
     if (user) {
       user.comparePassword(req.body.pin, function (err, isMatch) {
         if (isMatch && !err) {
-          // don't send these fields to client
-          user = user.toJSON();
-          delete user.pin;
-          // set cookie to the frontend
-          let token = createToken(user);
-          res.cookie(createCookie(token));
+          user.status = "online";
+          user.save((err) => {
+            if (err) {
+              return res.json({
+                error: "Something went wrong while authenticating you.",
+              });
+            }
+            // if user has friends, send socket info as online
+            sendOnlineStatus(user);
+            // don't send these fields to client
+            user = user.toJSON();
+            delete user.pin;
+            // set cookie to the frontend
+            let token = createToken(user);
+            res.cookie(createCookie(token));
 
-          return res.status(200).json({
-            user,
-            token,
+            return res.status(200).json({
+              user,
+              token,
+            });
           });
         } else {
           return res.json({
@@ -40,7 +51,7 @@ async function loginOrRegisterUser(req, res) {
       // if user not exists register
     } else {
       const { username, pin } = req.body;
-      let user = await User.create({ username, pin });
+      let user = await User.create({ username, pin, status: "online" });
       // set cookie to the frontend
       // also include username and hashed password so that when we decode the token
       // we can verify that the username and password match to our database

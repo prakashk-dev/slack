@@ -9,6 +9,7 @@ import axios from "axios";
 const USER_AUTHENTICATING = "USER_AUTHENTICATING";
 const USER_AUTHENTICATING_ERROR = "USER_AUTHENTICATING_ERROR";
 const USER_AUTHENTICATING_SUCCESS = "USER_AUTHENTICATING_SUCCESS";
+const UPDATE_ONLINE_STATUS = "UPDATE_ONLINE_STATUS";
 
 const ROOM_FETCHING = "ROOM_FETCHING";
 const ROOM_FETCHING_ERROR = "ROOM_FETCHING_ERROR";
@@ -87,7 +88,7 @@ const INIT_STATE = initialState();
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {
-  // console.log({ type, payload });
+  console.log({ type, payload });
   // console.log("state:", state);
   switch (type) {
     case SET_SOCKET:
@@ -118,6 +119,22 @@ export const appReducer = (state, { type, payload }) => {
           data: { SOCKET_URL: payload.socket },
           loading: false,
           error: null,
+        },
+      };
+    case UPDATE_ONLINE_STATUS:
+      const { id, status } = payload;
+      let friends = [...state.user.data.friends];
+      friends.forEach(
+        ({ friend }) => friend.id === id && (friend.status = status)
+      );
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          data: {
+            ...state.user.data,
+            friends,
+          },
         },
       };
     case FETCH_CONFIG_SUCCESS:
@@ -334,6 +351,13 @@ export const AppProvider = ({ children }) => {
         payload: err.message,
       });
     }
+  };
+
+  const updateOnlineStatus = (payload) => {
+    return dispatch({
+      type: UPDATE_ONLINE_STATUS,
+      payload,
+    });
   };
 
   // change this once group feature is implemented from backend
@@ -591,9 +615,21 @@ export const AppProvider = ({ children }) => {
   };
 
   const logout = () => {
-    return dispatch({
-      type: LOGOUT,
-    });
+    try {
+      axios
+        .patch(`/api/users/${state.user.data.id}`, {
+          status: "offline",
+        })
+        .then((data, err) => {
+          if (err) console.log("Error", err);
+          console.log("LOgged OUt", data);
+          return dispatch({
+            type: LOGOUT,
+          });
+        });
+    } catch (err) {
+      console.log("Error logging out user");
+    }
   };
 
   // {
@@ -668,6 +704,7 @@ export const AppProvider = ({ children }) => {
     updateNotification,
     updateFriendList,
     setDevice,
+    updateOnlineStatus,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

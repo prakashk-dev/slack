@@ -213,6 +213,8 @@ const Sidebar = () => {
                     icon={
                       status === "pending" ? (
                         <Badge status="processing" />
+                      ) : friend.status === "online" ? (
+                        <Badge status="success" />
                       ) : null
                     }
                   >
