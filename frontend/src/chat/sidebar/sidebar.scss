@@ -39,13 +39,22 @@
 
       li.ant-menu-submenu {
         div.ant-menu-submenu-title {
+          font-weight: bold;
           box-shadow: 0px 1px 1px 1px $box-shadow;
+          padding-left: 16px !important;
         }
 
         .sub-topic {
           div.ant-menu-submenu-title {
-            font-style: italic;
+            font-weight: 600;
             box-shadow: none;
+            padding-left: 32px !important;
+          }
+
+          ul {
+            li.ant-menu-item {
+              padding-left: 48px !important;
+            }
           }
         }
 

@@ -16,7 +16,7 @@ export default {
       category: "Region",
     },
     {
-      name: "Chitwan",
+      name: "Chitwan - Chills",
       image: "/api/static/images/kathmandu.png",
       category: "Region",
     },
