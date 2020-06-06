@@ -19,7 +19,7 @@ const Infobar = ({ entity }) => {
   const user = entity; // for individual, entity itself a single user
   const title = entity.name || entity.username; // for room and group use name, for user, username
   const handleMenuItemClick = (username) => {
-    style.device === "mobile" &&
+    style.layout === "mobile" &&
       toggleSidebar({ showInfobar: !style.showInfobar });
     navigate(`/chat/u/${username}`);
   };
@@ -41,7 +41,7 @@ const Infobar = ({ entity }) => {
     }
   };
   useEffect(() => {
-    if (style.device === "mobile" && style.showInfobar) {
+    if (style.layout === "mobile" && style.showInfobar) {
       document.addEventListener("click", handleOutsideClick, false);
     }
     return () =>
@@ -54,7 +54,7 @@ const Infobar = ({ entity }) => {
       trigger={null}
       collapsed={!style.showInfobar}
       className={
-        style.device === "mobile"
+        style.layout === "mobile"
           ? style.showInfobar
             ? "right-sidebar-mobile-shown"
             : "right-sidebar-mobile"

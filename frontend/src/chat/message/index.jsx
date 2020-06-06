@@ -244,7 +244,7 @@ const Message = ({ receiver, onReceiver }) => {
     <Layout className={onReceiver !== "user" ? "chat-body" : "chat-body-rooms"}>
       <Header
         className={
-          style.device === "mobile" ? "chat-header-small" : "chat-header"
+          style.layout === "mobile" ? "chat-header-small" : "chat-header"
         }
         theme="light"
       >
@@ -252,13 +252,13 @@ const Message = ({ receiver, onReceiver }) => {
           onClick={() => toggleSidebar({ showSidebar: !style.showSidebar })}
         />
         <div className="chat-title">{name}</div>
-        {style.device === "mobile" && style.showSidebar ? null : (
+        {style.layout === "mobile" && style.showSidebar ? null : (
           <div
             className="info-circle"
             onClick={() => toggleSidebar({ showInfobar: !style.showInfobar })}
           >
             <InfoCircleOutlined />
-            {style.device !== "mobile" ? <span>Details</span> : null}
+            {style.layout !== "mobile" ? <span>Details</span> : null}
           </div>
         )}
       </Header>

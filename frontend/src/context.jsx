@@ -37,6 +37,7 @@ const MESSAGE_UPDATED = "MESSAGE_UPDATED";
 const MESSAGE_SENT = "MESSAGE_SENT";
 
 const SMALL_SCREEN_LAYOUT = "SMALL_SCREEN_LAYOUT";
+const SET_MOBILE_LAYOUT = "SET_MOBILE_LAYOUT";
 const DEFAULT_LAYOUT = "DEFAULT_LAYOUT";
 const TOGGLE_SIDEBAR = "TOGGLE_SIDEBAR";
 
@@ -51,7 +52,12 @@ const DEFAULT_STATE = {
   room: { data: null, error: null, loading: false },
   friend: { data: null, error: null, loading: false },
   rooms: { data: [], error: null, loading: false },
-  style: { showSidebar: true, showInfobar: false, device: "desktop" },
+  style: {
+    showSidebar: true,
+    showInfobar: false,
+    device: "desktop",
+    layout: "desktop",
+  },
   globals: { loading: true, error: null },
   socket: null,
 };
@@ -256,9 +262,21 @@ export const appReducer = (state, { type, payload }) => {
         ...state,
         style: {
           ...state.style,
+          layout: "mobile",
+          showSidebar: false,
+          showInfobar: false,
+        },
+      };
+    // this is called only once in a app
+    case SET_MOBILE_LAYOUT:
+      return {
+        ...state,
+        style: {
+          ...state.style,
           device: "mobile",
           showSidebar: false,
           showInfobar: false,
+          layout: "mobile",
         },
       };
     case DEFAULT_LAYOUT:
@@ -266,7 +284,7 @@ export const appReducer = (state, { type, payload }) => {
         ...state,
         style: {
           ...state.style,
-          device: "desktop",
+          layout: "desktop",
         },
       };
     case TOGGLE_SIDEBAR:
@@ -587,21 +605,37 @@ export const AppProvider = ({ children }) => {
   // }
 
   const changeLayout = ({ width, height }) => {
-    const isMobile = window.orientation !== undefined;
     const smallScreen = width <= 800 || height <= 850;
-    if (isMobile || smallScreen) {
+    const { device, layout } = state.style;
+
+    if (device === "desktop") {
+      if (layout === "desktop") {
+        if (smallScreen) {
+          return dispatch({
+            type: SMALL_SCREEN_LAYOUT,
+          });
+        }
+      } else {
+        if (!smallScreen) {
+          return dispatch({
+            type: DEFAULT_LAYOUT,
+          });
+        }
+      }
+    }
+  };
+
+  // this is called only once in a app
+  const setDevice = (device) => {
+    if (device === "mobile") {
       return dispatch({
-        type: SMALL_SCREEN_LAYOUT,
-      });
-    } else {
-      return dispatch({
-        type: DEFAULT_LAYOUT,
+        type: SET_MOBILE_LAYOUT,
       });
     }
   };
 
   const toggleSidebar = (payload) => {
-    if (state.style.device === "mobile") {
+    if (state.style.layout === "mobile") {
       payload = payload.showInfobar
         ? { ...payload, showSidebar: false }
         : { ...payload, showInfobar: false };
@@ -632,6 +666,7 @@ export const AppProvider = ({ children }) => {
     fetchConfig,
     updateNotification,
     updateFriendList,
+    setDevice,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

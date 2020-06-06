@@ -34,7 +34,7 @@ const Sidebar = () => {
 
   const handleMenuItemClick = ({ id, sub }) => {
     navigate(`/chat/${sub}/${id}`);
-    style.device === "mobile" &&
+    style.layout === "mobile" &&
       toggleSidebar({ showSidebar: !style.showSidebar });
   };
 
@@ -82,15 +82,15 @@ const Sidebar = () => {
       collapsible
       collapsed={!style.showSidebar}
       width="240"
-      collapsedWidth={style.device === "mobile" ? 0 : 80}
+      collapsedWidth={style.layout === "mobile" ? 0 : 80}
       className={
-        style.device === "mobile" && style.showSidebar
+        style.layout === "mobile" && style.showSidebar
           ? "small-left-sidebar"
           : "left-sidebar"
       }
     >
       <div className={style.showSidebar ? "logo" : "logo-small"}>
-        {style.device === "desktop" ? (
+        {style.layout === "desktop" ? (
           style.showSidebar ? (
             <Fragment>
               {user.data.username}
