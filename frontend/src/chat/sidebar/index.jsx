@@ -82,27 +82,35 @@ const Sidebar = () => {
       collapsible
       collapsed={!style.showSidebar}
       width="240"
-      collapsedWidth={0}
+      collapsedWidth={style.device === "mobile" ? 0 : 80}
       className={
         style.device === "mobile" && style.showSidebar
           ? "small-left-sidebar"
           : "left-sidebar"
       }
     >
-      <div className="logo">
+      <div className={style.showSidebar ? "logo" : "logo-small"}>
         {style.device === "desktop" ? (
-          <Fragment>
-            {user.data.username}
-            <Avatar size={40} icon={<UserOutlined />} alt="" />
-            <Dropdown overlay={profile} trigger={["hover", "click"]}>
-              <a
-                className="ant-dropdown-link"
-                onClick={(e) => e.preventDefault()}
-              >
-                <CaretDownFilled />
-              </a>
-            </Dropdown>
-          </Fragment>
+          style.showSidebar ? (
+            <Fragment>
+              {user.data.username}
+              <Avatar size={40} icon={<UserOutlined />} alt="" />
+              <Dropdown overlay={profile} trigger={["click"]}>
+                <a
+                  className="ant-dropdown-link"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <CaretDownFilled />
+                </a>
+              </Dropdown>
+            </Fragment>
+          ) : (
+            <Fragment>
+              <Dropdown overlay={profile} trigger={["click"]}>
+                <Avatar size={40} icon={<UserOutlined />} alt="" />
+              </Dropdown>
+            </Fragment>
+          )
         ) : (
           <Fragment>
             <CloseCircleOutlined
