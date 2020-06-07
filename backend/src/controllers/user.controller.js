@@ -93,6 +93,34 @@ const findRoomById = async (req, res) => {
     }
   }
 };
+
+const updateRoomById = async (req, res) => {
+  const { roomId, id } = req.params;
+  let updateObj = {};
+  Object.keys(req.body).forEach((key) => {
+    updateObj[`rooms.$.${key}`] = req.body[key];
+  });
+
+  try {
+    if (!roomId || !id) {
+      return res.json({ error: "Either roomId or userId missing" });
+    }
+    const user = User.findOneAndUpdate(
+      { _id: id, "rooms.room": { $eq: roomId } },
+      {
+        $set: updateObj,
+      },
+      { new: true }
+    )
+      .populate("friends.friend")
+      .populate("rooms.room")
+      .populate("groups.group")
+      .exec();
+    return res.json(user);
+  } catch (err) {
+    return res.json({ error: err.message });
+  }
+};
 const fetchUserWithChatHistory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -342,4 +370,5 @@ export {
   updateNotification,
   sendOnlineStatus,
   updateOneById,
+  updateRoomById,
 };

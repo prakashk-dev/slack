@@ -76,6 +76,10 @@ const Sidebar = () => {
     return ns ? ns.count : 0;
   };
 
+  const userFavRooms = user.data.rooms.map(
+    (room) => room.favourite && room.room.id
+  );
+  console.log("Id of user fav rooms if any", userFavRooms);
   return isReady() ? (
     <Sider
       trigger={null}
@@ -132,15 +136,56 @@ const Sidebar = () => {
       </div>
       <Menu
         mode="inline"
-        defaultOpenKeys={["rooms", "byTopics", "byRegions", "directMessages"]}
+        defaultOpenKeys={[
+          "rooms",
+          "byTopics",
+          "byRegions",
+          "byFavourite",
+          "directMessages",
+        ]}
         selectedKeys={[selectedKey]}
         className="sidebar-topic"
       >
         <SubMenu key="rooms" icon={<SlackSquareOutlined />} title="Rooms">
+          <SubMenu
+            key="byFavourite"
+            title="Your Favourite"
+            className="sub-topic"
+          >
+            {user.data.rooms.length
+              ? user.data.rooms.map((rm) => {
+                  return rm.favourite ? (
+                    <Menu.Item
+                      onClick={() =>
+                        handleMenuItemClick({ id: rm.room.id, sub: "r" })
+                      }
+                      key={rm.room.id}
+                    >
+                      # {rm.room.name}
+                      {user.data.notification.length &&
+                      getNotificationCount(user.data.notification, rm.room.id) >
+                        0 ? (
+                        <Badge
+                          count={getNotificationCount(
+                            user.data.notification,
+                            rm.room.id
+                          )}
+                          style={{
+                            backgroundColor: "#52c41a",
+                            marginLeft: 10,
+                          }}
+                        />
+                      ) : null}
+                    </Menu.Item>
+                  ) : null;
+                })
+              : null}
+          </SubMenu>
+
           <SubMenu key="byRegions" title="By Region" className="sub-topic">
             {rooms.data.length
               ? rooms.data.map((rm) => {
-                  return rm.category === "Region" ? (
+                  return rm.category === "Region" && !rm.favourite ? (
                     <Menu.Item
                       onClick={() =>
                         handleMenuItemClick({ id: rm.id, sub: "r" })
@@ -168,33 +213,34 @@ const Sidebar = () => {
               : null}
           </SubMenu>
           <SubMenu key="byTopics" title="By Topic" className="sub-topic">
-            {rooms.data.length ? (
-              rooms.data.map((rm) => {
-                return rm.category === "Topic" ? (
-                  <Menu.Item
-                    onClick={() => handleMenuItemClick({ id: rm.id, sub: "r" })}
-                    key={rm.id}
-                  >
-                    # {rm.name}
-                    {user.data.notification.length &&
-                    getNotificationCount(user.data.notification, rm.id) > 0 ? (
-                      <Badge
-                        count={getNotificationCount(
-                          user.data.notification,
-                          rm.id
-                        )}
-                        style={{
-                          backgroundColor: "#52c41a",
-                          marginLeft: 10,
-                        }}
-                      />
-                    ) : null}
-                  </Menu.Item>
-                ) : null;
-              })
-            ) : (
-              <li> Your Inbox </li>
-            )}
+            {rooms.data.length
+              ? rooms.data.map((rm) => {
+                  return rm.category === "Topic" && !rm.favourite ? (
+                    <Menu.Item
+                      onClick={() =>
+                        handleMenuItemClick({ id: rm.id, sub: "r" })
+                      }
+                      key={rm.id}
+                    >
+                      # {rm.name}
+                      {user.data.notification.length &&
+                      getNotificationCount(user.data.notification, rm.id) >
+                        0 ? (
+                        <Badge
+                          count={getNotificationCount(
+                            user.data.notification,
+                            rm.id
+                          )}
+                          style={{
+                            backgroundColor: "#52c41a",
+                            marginLeft: 10,
+                          }}
+                        />
+                      ) : null}
+                    </Menu.Item>
+                  ) : null;
+                })
+              : null}
           </SubMenu>
         </SubMenu>
         <SubMenu
@@ -202,41 +248,43 @@ const Sidebar = () => {
           icon={<MessageOutlined />}
           title="Direct Messages"
         >
-          {user.data.friends.length
-            ? user.data.friends.map(({ status, friend }) => {
-                return (
-                  <Menu.Item
-                    onClick={() =>
-                      handleMenuItemClick({ id: friend.username, sub: "u" })
-                    }
-                    key={friend.username}
-                    icon={
-                      status === "pending" ? (
-                        <Badge status="processing" />
-                      ) : friend.status === "online" ? (
-                        <Badge status="success" />
-                      ) : null
-                    }
-                  >
-                    {friend.username}
-                    {user.data.notification.length &&
-                    getNotificationCount(user.data.notification, friend.id) >
-                      0 ? (
-                      <Badge
-                        count={getNotificationCount(
-                          user.data.notification,
-                          friend.id
-                        )}
-                        style={{
-                          backgroundColor: "#52c41a",
-                          marginLeft: 10,
-                        }}
-                      />
-                    ) : null}
-                  </Menu.Item>
-                );
-              })
-            : null}
+          {user.data.friends.length ? (
+            user.data.friends.map(({ status, friend }) => {
+              return (
+                <Menu.Item
+                  onClick={() =>
+                    handleMenuItemClick({ id: friend.username, sub: "u" })
+                  }
+                  key={friend.username}
+                  icon={
+                    status === "pending" ? (
+                      <Badge status="processing" />
+                    ) : friend.status === "online" ? (
+                      <Badge status="success" />
+                    ) : null
+                  }
+                >
+                  {friend.username}
+                  {user.data.notification.length &&
+                  getNotificationCount(user.data.notification, friend.id) >
+                    0 ? (
+                    <Badge
+                      count={getNotificationCount(
+                        user.data.notification,
+                        friend.id
+                      )}
+                      style={{
+                        backgroundColor: "#52c41a",
+                        marginLeft: 10,
+                      }}
+                    />
+                  ) : null}
+                </Menu.Item>
+              );
+            })
+          ) : (
+            <li> Your Inbox </li>
+          )}
         </SubMenu>
       </Menu>
     </Sider>

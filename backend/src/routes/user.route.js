@@ -6,6 +6,7 @@ router.get("/:id/chat", User.fetchUserWithChatHistory);
 router.get("/groupd/:groupId", User.findGroupById);
 router.patch("/:id/notification", User.updateNotification); // rethink the update endpoint
 router.get("/:id/rooms/:roomId", User.findRoomById);
+router.patch("/:id/rooms/:roomId", User.updateRoomById);
 router.delete("/:id", User.deleteOne);
 router.get("/:id", User.findOne);
 router.patch("/:id", User.updateOneById);

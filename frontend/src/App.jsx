@@ -73,7 +73,7 @@ const Root = () => {
       changeLayout({ width, height });
     }
   }, [state.style.device, width, height]);
-
+  console.log("I am from app");
   useEffect(() => {
     !state.config.data.SOCKET_URL && fetchConfig();
     !state.user.data && fetchAuthUser();

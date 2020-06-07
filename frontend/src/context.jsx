@@ -24,7 +24,7 @@ const USER_FETCHING_ERROR = "USER_FETCHING_ERROR";
 const USER_FETCHING_SUCCESS = "USER_FETCHING_SUCCESS";
 const RESET_NOTIFICATION = "RESET_NOTIFICATION";
 const ADD_NOTIFICATION = "ADD_NOTIFICATION";
-
+const TOGGLE_ROOM_FAVOURITE = "TOGGLE_ROOM_FAVOURITE";
 const FRIEND_FETCHING = "FRIEND_FETCHING";
 const FRIEND_FETCHING_ERROR = "FRIEND_FETCHING_ERROR";
 const FRIEND_FETCHING_SUCCESS = "FRIEND_FETCHING_SUCCESS";
@@ -228,6 +228,22 @@ export const appReducer = (state, { type, payload }) => {
           data: {
             ...state.user.data,
             friends: payload.friends,
+          },
+        },
+      };
+    case TOGGLE_ROOM_FAVOURITE:
+      const { id: roomId, favourite } = payload;
+      let rooms = [...state.user.data.rooms];
+      rooms.forEach(
+        (item) => item.room.id === roomId && (item.favourite = favourite)
+      );
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          data: {
+            ...state.user.data,
+            rooms,
           },
         },
       };
@@ -642,7 +658,9 @@ export const AppProvider = ({ children }) => {
   // }
 
   const changeLayout = ({ width, height }) => {
-    const smallScreen = width <= 800 || height <= 850;
+    const smallScreen = width <= 800 || height <= 600;
+    console.log("Width", width);
+    console.log("Height", height);
     const { device, layout } = state.style;
 
     if (device === "desktop") {
@@ -683,6 +701,21 @@ export const AppProvider = ({ children }) => {
     });
   };
 
+  const favouriteClick = async (payload) => {
+    try {
+      await axios.patch(
+        `/api/users/${state.user.data.id}/rooms/${payload.id}`,
+        { favourite: payload.favourite }
+      );
+      return dispatch({
+        type: TOGGLE_ROOM_FAVOURITE,
+        payload: payload,
+      });
+    } catch (err) {
+      console.log("Error", err);
+    }
+  };
+
   const value = {
     state,
     saveOrAuthenticateUser,
@@ -705,6 +738,7 @@ export const AppProvider = ({ children }) => {
     updateFriendList,
     setDevice,
     updateOnlineStatus,
+    favouriteClick,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

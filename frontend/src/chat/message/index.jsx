@@ -38,6 +38,7 @@ const Message = ({ receiver, onReceiver }) => {
     updateNotification,
     updateFriendList,
     updateOnlineStatus,
+    favouriteClick,
   } = useContext(AppContext);
   const divRef = useRef(null);
   const inputRef = useRef(null);
@@ -246,6 +247,13 @@ const Message = ({ receiver, onReceiver }) => {
     return msg && (isCurrentRoom(msg) || isCurrentFriend(msg));
   };
 
+  const handleFavouriteClick = () => {
+    const userRoom = state.user.data.rooms.find(
+      ({ room }) => room.id === receiver.id
+    );
+    console.log(state.user.data.rooms);
+    // favouriteClick({ id: receiver.id, favourite: !userRoom.favourite });
+  };
   const chatHeading = () => {
     return onReceiver === "user" ? (
       name
@@ -253,9 +261,19 @@ const Message = ({ receiver, onReceiver }) => {
       <Fragment>
         {name}
         <Tooltip title="Add to your favourite room" placement="bottom">
-          <Button icon={<StarOutlined />} size="small"></Button>
+          <Button
+            icon={
+              receiver.favourite ? (
+                <StarOutlined fill="black" />
+              ) : (
+                <StarOutlined />
+              )
+            }
+            size="small"
+            onClick={handleFavouriteClick}
+          ></Button>
         </Tooltip>
-        {receiver.users.length && (
+        {receiver.users.length ? (
           <small className="chat-title-extra-info">
             <Tooltip title="view users list" placement="bottom">
               <Button onClick={() => toggleSidebar({ showInfobar: true })}>
@@ -269,7 +287,7 @@ const Message = ({ receiver, onReceiver }) => {
               </Button>
             </Tooltip>
           </small>
-        )}
+        ) : null}
       </Fragment>
     );
   };
