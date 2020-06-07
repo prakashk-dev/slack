@@ -2,18 +2,11 @@ import express from "express";
 import * as Room from "../controllers/room.controller";
 
 const router = express.Router();
-router.route("/").get(Room.getAll);
-router.route("/name").get(Room.groupName);
-router.route("/recent").get(Room.getRecent);
-router.route("/:id").get(Room.getOne);
+router.get("/", Room.getAll);
+router.get("/name", Room.groupName);
+router.get("/recent", Room.getRecent);
+router.get("/:id", Room.findById);
 // this might be redundent
-router.route("/:id/users").get(Room.getUsers);
-// router.route("/:id").get(Room.findById);
-// router.route('/save')
-//   .post(User.save);
-// router.route('/:id')
-//   .get(User.findOne);
-// router.route('/:id')
-//   .delete(User.remove);
+router.get("/:id/users", Room.getUsers);
 
 export default router;

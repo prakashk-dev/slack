@@ -11,6 +11,9 @@ const USER_AUTHENTICATING_ERROR = "USER_AUTHENTICATING_ERROR";
 const USER_AUTHENTICATING_SUCCESS = "USER_AUTHENTICATING_SUCCESS";
 const UPDATE_ONLINE_STATUS = "UPDATE_ONLINE_STATUS";
 
+const USER_ROOM_FETCHING = "USER_ROOM_FETCHING";
+const USER_ROOM_FETCHING_ERROR = "USER_ROOM_FETCHING_ERROR";
+const USER_ROOM_FETCHING_SUCCESS = "USER_ROOM_FETCHING_SUCCESS";
 const ROOM_FETCHING = "ROOM_FETCHING";
 const ROOM_FETCHING_ERROR = "ROOM_FETCHING_ERROR";
 const ROOM_FETCHING_SUCCESS = "ROOM_FETCHING_SUCCESS";
@@ -156,7 +159,24 @@ export const appReducer = (state, { type, payload }) => {
       return {
         ...state,
         room: { data: payload, loading: false, error: null },
-        friend: { ...state.room, data: null },
+        // friend: { ...state.room, data: null },
+      };
+    case USER_ROOM_FETCHING:
+      return { ...state, room: { ...state.room, error: null, loading: true } };
+    case USER_ROOM_FETCHING_ERROR:
+      return {
+        ...state,
+        room: { ...state.room, loading: false, error: payload },
+      };
+    case USER_ROOM_FETCHING_SUCCESS:
+      return {
+        ...state,
+        room: { data: payload.room, loading: false, error: null },
+        user: {
+          ...state.user,
+          data:
+            payload.room.name === "Bhetghat" ? state.user.data : payload.user,
+        },
       };
     case USER_FETCHING:
       return {
@@ -232,11 +252,10 @@ export const appReducer = (state, { type, payload }) => {
         },
       };
     case TOGGLE_ROOM_FAVOURITE:
-      const { id: roomId, favourite } = payload;
-      let rooms = [...state.user.data.rooms];
-      rooms.forEach(
-        (item) => item.room.id === roomId && (item.favourite = favourite)
+      let rooms = state.user.data.rooms.map((room) =>
+        room._id === payload._id ? payload : room
       );
+
       return {
         ...state,
         user: {
@@ -406,10 +425,9 @@ export const AppProvider = ({ children }) => {
   const fetchRoomById = async (roomId, source) => {
     dispatch({ type: ROOM_FETCHING });
     try {
-      const res = await axios.get(
-        `/api/users/${state.user.data.id}/rooms/${roomId}`,
-        { cancelToken: source.token }
-      );
+      const res = await axios.get(`/api/rooms/${roomId}`, {
+        cancelToken: source.token,
+      });
       if (!axios.isCancel()) {
         if (res.data.error) {
           return dispatch({
@@ -417,10 +435,10 @@ export const AppProvider = ({ children }) => {
             payload: res.data.error,
           });
         }
-        const room = res.data;
+        const payload = res.data;
         return dispatch({
           type: ROOM_FETCHING_SUCCESS,
-          payload: room,
+          payload,
         });
       }
     } catch (error) {
@@ -431,27 +449,33 @@ export const AppProvider = ({ children }) => {
         });
     }
   };
-  const fetchRoom = async (roomId) => {
-    dispatch({ type: ROOM_FETCHING });
-    const decoded = decodeToken();
+
+  const fetchRoomAndUpdatedUser = async (roomId, source) => {
+    dispatch({ type: USER_ROOM_FETCHING });
     try {
-      const res = await axios.put(`/api/rooms/${roomId}?user_id=${decoded.id}`);
-      if (res.data.error) {
+      const res = await axios.get(
+        `/api/users/${state.user.data.id}/rooms/${roomId}`,
+        { cancelToken: source.token }
+      );
+      if (!axios.isCancel()) {
+        if (res.data.error) {
+          return dispatch({
+            type: USER_ROOM_FETCHING_ERROR,
+            payload: res.data.error,
+          });
+        }
+        const payload = res.data;
         return dispatch({
-          type: ROOM_FETCHING_ERROR,
-          payload: res.data.error,
+          type: USER_ROOM_FETCHING_SUCCESS,
+          payload,
         });
       }
-      const room = res.data;
-      return dispatch({
-        type: ROOM_FETCHING_SUCCESS,
-        payload: room,
-      });
     } catch (error) {
-      return dispatch({
-        type: ROOM_FETCHING_ERROR,
-        payload: error.message,
-      });
+      if (!axios.isCancel())
+        return dispatch({
+          type: USER_ROOM_FETCHING_ERROR,
+          payload: error.message,
+        });
     }
   };
 
@@ -630,19 +654,14 @@ export const AppProvider = ({ children }) => {
     return false;
   };
 
-  const logout = () => {
+  const logout = async () => {
     try {
-      axios
-        .patch(`/api/users/${state.user.data.id}`, {
-          status: "offline",
-        })
-        .then((data, err) => {
-          if (err) console.log("Error", err);
-          console.log("LOgged OUt", data);
-          return dispatch({
-            type: LOGOUT,
-          });
-        });
+      await axios.patch(`/api/users/${state.user.data.id}`, {
+        status: "offline",
+      });
+      return dispatch({
+        type: LOGOUT,
+      });
     } catch (err) {
       console.log("Error logging out user");
     }
@@ -701,13 +720,13 @@ export const AppProvider = ({ children }) => {
 
   const favouriteClick = async (payload) => {
     try {
-      await axios.patch(
+      const res = await axios.patch(
         `/api/users/${state.user.data.id}/rooms/${payload.id}`,
         { favourite: payload.favourite }
       );
       return dispatch({
         type: TOGGLE_ROOM_FAVOURITE,
-        payload: payload,
+        payload: res.data,
       });
     } catch (err) {
       console.log("Error", err);
@@ -725,7 +744,7 @@ export const AppProvider = ({ children }) => {
     fetchRooms,
     changeLayout,
     toggleSidebar,
-    fetchRoom,
+    fetchRoomAndUpdatedUser,
     fetchRoomById,
     updateRoomUsers,
     fetchUserChatInfo,

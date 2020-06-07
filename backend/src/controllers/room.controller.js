@@ -43,28 +43,28 @@ function getRecent(req, res) {
     });
 }
 
-async function findById(req, res) {
-  if (!req.params.id) {
-    return res.json({ error: "Room id is required" });
-  }
-  if (req.params.id === "welcome") {
-    return res.json({ name: "Bhet Ghat", users: [] });
-  }
+// async function findById(req, res) {
+//   if (!req.params.id) {
+//     return res.json({ error: "Room id is required" });
+//   }
+//   if (req.params.id === "welcome") {
+//     return res.json({ name: "Bhet Ghat", users: [] });
+//   }
 
-  try {
-    const group = await Room.findOne({ _id: req.params.id })
-      .populate("users", "username")
-      .populate("messages.from", "username")
-      .populate("messages.to", "name")
-      .exec();
-    return res.json(group);
-  } catch (e) {
-    console.log(e.message);
-    return res.json({
-      error: `Room not found with id: ${req.params.id}`,
-    });
-  }
-}
+//   try {
+//     const group = await Room.findOne({ _id: req.params.id })
+//       .populate("users", "username")
+//       .populate("messages.from", "username")
+//       .populate("messages.to", "name")
+//       .exec();
+//     return res.json(group);
+//   } catch (e) {
+//     console.log(e.message);
+//     return res.json({
+//       error: `Room not found with id: ${req.params.id}`,
+//     });
+//   }
+// }
 
 async function getUsers(req, res) {
   if (!req.params.id) {
@@ -84,8 +84,8 @@ async function getUsers(req, res) {
 }
 
 // /:id
-async function getOne(req, res) {
-  const id = res.locals.id || req.params.id;
+async function findById(req, res) {
+  const id = req.params.id;
   if (id === "welcome") {
     // send video url or something
     return res.json({ name: "Bhet Ghat", users: [] });
@@ -112,4 +112,22 @@ async function getOne(req, res) {
   }
 }
 
-export { getAll, getRecent, findById, groupName, getUsers, getOne };
+// helper functions
+const _getOneById = async (id) => {
+  try {
+    const room = await Room.findById(id)
+      .populate("users")
+      .populate("messages")
+      .exec();
+    if (room) {
+      return room.toJSON({ virtuals: true });
+    } else {
+      return undefined;
+    }
+  } catch (error) {
+    console.log(error);
+    return undefined;
+  }
+};
+
+export { getAll, getRecent, findById, groupName, getUsers, _getOneById };

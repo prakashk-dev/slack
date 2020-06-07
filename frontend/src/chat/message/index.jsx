@@ -23,6 +23,7 @@ import {
   UserOutlined,
   PushpinOutlined,
   StarOutlined,
+  StarFilled,
 } from "@ant-design/icons";
 import { Upload, Comment } from "src/common";
 
@@ -248,10 +249,19 @@ const Message = ({ receiver, onReceiver }) => {
   };
 
   const handleFavouriteClick = () => {
-    const userRoom = state.user.data.rooms.find(
-      ({ room }) => room.id === receiver.id
+    if (userCurrentRoom()) {
+      favouriteClick({
+        id: receiver.id,
+        favourite: !userCurrentRoom().favourite,
+      });
+    }
+  };
+
+  const userCurrentRoom = () => {
+    return (
+      state.user.data.rooms &&
+      state.user.data.rooms.find(({ room }) => room.id == receiver.id)
     );
-    favouriteClick({ id: receiver.id, favourite: !userRoom.favourite });
   };
   const chatHeading = () => {
     return onReceiver === "user" ? (
@@ -262,8 +272,8 @@ const Message = ({ receiver, onReceiver }) => {
         <Tooltip title="Add to your favourite room" placement="bottom">
           <Button
             icon={
-              receiver.favourite ? (
-                <StarOutlined fill="black" />
+              userCurrentRoom() && userCurrentRoom().favourite ? (
+                <StarFilled />
               ) : (
                 <StarOutlined />
               )

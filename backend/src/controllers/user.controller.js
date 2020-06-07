@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import moment from "moment";
 import { User, Room, Message } from "../models";
-import { getOne } from "./room.controller";
+import { _getOneById } from "./room.controller";
 import { logger } from "../helpers";
 import { getIO, getSocket, isOnline } from "../socket/data";
 
@@ -50,28 +50,33 @@ const findRoomById = async (req, res) => {
   if (!roomId || !id) {
     return res.json({ error: "Group id and user id needed" });
   } else if (roomId === "welcome") {
-    return res.json({ name: "Bhetghat", users: [] });
+    return res.json({ room: { name: "Bhetghat", users: [] } });
   } else if (!mongoose.Types.ObjectId.isValid(roomId)) {
     return res.json({ error: "Not a valid room id" });
   } else {
     try {
-      const user = await User.findById(id)
-        .populate("rooms.room")
-        .populate("groups.group")
-        .populate("friends.friend")
-        .exec();
+      const user = await User.findById(id).exec();
 
       let foundAt;
-      const exists = user.rooms.find((room, index) => {
+      let exists = user.rooms.find((room, index) => {
         foundAt = index;
-        return room.room.id === roomId;
+        return room.room == roomId;
       });
       if (exists) {
-        user.rooms.splice(foundAt, 1);
-        user.rooms.unshift({
-          room: exists.room,
-          last_active: moment.utc().format(),
-        });
+        // fresh added fav room
+        if (!exists.favourite) {
+          user.rooms.splice(foundAt, 1);
+          user.rooms.unshift({
+            room: exists.room,
+            last_active: moment.utc().format(),
+          });
+        } else {
+          user.rooms[foundAt] = {
+            room: exists.room,
+            favourite: exists.favourite,
+            last_active: moment.utc().format(),
+          };
+        }
       } else {
         user.rooms.unshift({
           room: roomId,
@@ -80,13 +85,15 @@ const findRoomById = async (req, res) => {
         updateRoomUsers(roomId, user);
       }
       await user.save();
+      const updatedUser = await User.findById(id)
+        .populate("rooms.room")
+        .populate("groups.group")
+        .populate("friends.friend")
+        .exec();
 
-      res.locals = {
-        id: roomId,
-        user,
-      };
-
-      getOne(req, res);
+      const room = await _getOneById(roomId);
+      // the user.rooms contains the newly added room
+      return res.json({ user: updatedUser, room });
     } catch (err) {
       console.log("Error Message", err);
       return res.json({ error: err.message });
@@ -100,12 +107,12 @@ const updateRoomById = async (req, res) => {
   Object.keys(req.body).forEach((key) => {
     updateObj[`rooms.$.${key}`] = req.body[key];
   });
-
+  console.log("Update Obj", req.body);
   try {
     if (!roomId || !id) {
       return res.json({ error: "Either roomId or userId missing" });
     }
-    const user = User.findOneAndUpdate(
+    let user = await User.findOneAndUpdate(
       { _id: id, "rooms.room": { $eq: roomId } },
       {
         $set: updateObj,
@@ -116,7 +123,15 @@ const updateRoomById = async (req, res) => {
       .populate("rooms.room")
       .populate("groups.group")
       .exec();
-    return res.json(user);
+    if (user) {
+      user = user.toJSON();
+      const room = user.rooms.find(({ room }) => room.id == roomId);
+      return res.json(room);
+    } else {
+      return res.json({
+        error: `User not found with id ${id} and room id ${roomId}`,
+      });
+    }
   } catch (err) {
     return res.json({ error: err.message });
   }

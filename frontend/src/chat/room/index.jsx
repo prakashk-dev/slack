@@ -4,15 +4,17 @@ import { AppContext } from "src/context";
 import axios from "axios";
 
 const Room = ({ roomId }) => {
-  const { state, fetchRoomById } = useContext(AppContext);
+  const { state, fetchRoomAndUpdatedUser } = useContext(AppContext);
 
   useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
+    // use this when user refresh the page
+    // fetchRoomById(roomId, source);
+    fetchRoomAndUpdatedUser(roomId, source);
 
-    fetchRoomById(roomId, source);
     return () => source.cancel();
-  }, [roomId]);
+  }, [roomId, state.rooms]);
   return state.room.data ? (
     <Message receiver={state.room.data} onReceiver="room" />
   ) : null;

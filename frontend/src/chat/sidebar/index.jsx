@@ -76,9 +76,12 @@ const Sidebar = () => {
     return ns ? ns.count : 0;
   };
 
-  const userFavRooms = user.data.rooms
-    .filter((room) => room.favourite)
-    .map((room) => room.room.id);
+  const userFavRooms =
+    user.data.rooms && user.data.rooms.length
+      ? user.data.rooms
+          .filter((room) => room.favourite)
+          .map((room) => room.room.id)
+      : [];
 
   return isReady() ? (
     <Sider
@@ -152,7 +155,7 @@ const Sidebar = () => {
             title="Your Favourite"
             className="sub-topic"
           >
-            {user.data.rooms.length
+            {user.data.rooms && user.data.rooms.length
               ? user.data.rooms.map((rm) => {
                   return rm.favourite ? (
                     <Menu.Item
@@ -250,43 +253,41 @@ const Sidebar = () => {
           icon={<MessageOutlined />}
           title="Direct Messages"
         >
-          {user.data.friends.length ? (
-            user.data.friends.map(({ status, friend }) => {
-              return (
-                <Menu.Item
-                  onClick={() =>
-                    handleMenuItemClick({ id: friend.username, sub: "u" })
-                  }
-                  key={friend.username}
-                  icon={
-                    status === "pending" ? (
-                      <Badge status="processing" />
-                    ) : friend.status === "online" ? (
-                      <Badge status="success" />
-                    ) : null
-                  }
-                >
-                  {friend.username}
-                  {user.data.notification.length &&
-                  getNotificationCount(user.data.notification, friend.id) >
-                    0 ? (
-                    <Badge
-                      count={getNotificationCount(
-                        user.data.notification,
-                        friend.id
-                      )}
-                      style={{
-                        backgroundColor: "#52c41a",
-                        marginLeft: 10,
-                      }}
-                    />
-                  ) : null}
-                </Menu.Item>
-              );
-            })
-          ) : (
-            <li> Your Inbox </li>
-          )}
+          {user.data.friends && user.data.friends.length
+            ? user.data.friends.map(({ status, friend }) => {
+                return (
+                  <Menu.Item
+                    onClick={() =>
+                      handleMenuItemClick({ id: friend.username, sub: "u" })
+                    }
+                    key={friend.username}
+                    icon={
+                      status === "pending" ? (
+                        <Badge status="processing" />
+                      ) : friend.status === "online" ? (
+                        <Badge status="success" />
+                      ) : null
+                    }
+                  >
+                    {friend.username}
+                    {user.data.notification.length &&
+                    getNotificationCount(user.data.notification, friend.id) >
+                      0 ? (
+                      <Badge
+                        count={getNotificationCount(
+                          user.data.notification,
+                          friend.id
+                        )}
+                        style={{
+                          backgroundColor: "#52c41a",
+                          marginLeft: 10,
+                        }}
+                      />
+                    ) : null}
+                  </Menu.Item>
+                );
+              })
+            : null}
         </SubMenu>
       </Menu>
     </Sider>
