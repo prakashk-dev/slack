@@ -130,6 +130,19 @@ img {
 
     &:hover {
       color: dodgerblue;
+      background: #eee;
+    }
+  }
+
+  div.ant-divider-horizontal {
+    margin: 12px 0px;
+  }
+
+  .danger {
+    color: rosybrown;
+
+    &:hover {
+      color: red;
     }
   }
 }

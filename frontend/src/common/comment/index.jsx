@@ -7,6 +7,7 @@ import {
   Popover,
   Modal,
   Button,
+  Divider,
 } from "antd";
 import {
   MessageOutlined,
@@ -23,9 +24,9 @@ const Reaction = ({ children, by }) => {
   const more = () => {
     return (
       <div className="reaction-icons">
-        <li>Pin</li>
         <li>Pin to the Channel</li>
-        <li>Delete</li>
+        <Divider />
+        <li className="danger">Delete</li>
       </div>
     );
   };
@@ -47,12 +48,10 @@ const Reaction = ({ children, by }) => {
             <SaveOutlined />
           </Button>
         </Tooltip>
-        <Popover trigger="click" content={more} placement="right">
-          <Tooltip title="More options">
-            <Button>
-              <MoreOutlined />
-            </Button>
-          </Tooltip>
+        <Popover trigger={["click", "hover"]} content={more} placement="right">
+          <Button>
+            <MoreOutlined />
+          </Button>
         </Popover>
       </div>
     );
