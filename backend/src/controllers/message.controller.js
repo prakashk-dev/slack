@@ -44,9 +44,31 @@ const saveMessage = async (data) => {
   return msg;
 };
 
+const saveThreadMessage = async (data) => {
+  const { thread, reply } = data;
+  const message = await Message.findByIdAndUpdate(
+    thread,
+    {
+      $push: {
+        reply: {
+          sender: reply.sender,
+          body: reply.body,
+          created_at: moment.utc().format(),
+        },
+      },
+    },
+    { new: true }
+  )
+    .populate("receiver")
+    .populate("sender")
+    .populate("reply.sender")
+    .exec();
+  return message;
+};
+
 const deleteAll = async (_, res) => {
   await Message.deleteMany({}).exec();
   return res.json({ msg: "All messages deleted" });
 };
 
-export { getByUsers, saveMessage, getAll, deleteAll };
+export { getByUsers, saveMessage, getAll, deleteAll, saveThreadMessage };

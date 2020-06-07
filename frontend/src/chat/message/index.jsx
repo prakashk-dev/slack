@@ -8,6 +8,7 @@ import React, {
 import moment from "moment";
 import { AppContext } from "src/context";
 import Infobar from "src/chat/infobar";
+import Thread from "src/chat/thread";
 
 import "./message.scss";
 import Axios from "axios";
@@ -30,7 +31,7 @@ import { Upload, Comment } from "src/common";
 const Message = ({ receiver, onReceiver }) => {
   // see backend/src/models/message.model.js
   const [message, setMessage] = useState("");
-  // const [messages, setMessages] = useState([]);
+  const [thread, setThread] = useState(null);
   const {
     state,
     toggleSidebar,
@@ -40,6 +41,7 @@ const Message = ({ receiver, onReceiver }) => {
     updateFriendList,
     updateOnlineStatus,
     favouriteClick,
+    updateMessage,
   } = useContext(AppContext);
   const divRef = useRef(null);
   const inputRef = useRef(null);
@@ -56,6 +58,7 @@ const Message = ({ receiver, onReceiver }) => {
 
   const handleEvents = () => {
     socket.on("messages", updateMessages);
+    socket.on("message", updateMessage);
     socket.on("typing", handleTypingEvent);
     socket.on("welcome", console.log);
     socket.on("updateRoomUsers", updateRoomUsers);
@@ -263,6 +266,16 @@ const Message = ({ receiver, onReceiver }) => {
       state.user.data.rooms.find(({ room }) => room.id == receiver.id)
     );
   };
+
+  const handleCommentClick = (reaction) => {
+    const { type, message } = reaction;
+    switch (type) {
+      case "thread":
+        return setThread(message);
+      default:
+        console.log(type);
+    }
+  };
   const chatHeading = () => {
     return onReceiver === "user" ? (
       name
@@ -344,6 +357,7 @@ const Message = ({ receiver, onReceiver }) => {
                           by={messageBy(msg)}
                           message={msg}
                           key={index}
+                          handleClick={handleCommentClick}
                         />
                       ) : null;
                     })
@@ -398,7 +412,11 @@ const Message = ({ receiver, onReceiver }) => {
             </Fragment>
           )}
         </Content>
-        {onReceiver !== "user" && <Infobar entity={receiver} />}
+        {onReceiver !== "user" && thread ? (
+          <Thread receiver={receiver} onReceiver={onReceiver} thread={thread} />
+        ) : (
+          <Infobar entity={receiver} />
+        )}
       </div>
     </Layout>
   );

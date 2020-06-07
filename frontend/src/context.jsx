@@ -36,8 +36,9 @@ const ROOMS_FETCHING = "ROOMS_FETCHING";
 const ROOMS_FETCHING_ERROR = "ROOMS_FETCHING_ERROR";
 const ROOMS_FETCH_SUCCESS = "ROOMS_FETCHING_SUCCESS";
 
-const MESSAGE_RECEIVED = "MESSAGE_RECEIVED";
-const MESSAGE_UPDATED = "MESSAGE_UPDATED";
+const MESSAGES_RECEIVED = "MESSAGES_RECEIVED";
+const RECEIVE_NEW_MESSAGE = "RECEIVE_NEW_MESSAGE";
+const UPDATE_MESSAGE = "UPDATE_MESSAGE";
 const MESSAGE_SENT = "MESSAGE_SENT";
 
 const SMALL_SCREEN_LAYOUT = "SMALL_SCREEN_LAYOUT";
@@ -91,7 +92,7 @@ const INIT_STATE = initialState();
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {
-  console.log({ type, payload });
+  // console.log({ type, payload });
   // console.log("state:", state);
   switch (type) {
     case SET_SOCKET:
@@ -281,12 +282,12 @@ export const appReducer = (state, { type, payload }) => {
         ...state,
         rooms: { data: payload, loading: false, error: null },
       };
-    case MESSAGE_RECEIVED:
+    case MESSAGES_RECEIVED:
       return {
         ...state,
         messages: payload,
       };
-    case MESSAGE_UPDATED:
+    case RECEIVE_NEW_MESSAGE:
       // temp fix, somehow message is receiving multiple times
       let messages =
         payload.id &&
@@ -296,6 +297,14 @@ export const appReducer = (state, { type, payload }) => {
       return {
         ...state,
         messages,
+      };
+    case UPDATE_MESSAGE:
+      let msgs = state.messages.map((message) =>
+        message.id == payload.id ? payload : message
+      );
+      return {
+        ...state,
+        messages: msgs,
       };
     case LOGOUT:
       Cookies.remove("token");
@@ -612,10 +621,17 @@ export const AppProvider = ({ children }) => {
   };
 
   const receivedMessage = (msg) => {
-    let type = msg.length ? MESSAGE_RECEIVED : MESSAGE_UPDATED;
+    let type = msg.length ? MESSAGES_RECEIVED : RECEIVE_NEW_MESSAGE;
     return dispatch({
       type,
       payload: msg,
+    });
+  };
+
+  const updateMessage = (payload) => {
+    return dispatch({
+      type: UPDATE_MESSAGE,
+      payload,
     });
   };
 
@@ -756,6 +772,7 @@ export const AppProvider = ({ children }) => {
     setDevice,
     updateOnlineStatus,
     favouriteClick,
+    updateMessage,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

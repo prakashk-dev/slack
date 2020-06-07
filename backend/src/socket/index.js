@@ -1,5 +1,8 @@
 import { logger, formatMessage } from "../helpers";
-import { saveMessage } from "../controllers/message.controller";
+import {
+  saveMessage,
+  saveThreadMessage,
+} from "../controllers/message.controller";
 import { setSocket, getSocket, setIO } from "./data";
 
 function welcomeMessage(socket) {
@@ -46,15 +49,26 @@ function onJoin(socket, { username, room, onReceiver, id }) {
 }
 
 async function onMessage(io, socket, msg) {
+  logger(io.sockets.adapter.rooms);
+
   try {
     const message = await saveMessage(msg);
-    logger("How many times");
     if (msg.onReceiver === "user") {
       const socketId = getSocket(msg.receiver).id;
       io.to(socketId).emit("messages", message);
     } else {
       socket.to(msg.receiver).emit("messages", message);
     }
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+async function onThreadMessage(io, socket, msg) {
+  try {
+    const message = await saveThreadMessage(msg);
+    logger(msg.reply);
+    socket.to(msg.reply.receiver).emit("message", message);
   } catch (err) {
     console.log(err);
   }
@@ -95,6 +109,7 @@ const handleConnection = (io, socket) => {
   socket.on("chat", (msg) => onChat(socket, msg));
   socket.on("typing", (msg) => onTyping(socket, msg));
   socket.on("message", (msg) => onMessage(io, socket, msg));
+  socket.on("thread", (msg) => onThreadMessage(io, socket, msg));
   socket.on("join", (msg) => onJoin(socket, msg));
   socket.on("joinUserToAllRoomsAndGroups", (msg) =>
     joinUserToAllRoomsAndGroups(socket, msg)

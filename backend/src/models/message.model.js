@@ -27,7 +27,7 @@ const MessageSchema = new Schema({
   updated_at: Date,
   reply: [
     {
-      from: { type: Schema.Types.ObjectId, ref: "user" },
+      sender: { type: Schema.Types.ObjectId, ref: "user" },
       body: {
         type: {
           type: String,

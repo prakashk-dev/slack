@@ -20,7 +20,7 @@ import moment from "moment";
 import "./comment.scss";
 import { LikeTwoTone } from "@ant-design/icons";
 
-const Reaction = ({ children, by }) => {
+const Reaction = ({ children, by, handleClick }) => {
   const more = () => {
     return (
       <div className="reaction-icons">
@@ -39,7 +39,7 @@ const Reaction = ({ children, by }) => {
           </Button>
         </Tooltip>
         <Tooltip title="Start Thread">
-          <Button>
+          <Button onClick={() => handleClick("thread")}>
             <MessageOutlined />
           </Button>
         </Tooltip>
@@ -67,7 +67,7 @@ const Reaction = ({ children, by }) => {
   );
 };
 // Do not re render message content, only re render time, see below
-const Content = React.memo(({ message, by }) => {
+const Content = React.memo(({ message, by, handleClick, ...props }) => {
   const [isVisible, setIsVisible] = useState(false);
   return (
     <Fragment>
@@ -90,8 +90,10 @@ const Content = React.memo(({ message, by }) => {
       )}
       {message.body.type === "icon" ? (
         <LikeTwoTone />
+      ) : props.reply ? (
+        <p>{message.body.text}</p>
       ) : (
-        <Reaction by={by}>
+        <Reaction by={by} handleClick={handleClick}>
           <p>{message.body.text}</p>
         </Reaction>
       )}
@@ -99,10 +101,14 @@ const Content = React.memo(({ message, by }) => {
   );
 });
 
-const Comment = ({ by, message, ...props }) => {
+const Comment = ({ by, message, handleClick, ...props }) => {
   const getLocal = moment(message.created_at).local();
   const fromNow = getLocal.fromNow();
   const localTimeTooltip = getLocal.format("YYYY-MM-DD HH:mm:ss");
+  const handleCommentClick = (type) => {
+    handleClick({ type, message });
+  };
+
   const more = () => (
     <div className="more_options">
       <p onClick={() => navigate(`/chat/u/${message.sender.username}`)}>
@@ -136,7 +142,14 @@ const Comment = ({ by, message, ...props }) => {
     <AntComment
       {...Config}
       {...props}
-      content={<Content message={message} by={by} />}
+      content={
+        <Content
+          message={message}
+          by={by}
+          handleClick={handleCommentClick}
+          {...props}
+        />
+      }
       datetime={
         <Tooltip title={localTimeTooltip}>
           <span>{fromNow}</span>
