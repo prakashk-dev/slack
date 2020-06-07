@@ -59,7 +59,7 @@ const Reaction = ({ children, by }) => {
   };
   return (
     <Popover
-      trigger="click"
+      trigger="hover"
       content={icons}
       placement={by === "other" ? "topRight" : "topLeft"}
     >
