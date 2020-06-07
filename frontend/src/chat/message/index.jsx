@@ -251,8 +251,7 @@ const Message = ({ receiver, onReceiver }) => {
     const userRoom = state.user.data.rooms.find(
       ({ room }) => room.id === receiver.id
     );
-    console.log(state.user.data.rooms);
-    // favouriteClick({ id: receiver.id, favourite: !userRoom.favourite });
+    favouriteClick({ id: receiver.id, favourite: !userRoom.favourite });
   };
   const chatHeading = () => {
     return onReceiver === "user" ? (

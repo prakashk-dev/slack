@@ -659,8 +659,6 @@ export const AppProvider = ({ children }) => {
 
   const changeLayout = ({ width, height }) => {
     const smallScreen = width <= 800 || height <= 600;
-    console.log("Width", width);
-    console.log("Height", height);
     const { device, layout } = state.style;
 
     if (device === "desktop") {

@@ -76,10 +76,10 @@ const Sidebar = () => {
     return ns ? ns.count : 0;
   };
 
-  const userFavRooms = user.data.rooms.map(
-    (room) => room.favourite && room.room.id
-  );
-  console.log("Id of user fav rooms if any", userFavRooms);
+  const userFavRooms = user.data.rooms
+    .filter((room) => room.favourite)
+    .map((room) => room.room.id);
+
   return isReady() ? (
     <Sider
       trigger={null}
@@ -185,7 +185,8 @@ const Sidebar = () => {
           <SubMenu key="byRegions" title="By Region" className="sub-topic">
             {rooms.data.length
               ? rooms.data.map((rm) => {
-                  return rm.category === "Region" && !rm.favourite ? (
+                  return rm.category === "Region" &&
+                    !userFavRooms.includes(rm.id) ? (
                     <Menu.Item
                       onClick={() =>
                         handleMenuItemClick({ id: rm.id, sub: "r" })
@@ -215,7 +216,8 @@ const Sidebar = () => {
           <SubMenu key="byTopics" title="By Topic" className="sub-topic">
             {rooms.data.length
               ? rooms.data.map((rm) => {
-                  return rm.category === "Topic" && !rm.favourite ? (
+                  return rm.category === "Topic" &&
+                    !userFavRooms.includes(rm.id) ? (
                     <Menu.Item
                       onClick={() =>
                         handleMenuItemClick({ id: rm.id, sub: "r" })
