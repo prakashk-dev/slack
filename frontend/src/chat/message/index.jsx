@@ -269,7 +269,14 @@ const Message = ({ receiver, onReceiver }) => {
     ) : (
       <Fragment>
         {name}
-        <Tooltip title="Add to your favourite room" placement="bottom">
+        <Tooltip
+          title={
+            userCurrentRoom() && userCurrentRoom().favourite
+              ? "Remove from your favourite room."
+              : "Add to your favourite room."
+          }
+          placement="bottom"
+        >
           <Button
             icon={
               userCurrentRoom() && userCurrentRoom().favourite ? (

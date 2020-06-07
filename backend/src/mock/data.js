@@ -46,7 +46,7 @@ export default {
       category: "Topic",
     },
     {
-      name: "Travel Ideas",
+      name: "Sport Center",
       image: "/api/static/images/kathmandu.png",
       category: "Topic",
     },
