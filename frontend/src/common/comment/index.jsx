@@ -1,13 +1,74 @@
 import React, { Fragment, useState } from "react";
 import { navigate } from "@reach/router";
-import { Comment as AntComment, Tooltip, Avatar, Popover, Modal } from "antd";
+import {
+  Comment as AntComment,
+  Tooltip,
+  Avatar,
+  Popover,
+  Modal,
+  Button,
+} from "antd";
+import {
+  MessageOutlined,
+  MoreOutlined,
+  SmileOutlined,
+  SaveOutlined,
+} from "@ant-design/icons";
 import moment from "moment";
 
 import "./comment.scss";
 import { LikeTwoTone } from "@ant-design/icons";
 
+const Reaction = ({ children, by }) => {
+  const more = () => {
+    return (
+      <div className="reaction-icons">
+        <li>Pin</li>
+        <li>Pin to the Channel</li>
+        <li>Delete</li>
+      </div>
+    );
+  };
+  const icons = () => {
+    return (
+      <div className="message-reaction-container">
+        <Tooltip title="Add Reaction">
+          <Button>
+            <SmileOutlined />
+          </Button>
+        </Tooltip>
+        <Tooltip title="Start Thread">
+          <Button>
+            <MessageOutlined />
+          </Button>
+        </Tooltip>
+        <Tooltip title="Save">
+          <Button>
+            <SaveOutlined />
+          </Button>
+        </Tooltip>
+        <Popover trigger="click" content={more} placement="right">
+          <Tooltip title="More options">
+            <Button>
+              <MoreOutlined />
+            </Button>
+          </Tooltip>
+        </Popover>
+      </div>
+    );
+  };
+  return (
+    <Popover
+      trigger="click"
+      content={icons}
+      placement={by === "other" ? "topRight" : "topLeft"}
+    >
+      {children}
+    </Popover>
+  );
+};
 // Do not re render message content, only re render time, see below
-const Content = React.memo(({ message }) => {
+const Content = React.memo(({ message, by }) => {
   const [isVisible, setIsVisible] = useState(false);
   return (
     <Fragment>
@@ -31,7 +92,9 @@ const Content = React.memo(({ message }) => {
       {message.body.type === "icon" ? (
         <LikeTwoTone />
       ) : (
-        <p>{message.body.text}</p>
+        <Reaction by={by}>
+          <p>{message.body.text}</p>
+        </Reaction>
       )}
     </Fragment>
   );
@@ -74,7 +137,7 @@ const Comment = ({ by, message, ...props }) => {
     <AntComment
       {...Config}
       {...props}
-      content={<Content message={message} />}
+      content={<Content message={message} by={by} />}
       datetime={
         <Tooltip title={localTimeTooltip}>
           <span>{fromNow}</span>

@@ -1,6 +1,9 @@
 @import "src/style.scss";
 
 .ant-comment {
+  max-width: 80%;
+  display: grid;
+
   .ant-comment-inner {
     .ant-comment-avatar {
       margin-right: 4px;
@@ -38,6 +41,8 @@ img {
   @extend .ant-comment;
 
   .ant-comment-inner {
+    justify-self: flex-end;
+
     .ant-comment-avatar {
       margin-right: 4px;
     }
@@ -53,6 +58,8 @@ img {
   @extend .ant-comment;
 
   .ant-comment-inner {
+    justify-self: flex-start;
+
     .ant-comment-content {
       background: white;
     }
@@ -61,6 +68,7 @@ img {
 
 .admin {
   @extend .ant-comment;
+  width: 100%;
 
   .ant-comment-inner {
     .ant-comment-content {
@@ -96,6 +104,32 @@ img {
     &:hover {
       color: dodgerblue;
       cursor: pointer;
+    }
+  }
+}
+
+.message-reaction-container {
+  display: grid;
+  grid-template-columns: repeat(4, 30px);
+  grid-column-gap: 10px;
+
+  button {
+    border: none;
+    padding: 0px;
+
+    span {
+      cursor: pointer;
+      font-size: 1.5em;
+    }
+  }
+}
+
+.reaction-icons {
+  li {
+    cursor: pointer;
+
+    &:hover {
+      color: dodgerblue;
     }
   }
 }
