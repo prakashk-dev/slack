@@ -60,6 +60,7 @@ const DEFAULT_STATE = {
   style: {
     showSidebar: true,
     showInfobar: false,
+    showThread: false,
     device: "desktop",
     layout: "desktop",
   },

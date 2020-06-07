@@ -10,7 +10,7 @@ import { AppContext } from "src/context";
 import moment from "moment";
 
 import "./thread.scss";
-import { Layout, Input, Divider } from "antd";
+import { Layout, Input, Divider, Button } from "antd";
 const { Sider } = Layout;
 
 import { LikeTwoTone, SendOutlined, CloseOutlined } from "@ant-design/icons";
@@ -37,11 +37,11 @@ const Thread = ({ receiver, onReceiver, thread }) => {
   const handleOutsideClick = (e) => {
     const infobarDOM = ReactDOM.findDOMNode(infobarRef.current);
     if (!infobarDOM.contains(e.target)) {
-      toggleSidebar({ showInfobar: false });
+      toggleSidebar({ showThread: false });
     }
   };
   useEffect(() => {
-    if (style.layout === "mobile" && style.showInfobar) {
+    if (style.layout === "mobile" && style.showThread) {
       document.addEventListener("click", handleOutsideClick, false);
     }
     return () =>
@@ -147,7 +147,12 @@ const Thread = ({ receiver, onReceiver, thread }) => {
       <div className="thread-container">
         <div className="thread-title">
           <div className="title">Thread</div>
-          <CloseOutlined />
+          <Button
+            onClick={() => toggleSidebar({ showThread: false })}
+            style={{ border: "none" }}
+          >
+            <CloseOutlined />
+          </Button>
         </div>
         <Divider />
         <Comment message={thread} by="other" reply />

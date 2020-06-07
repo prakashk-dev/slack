@@ -271,6 +271,7 @@ const Message = ({ receiver, onReceiver }) => {
     const { type, message } = reaction;
     switch (type) {
       case "thread":
+        toggleSidebar({ showThread: true });
         return setThread(message);
       default:
         console.log(type);
@@ -332,7 +333,8 @@ const Message = ({ receiver, onReceiver }) => {
           onClick={() => toggleSidebar({ showSidebar: !style.showSidebar })}
         />
         <div className="chat-title">{chatHeading()}</div>
-        {style.layout === "mobile" && style.showSidebar ? null : (
+        {(style.layout === "mobile" && style.showSidebar) ||
+        style.showThread ? null : (
           <div
             className="info-circle"
             onClick={() => toggleSidebar({ showInfobar: !style.showInfobar })}
@@ -412,7 +414,7 @@ const Message = ({ receiver, onReceiver }) => {
             </Fragment>
           )}
         </Content>
-        {onReceiver !== "user" && thread ? (
+        {onReceiver !== "user" && thread && style.showThread ? (
           <Thread receiver={receiver} onReceiver={onReceiver} thread={thread} />
         ) : (
           <Infobar entity={receiver} />
