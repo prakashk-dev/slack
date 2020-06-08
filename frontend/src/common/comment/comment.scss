@@ -12,6 +12,9 @@
     .ant-comment-content {
       padding: 6px 12px;
       border-radius: 4px;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      hyphens: auto;
 
       .ant-comment-content-author {
         margin-top: -24px;

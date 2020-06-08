@@ -36,6 +36,7 @@
       height: calc(calc(var(--vh, 1vh) * 100) - 64px);
       max-height: calc(calc(var(--vh, 1vh) * 100) - 64px);
       overflow-y: scroll;
+      overflow-x: hidden;
 
       li.ant-menu-submenu {
         div.ant-menu-submenu-title {
