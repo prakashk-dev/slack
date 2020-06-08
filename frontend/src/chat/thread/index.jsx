@@ -133,13 +133,25 @@ const Thread = ({ receiver, onReceiver, thread }) => {
           </Button>
         </div>
         <Divider />
-        <Comment message={thread} by="other" reply />
+        <Comment
+          message={thread}
+          by="other"
+          key={thread.id}
+          reply
+          user={sender}
+        />
         {replies.length > 0 && (
           <Fragment>
             <Divider orientation="left">{replies.length} reply</Divider>
             <div className="reply-cotainer">
               {replies.map((reply) => (
-                <Comment message={reply} key={reply.id} by="other" reply />
+                <Comment
+                  message={reply}
+                  key={reply.id}
+                  by="other"
+                  reply
+                  user={sender}
+                />
               ))}
             </div>
           </Fragment>

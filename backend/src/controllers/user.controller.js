@@ -215,7 +215,11 @@ const fetchUserWithChatHistory = async (req, res) => {
           ],
         },
       ],
-    }).exec();
+    })
+      .populate("sender")
+      .populate("receiver")
+      .populate("reply.sender")
+      .exec();
 
     friend = friend.toJSON();
     friend.messages = messages;

@@ -52,7 +52,7 @@ const MessageSchema = new Schema({
 
 // alwyas populate sender and receiver while requesting message
 MessageSchema.pre("find", function () {
-  this.populate("sender").populate("receiver");
+  this.populate("sender").populate("receiver").populate("reply.sender");
 });
 
 MessageSchema.set("toJSON", {

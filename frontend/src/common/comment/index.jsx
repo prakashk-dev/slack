@@ -135,7 +135,7 @@ const Content = React.memo(({ message, by, handleClick, reply }) => {
   );
 });
 
-const Comment = ({ by, message, handleClick, reply, ...props }) => {
+const Comment = ({ by, message, handleClick, reply, user, ...props }) => {
   const getLocal = moment(message.created_at).local();
   const fromNow = getLocal.fromNow();
   const localTimeTooltip = getLocal.format("YYYY-MM-DD HH:mm:ss");
@@ -151,17 +151,24 @@ const Comment = ({ by, message, handleClick, reply, ...props }) => {
       <p>View Profile</p>
     </div>
   );
+  console.log("user", user);
+  console.log("message.sender", message.sender);
   const Config =
     by === "other"
       ? {
           author: <a>{message.sender.username}</a>,
-          avatar: (
+          avatar: !(user && user.username === message.sender.username) ? (
             <Popover trigger="click" content={more} placement="bottomLeft">
               <Avatar
                 src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
                 alt="Han Solo"
               />
             </Popover>
+          ) : (
+            <Avatar
+              src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+              alt="Han Solo"
+            />
           ),
           className:
             message.body.type === "icon" ? "icon-receiver" : "receiver",
