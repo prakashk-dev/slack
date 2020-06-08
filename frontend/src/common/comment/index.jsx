@@ -191,7 +191,7 @@ const Comment = ({ by, message, handleClick, reply, ...props }) => {
           </Tooltip>
         }
       />
-      {message.reply && message.reply.length > 0 && (
+      {message.reply && message.reply.length > 0 && !reply && (
         <div className={`${Config.className} thread`}>
           <Tooltip title="view reply">
             <Button onClick={() => handleCommentClick("thread")}>

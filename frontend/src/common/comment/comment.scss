@@ -42,12 +42,26 @@
   margin-left: 32px;
   cursor: pointer;
 
-  button {
+  button.ant-btn {
     background: none;
     border: none;
 
     &:hover {
       background: none;
+      background: none;
+
+      span {
+        text-decoration: underline;
+      }
+    }
+
+    &:active {
+      background: none;
+      background: none;
+
+      span {
+        text-decoration: underline;
+      }
     }
   }
 
