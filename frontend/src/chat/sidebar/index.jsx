@@ -40,24 +40,29 @@ const Sidebar = () => {
 
   const profile = (
     <Menu className="menu-item">
-      <Menu.Item key="0">
-        <Progress
-          type="circle"
-          strokeColor={{
-            "0%": "#108ee9",
-            "100%": "#87d068",
-          }}
-          percent={90}
-        />
-        Profile Completion
-        <Menu.Divider />
-      </Menu.Item>
-      <Menu.Divider />
-      <Menu.Item key="1">
-        <a target="_blank">Profile</a>
-      </Menu.Item>
-      <Menu.Divider />
-      <Menu.Item key="2">
+      {user.roles && user.roles.length > 0 && user.roles.includes("admin") && (
+        <Fragment>
+          <Menu.Item key="0">
+            <Progress
+              type="circle"
+              strokeColor={{
+                "0%": "#108ee9",
+                "100%": "#87d068",
+              }}
+              percent={90}
+            />
+            Profile Completion
+            <Menu.Divider />
+          </Menu.Item>
+          <Menu.Divider />
+          <Menu.Item key="1">
+            <a target="_blank">Profile</a>
+          </Menu.Item>
+          <Menu.Divider />
+        </Fragment>
+      )}
+
+      <Menu.Item key="2" style={{ padding: "8px 32px" }}>
         <a target="_blank" onClick={handleLogout}>
           Logout
         </a>
@@ -102,7 +107,7 @@ const Sidebar = () => {
             <Fragment>
               {user.data.username}
               <Avatar size={40} icon={<UserOutlined />} alt="" />
-              <Dropdown overlay={profile} trigger={["click"]}>
+              <Dropdown overlay={profile} trigger={["click", "hover"]}>
                 <a
                   className="ant-dropdown-link"
                   onClick={(e) => e.preventDefault()}

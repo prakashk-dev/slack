@@ -24,6 +24,7 @@ import { LikeTwoTone } from "@ant-design/icons";
 
 const Reaction = ({ children, by, handleClick, message }) => {
   const isAdmin = false;
+  // const activeIcons = [];
   const more = () => {
     return (
       <div className="reaction-icons">
@@ -42,29 +43,35 @@ const Reaction = ({ children, by, handleClick, message }) => {
   const icons = () => {
     return (
       <div className="message-reaction-container">
-        <Tooltip title="Add Reaction">
-          <Button>
-            <SmileOutlined />
-          </Button>
-        </Tooltip>
-        <Tooltip title="Start Thread">
-          <Button onClick={() => handleClick("thread")}>
-            <MessageOutlined />
-          </Button>
-        </Tooltip>
         {message.onReceiver !== "user" && (
-          <Fragment>
-            <Tooltip title="Save">
-              <Button>
-                <SaveOutlined />
-              </Button>
-            </Tooltip>
-          </Fragment>
+          <Tooltip title="Start Thread">
+            <Button onClick={() => handleClick("thread")}>
+              <MessageOutlined />
+            </Button>
+          </Tooltip>
         )}
+
         {isAdmin ? (
-          <Button>
-            <MoreOutlined />
-          </Button>
+          message.onReceiver !== "user" ? (
+            <Fragment>
+              <Tooltip title="Save">
+                <Button>
+                  <SaveOutlined />
+                </Button>
+              </Tooltip>
+            </Fragment>
+          ) : (
+            <Fragment>
+              <Tooltip title="Add Reaction">
+                <Button>
+                  <SmileOutlined />
+                </Button>
+              </Tooltip>
+              <Button>
+                <MoreOutlined />
+              </Button>
+            </Fragment>
+          )
         ) : (
           canDelete && (
             <Tooltip title="Delete this message" trigger="hover">
@@ -77,9 +84,13 @@ const Reaction = ({ children, by, handleClick, message }) => {
       </div>
     );
   };
+  if (message.onReceiver === "user" && by !== "me") {
+    return <Fragment>{children}</Fragment>;
+  }
   return (
     <Popover
       trigger="hover"
+      destroyTooltipOnHide
       content={icons}
       placement={by === "other" ? "right" : "left"}
     >
@@ -105,7 +116,9 @@ const Content = React.memo(({ message, by, handleClick, reply }) => {
             footer={null}
             onCancel={() => setIsVisible(false)}
           >
-            <img src={message.body.url} alt="No image found" />
+            <Reaction by={by} handleClick={handleClick} message={message}>
+              <img src={message.body.url} alt="No image found" />
+            </Reaction>
           </Modal>
         </Fragment>
       )}
