@@ -14,19 +14,13 @@ router.get("/", (req, res) => {
   return res.json({ msg: "OK" });
 });
 
-router.get("/ping", (req, res) => {
-  return res.json({ message: "OK" });
-});
-
 // create a file during build and fetch that info
 router.get("/version", (req, res) => {
-  return res.json({
-    Date: "09/01/2020",
-    changes: {
-      features: [],
-      bugfix: [],
-    },
-  });
+  return res.sendFile(path.resolve(__dirname, "../../", "version"));
+});
+
+router.get("/ping", (req, res) => {
+  return res.json({ message: "OK" });
 });
 
 export default router;

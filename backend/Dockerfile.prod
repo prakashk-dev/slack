@@ -17,10 +17,10 @@ FROM node:lts-alpine3.9
 
 ENV NODE_ENV=production
 WORKDIR /usr/app
-
+# do not copy static assets from here as they are store in server disk
 COPY --from=builder /usr/app/node_modules /usr/app/node_modules
 COPY --from=builder /usr/app/dist /usr/app/dist
 COPY --from=builder /usr/app/package.json /usr/app/package.json
-COPY --from=builder /usr/app/static /usr/app/static
+COPY --from=builder /usr/app/version /usr/app/version
 
 CMD ["npm", "run", "prod"]
