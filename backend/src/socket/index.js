@@ -49,8 +49,6 @@ function onJoin(socket, { username, room, onReceiver, id }) {
 }
 
 async function onMessage(io, socket, msg) {
-  logger(io.sockets.adapter.rooms);
-
   try {
     const message = await saveMessage(msg);
     if (msg.onReceiver === "user") {
@@ -67,7 +65,6 @@ async function onMessage(io, socket, msg) {
 async function onThreadMessage(io, socket, msg) {
   try {
     const message = await saveThreadMessage(msg);
-    logger(msg.reply);
     socket.to(msg.reply.receiver).emit("message", message);
   } catch (err) {
     console.log(err);

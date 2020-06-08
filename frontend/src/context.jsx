@@ -38,8 +38,10 @@ const ROOMS_FETCH_SUCCESS = "ROOMS_FETCHING_SUCCESS";
 
 const MESSAGES_RECEIVED = "MESSAGES_RECEIVED";
 const RECEIVE_NEW_MESSAGE = "RECEIVE_NEW_MESSAGE";
-const UPDATE_MESSAGE = "UPDATE_MESSAGE";
-const MESSAGE_SENT = "MESSAGE_SENT";
+const RECEIVE_UPDATED_MESSAGE = "RECEIVE_UPDATED_MESSAGE";
+const UPDATE_MESSAGE_SUCCESS = "UPDATE_MESSAGE_SUCCESS";
+const SAVE_MESSAGE_SUCCESS = "SAVE_MESSAGE_SUCCESS";
+const DELETE_SINGLE_MESSAGE_SUCCESS = "DELETE_SINGLE_MESSAGE_SUCCESS";
 
 const SMALL_SCREEN_LAYOUT = "SMALL_SCREEN_LAYOUT";
 const SET_MOBILE_LAYOUT = "SET_MOBILE_LAYOUT";
@@ -93,7 +95,7 @@ const INIT_STATE = initialState();
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {
-  // console.log({ type, payload });
+  console.log({ type, payload });
   // console.log("state:", state);
   switch (type) {
     case SET_SOCKET:
@@ -289,6 +291,7 @@ export const appReducer = (state, { type, payload }) => {
         messages: payload,
       };
     case RECEIVE_NEW_MESSAGE:
+    case SAVE_MESSAGE_SUCCESS:
       // temp fix, somehow message is receiving multiple times
       let messages =
         payload.id &&
@@ -299,13 +302,23 @@ export const appReducer = (state, { type, payload }) => {
         ...state,
         messages,
       };
-    case UPDATE_MESSAGE:
+    case UPDATE_MESSAGE_SUCCESS:
+    case RECEIVE_UPDATED_MESSAGE:
       let msgs = state.messages.map((message) =>
         message.id == payload.id ? payload : message
       );
       return {
         ...state,
         messages: msgs,
+      };
+    case DELETE_SINGLE_MESSAGE_SUCCESS:
+      let index = state.messages.findIndex((message) => message.id === payload);
+      return {
+        ...state,
+        messages: [
+          ...state.messages.splice(0, index),
+          ...state.messages.splice(index, state.messages.length - 1),
+        ],
       };
     case LOGOUT:
       Cookies.remove("token");
@@ -629,13 +642,6 @@ export const AppProvider = ({ children }) => {
     });
   };
 
-  const updateMessage = (payload) => {
-    return dispatch({
-      type: UPDATE_MESSAGE,
-      payload,
-    });
-  };
-
   const updateNotification = async (data) => {
     const type = data.count ? RESET_NOTIFICATION : ADD_NOTIFICATION;
     try {
@@ -648,8 +654,47 @@ export const AppProvider = ({ children }) => {
       console.error(err);
     }
   };
-  const sendMessage = (msg) => {
-    // do api request to the messsage
+  const sendMessage = async (msg) => {
+    // do api request to the messsage, don't have to save anything in the state
+    try {
+      const res = await axios.post("/api/messages", msg);
+      if (res.error) {
+        console.log("Error sending message", err);
+        return;
+      }
+      return dispatch({
+        type: SAVE_MESSAGE_SUCCESS,
+        payload: res.data,
+      });
+    } catch (err) {
+      console.log("Something went wrong while posting a message", err);
+    }
+  };
+
+  const updateMessage = async (msg) => {
+    // do api request to the messsage, don't have to save anything in the state
+    try {
+      const res = await axios.patch(`/api/messages/${msg.id}`, {
+        reply: msg.body,
+      });
+      if (res.error) {
+        console.log("Error updating message", err);
+        return;
+      }
+      return dispatch({
+        type: UPDATE_MESSAGE_SUCCESS,
+        payload: res.data,
+      });
+    } catch (err) {
+      console.log("Something went wrong while posting a message", err);
+    }
+  };
+
+  const receiveUpdatedMessage = async (msg) => {
+    return dispatch({
+      type: RECEIVE_UPDATED_MESSAGE,
+      payload: msg,
+    });
   };
   // helper functions
   const decodeToken = () => {
@@ -724,11 +769,11 @@ export const AppProvider = ({ children }) => {
   };
 
   const toggleSidebar = (payload) => {
-    if (state.style.layout === "mobile") {
-      payload = payload.showInfobar
-        ? { ...payload, showSidebar: false }
-        : { ...payload, showInfobar: false };
-    }
+    // if (state.style.layout === "mobile") {
+    //   payload = payload.showInfobar
+    //     ? { ...payload, showSidebar: false }
+    //     : { ...payload, showInfobar: false };
+    // }
     return dispatch({
       type: TOGGLE_SIDEBAR,
       payload,
@@ -747,6 +792,22 @@ export const AppProvider = ({ children }) => {
       });
     } catch (err) {
       console.log("Error", err);
+    }
+  };
+
+  const deleteMessage = async (id) => {
+    try {
+      const res = await axios.delete(`/api/messages/${id}`);
+      if (res.err) {
+        console.log(err);
+        return;
+      }
+      return dispatch({
+        type: DELETE_SINGLE_MESSAGE_SUCCESS,
+        payload: id,
+      });
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -774,6 +835,9 @@ export const AppProvider = ({ children }) => {
     updateOnlineStatus,
     favouriteClick,
     updateMessage,
+    sendMessage,
+    receiveUpdatedMessage,
+    deleteMessage,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

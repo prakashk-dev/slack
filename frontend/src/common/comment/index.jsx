@@ -14,22 +14,31 @@ import {
   MoreOutlined,
   SmileOutlined,
   SaveOutlined,
+  DeleteOutlined,
+  RightOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
 
 import "./comment.scss";
 import { LikeTwoTone } from "@ant-design/icons";
 
-const Reaction = ({ children, by, handleClick }) => {
+const Reaction = ({ children, by, handleClick, message }) => {
+  const isAdmin = false;
   const more = () => {
     return (
       <div className="reaction-icons">
-        <li>Pin to the Channel</li>
-        <Divider />
+        {isAdmin && (
+          <Fragment>
+            <li>Pin to the Channel</li>
+            <Divider />
+          </Fragment>
+        )}
         <li className="danger">Delete</li>
       </div>
     );
   };
+  const canDelete =
+    (!message.reply || message.reply.length === 0) && by === "me";
   const icons = () => {
     return (
       <div className="message-reaction-container">
@@ -43,16 +52,28 @@ const Reaction = ({ children, by, handleClick }) => {
             <MessageOutlined />
           </Button>
         </Tooltip>
-        <Tooltip title="Save">
-          <Button>
-            <SaveOutlined />
-          </Button>
-        </Tooltip>
-        <Popover trigger={["click", "hover"]} content={more} placement="right">
+        {message.onReceiver !== "user" && (
+          <Fragment>
+            <Tooltip title="Save">
+              <Button>
+                <SaveOutlined />
+              </Button>
+            </Tooltip>
+          </Fragment>
+        )}
+        {isAdmin ? (
           <Button>
             <MoreOutlined />
           </Button>
-        </Popover>
+        ) : (
+          canDelete && (
+            <Tooltip title="Delete this message" trigger="hover">
+              <Button onClick={() => handleClick("delete")}>
+                <DeleteOutlined />
+              </Button>
+            </Tooltip>
+          )
+        )}
       </div>
     );
   };
@@ -60,14 +81,14 @@ const Reaction = ({ children, by, handleClick }) => {
     <Popover
       trigger="hover"
       content={icons}
-      placement={by === "other" ? "topRight" : "topLeft"}
+      placement={by === "other" ? "right" : "left"}
     >
       {children}
     </Popover>
   );
 };
 // Do not re render message content, only re render time, see below
-const Content = React.memo(({ message, by, handleClick, ...props }) => {
+const Content = React.memo(({ message, by, handleClick, reply }) => {
   const [isVisible, setIsVisible] = useState(false);
   return (
     <Fragment>
@@ -90,10 +111,10 @@ const Content = React.memo(({ message, by, handleClick, ...props }) => {
       )}
       {message.body.type === "icon" ? (
         <LikeTwoTone />
-      ) : props.reply ? (
+      ) : reply ? (
         <p>{message.body.text}</p>
       ) : (
-        <Reaction by={by} handleClick={handleClick}>
+        <Reaction by={by} handleClick={handleClick} message={message}>
           <p>{message.body.text}</p>
         </Reaction>
       )}
@@ -101,7 +122,7 @@ const Content = React.memo(({ message, by, handleClick, ...props }) => {
   );
 });
 
-const Comment = ({ by, message, handleClick, ...props }) => {
+const Comment = ({ by, message, handleClick, reply, ...props }) => {
   const getLocal = moment(message.created_at).local();
   const fromNow = getLocal.fromNow();
   const localTimeTooltip = getLocal.format("YYYY-MM-DD HH:mm:ss");
@@ -139,23 +160,34 @@ const Comment = ({ by, message, handleClick, ...props }) => {
       : { className: "admin" };
 
   return (
-    <AntComment
-      {...Config}
-      {...props}
-      content={
-        <Content
-          message={message}
-          by={by}
-          handleClick={handleCommentClick}
-          {...props}
-        />
-      }
-      datetime={
-        <Tooltip title={localTimeTooltip}>
-          <span>{fromNow}</span>
-        </Tooltip>
-      }
-    />
+    <Fragment>
+      <AntComment
+        {...Config}
+        {...props}
+        content={
+          <Content
+            message={message}
+            by={by}
+            handleClick={handleCommentClick}
+            reply={reply}
+          />
+        }
+        datetime={
+          <Tooltip title={localTimeTooltip}>
+            <span>{fromNow}</span>
+          </Tooltip>
+        }
+      />
+      {message.reply && message.reply.length > 0 && (
+        <div className={`${Config.className} thread`}>
+          <Tooltip title="view reply">
+            <Button onClick={() => handleCommentClick("thread")}>
+              {message.reply.length} repiles
+            </Button>
+          </Tooltip>
+        </div>
+      )}
+    </Fragment>
   );
 };
 export default Comment;

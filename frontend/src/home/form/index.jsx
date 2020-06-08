@@ -23,7 +23,9 @@ const HomeForm = () => {
     if (state.user.data) {
       const { data: user } = state.user;
       const isReturningUser =
-        user.rooms.length || user.friends.length || user.groups.length;
+        (user.rooms && user.rooms.length) ||
+        (user.friends && user.friends.length) ||
+        (user.groups && user.groups.length);
       if (isReturningUser) {
         // join user to all the rooms and blah blah blah
         const rg = [

@@ -17,7 +17,7 @@ import { LikeTwoTone, SendOutlined, CloseOutlined } from "@ant-design/icons";
 import { Upload, Comment } from "src/common";
 
 const Thread = ({ receiver, onReceiver, thread }) => {
-  const { state, toggleSidebar, receivedMessage } = useContext(AppContext);
+  const { state, toggleSidebar, updateMessage } = useContext(AppContext);
   const { user, socket, style, messages } = state;
   const infobarRef = useRef(null);
   const inputRef = useRef(null);
@@ -32,7 +32,7 @@ const Thread = ({ receiver, onReceiver, thread }) => {
     // as thread updates only in messages property
     const updatedThread = messages.find((message) => message.id === thread.id);
     setReplies(updatedThread.reply);
-  }, [messages]);
+  }, [messages, thread]);
 
   const handleOutsideClick = (e) => {
     const infobarDOM = ReactDOM.findDOMNode(infobarRef.current);
@@ -65,24 +65,6 @@ const Thread = ({ receiver, onReceiver, thread }) => {
     };
   };
 
-  const formatMessageForMyself = ({
-    text = message,
-    type = "text",
-    url = "",
-  }) => {
-    return {
-      sender: sender,
-      receiver: receiver,
-      onReceiver,
-      body: {
-        text,
-        type,
-        url,
-      },
-      created_at: moment.utc().format(),
-    };
-  };
-
   const sendMessageWithFile = () => {
     const formData = new FormData();
     formData.append("folder", name);
@@ -103,11 +85,7 @@ const Thread = ({ receiver, onReceiver, thread }) => {
   const sendMessage = (msg) => {
     //  send message with post action
     setMessage("");
-    // receivedMessage(formatMessageForMyself(msg));
-    socket.emit("thread", {
-      thread: thread.id,
-      reply: formatMessage(msg),
-    });
+    updateMessage({ id: thread.id, body: formatMessage(msg) });
   };
 
   const handleSend = () => {

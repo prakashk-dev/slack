@@ -4,7 +4,9 @@ import { AppContext } from "src/context";
 import axios from "axios";
 
 const Room = ({ roomId }) => {
-  const { state, fetchRoomAndUpdatedUser } = useContext(AppContext);
+  const { state, fetchRoomAndUpdatedUser, toggleSidebar } = useContext(
+    AppContext
+  );
 
   useEffect(() => {
     const CancelToken = axios.CancelToken;
@@ -12,6 +14,7 @@ const Room = ({ roomId }) => {
     // use this when user refresh the page
     // fetchRoomById(roomId, source);
     fetchRoomAndUpdatedUser(roomId, source);
+    toggleSidebar({ showThread: false });
 
     return () => source.cancel();
   }, [roomId, state.rooms]);

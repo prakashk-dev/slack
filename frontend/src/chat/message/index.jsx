@@ -41,7 +41,9 @@ const Message = ({ receiver, onReceiver }) => {
     updateFriendList,
     updateOnlineStatus,
     favouriteClick,
-    updateMessage,
+    receiveUpdatedMessage,
+    sendMessage,
+    deleteMessage,
   } = useContext(AppContext);
   const divRef = useRef(null);
   const inputRef = useRef(null);
@@ -58,7 +60,7 @@ const Message = ({ receiver, onReceiver }) => {
 
   const handleEvents = () => {
     socket.on("messages", updateMessages);
-    socket.on("message", updateMessage);
+    socket.on("message", receiveUpdatedMessage);
     socket.on("typing", handleTypingEvent);
     socket.on("welcome", console.log);
     socket.on("updateRoomUsers", updateRoomUsers);
@@ -166,7 +168,7 @@ const Message = ({ receiver, onReceiver }) => {
       type: "icon",
     };
 
-    sendMessage(msg);
+    handleSendMessage(msg);
   };
 
   const formatMessage = ({ text = message, type = "text", url = "" }) => {
@@ -182,25 +184,7 @@ const Message = ({ receiver, onReceiver }) => {
     };
   };
 
-  const formatMessageForMyself = ({
-    text = message,
-    type = "text",
-    url = "",
-  }) => {
-    return {
-      sender: sender,
-      receiver: receiver,
-      onReceiver,
-      body: {
-        text,
-        type,
-        url,
-      },
-      created_at: moment.utc().format(),
-    };
-  };
-
-  const sendMessageWithFile = () => {
+  const handleSendMessageWithFile = () => {
     const formData = new FormData();
     formData.append("folder", name);
     formData.append("file", file);
@@ -208,7 +192,7 @@ const Message = ({ receiver, onReceiver }) => {
       .then((res) => {
         setFile(null);
         setMessage("");
-        sendMessage({
+        handleSendMessage({
           text: message,
           type: "image",
           url: res.data.url,
@@ -217,18 +201,19 @@ const Message = ({ receiver, onReceiver }) => {
       .catch((err) => console.error(err));
   };
 
-  const sendMessage = (msg) => {
+  const handleSendMessage = (msg) => {
     //  send message with post action
     setMessage("");
-    receivedMessage(formatMessageForMyself(msg));
-    socket.emit("message", formatMessage(msg));
+    sendMessage(formatMessage(msg));
+    // receivedMessage(formatMessageForMyself(msg));
+    // socket.emit("message", formatMessage(msg));
   };
 
   const handleSend = () => {
     const msg = {
       text: message,
     };
-    sendMessage(msg);
+    handleSendMessage(msg);
   };
 
   const messageBy = (msg) => {
@@ -269,10 +254,13 @@ const Message = ({ receiver, onReceiver }) => {
 
   const handleCommentClick = (reaction) => {
     const { type, message } = reaction;
+    console.log("Reaction", reaction);
     switch (type) {
       case "thread":
         toggleSidebar({ showThread: true });
         return setThread(message);
+      case "delete":
+        return deleteMessage(message.id);
       default:
         console.log(type);
     }
@@ -382,7 +370,7 @@ const Message = ({ receiver, onReceiver }) => {
                   onKeyPress={(e) =>
                     e.key === "Enter"
                       ? file
-                        ? sendMessageWithFile()
+                        ? handleSendMessageWithFile()
                         : message.length
                         ? handleSend()
                         : handleSendLike()
@@ -393,7 +381,7 @@ const Message = ({ receiver, onReceiver }) => {
                 <button
                   onClick={() =>
                     file
-                      ? sendMessageWithFile()
+                      ? handleSendMessageWithFile()
                       : message.length
                       ? handleSend()
                       : handleSendLike()
