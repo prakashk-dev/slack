@@ -8,6 +8,7 @@ import React, {
 import ReactDOM from "react-dom";
 import { AppContext } from "src/context";
 import moment from "moment";
+import Axios from "axios";
 
 import "./thread.scss";
 import { Layout, Input, Divider, Button } from "antd";

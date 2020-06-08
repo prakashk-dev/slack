@@ -298,12 +298,16 @@ const Message = ({ receiver, onReceiver }) => {
                 <UserOutlined /> {receiver.users.length}
               </Button>
             </Tooltip>
-            <Divider type="vertical" />
-            <Tooltip title="view pinned items" placement="bottom">
-              <Button>
-                <PushpinOutlined /> 4
-              </Button>
-            </Tooltip>
+            {false && (
+              <Fragment>
+                <Divider type="vertical" />
+                <Tooltip title="view pinned items" placement="bottom">
+                  <Button>
+                    <PushpinOutlined /> 4
+                  </Button>
+                </Tooltip>
+              </Fragment>
+            )}
           </small>
         ) : null}
       </Fragment>

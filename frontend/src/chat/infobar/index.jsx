@@ -15,7 +15,7 @@ const Infobar = ({ entity }) => {
   const infobarRef = useRef(null);
   const [moreVisible, setMoreVisible] = useState({});
   const [openKeys, setOpenKeys] = useState(["users"]);
-  const users = entity.users; // for room and group
+  const users = entity.users; // for room and groups
   const user = entity; // for individual, entity itself a single user
   const title = entity.name || entity.username; // for room and group use name, for user, username
 
