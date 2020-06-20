@@ -55,7 +55,11 @@ const FETCH_CONFIG_SUCCESS = " FETCH_CONFIG_SUCCESS";
 const DEFAULT_STATE = {
   user: { data: null, error: null, loading: false },
   messages: [],
-  config: { data: { SOCKET_URL: null }, error: null, loading: false },
+  config: {
+    data: { SOCKET_URL: null, env: "development" },
+    error: null,
+    loading: false,
+  },
   room: { data: null, error: null, loading: false },
   friend: { data: null, error: null, loading: false },
   rooms: { data: [], error: null, loading: false },
@@ -80,7 +84,10 @@ export const initialState = () => {
         ...DEFAULT_STATE,
         config: {
           ...DEFAULT_STATE.config,
-          data: { SOCKET_URL: decoded.socket },
+          data: {
+            ...DEFAULT_STATE.config.data,
+            SOCKET_URL: decoded.socket,
+          },
         },
       };
     } else {
@@ -91,7 +98,7 @@ export const initialState = () => {
   return DEFAULT_STATE;
 };
 
-const INIT_STATE = initialState();
+const INIT_STATE = DEFAULT_STATE;
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {

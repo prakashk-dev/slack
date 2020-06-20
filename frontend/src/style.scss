@@ -16,6 +16,13 @@ body {
   .loading {
     text-align: center;
   }
+
+  .env-bar {
+    max-height: 22px;
+    text-align: center;
+    background: yellow;
+    font-weight: bold;
+  }
 }
 
 #root {
@@ -23,10 +30,12 @@ body {
   max-height: 100vh;
   height: calc(var(--vh, 1vh) * 100);
   max-height: calc(var(--vh, 1vh) * 100);
+
   .app {
     height: 100%;
   }
-  .app > div:first-child {
+
+  .app>div:first-child {
     height: 100%;
   }
 }

@@ -4,10 +4,10 @@
 
 | Command                    | Description                                                                   |
 | -------------------------- | ----------------------------------------------------------------------------- |
-| `./bhetghat.sh dev`        | Run application in development mode                                           |
-| `./bhetghat.sh build:prod` | Build application in production environment (Also tags images for production) |
-| `./bhetghat.sh run:prod`   | Run production images                                                         |
-| `./bhetghat.sh push`       | Push production images to the docker hub                                      |
+| `./docker.sh dev`        | Run application in development mode                                           |
+| `./docker.sh build` |      Build application with :master environment                                    |
+| `./docker.sh run`   | Run images with :master flag                                                         |
+| `./docker.sh make-release`       | staging release                                     |
 
 ### Url 
 

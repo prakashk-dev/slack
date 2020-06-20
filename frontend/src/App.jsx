@@ -101,6 +101,9 @@ const Root = () => {
   }
   return (
     <div className="app">
+      {state.config.data.env === "staging" && (
+        <div className="env-bar">Environment: Staging</div>
+      )}
       <Router>
         <Home path="/" />
         <Chat path="chat">

@@ -1,5 +1,6 @@
 #backend
-
+backend/version
+backend/static
 
 # frontend
 frontend/dist

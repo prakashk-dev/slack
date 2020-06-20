@@ -1,12 +1,11 @@
 import express from "express";
+import config from "../config";
 
 const router = express.Router();
 router.get("/config", (req, res) => {
   return res.json({
-    SOCKET_URL:
-      process.env.NODE_ENV === "production"
-        ? "https://socket.bhet-ghat.com"
-        : `http://localhost:3001`,
+    SOCKET_URL: config.socket_url,
+    env: config.env,
   });
 });
 

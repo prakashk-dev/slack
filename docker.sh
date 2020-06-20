@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJECT_NAME=${PROJECT_NAME:-bhetghat}
-DOCKER_REPO=${DOCKER_REPO:-docker.bhet-ghat.com}
+DOCKER_REPO=${DOCKER_REPO:-docker.prakashk.com}
 
 build-container() {
     echo ${PROJECT_NAME}/bhetghat revision $( git describe --tags ) built $( date ) > backend/version
@@ -11,11 +11,13 @@ build-container() {
 }
 # Promote one tag to another
 promote-image() {
-    docker tag $DOCKER_REPO/${PROJECT_NAME}/bhetghat:$1 $DOCKER_REPO/${PROJECT_NAME}/bhetghat:$2
+    docker tag $DOCKER_REPO/${PROJECT_NAME}/backend:$1 $DOCKER_REPO/${PROJECT_NAME}/backend:$2
+    docker tag $DOCKER_REPO/${PROJECT_NAME}/frontend:$1 $DOCKER_REPO/${PROJECT_NAME}/frontend:$2
 }
 
 push-image(){
-    docker push $DOCKER_REPO/${PROJECT_NAME}/bhetghat:$1
+    docker push $DOCKER_REPO/${PROJECT_NAME}/backend:$1
+    docker push $DOCKER_REPO/${PROJECT_NAME}/frontend:$1
 }
 
 
@@ -27,6 +29,13 @@ case $CMD in
     build)
         ARGS=$@
         build-container
+        ;;
+
+    dev)
+        echo "Application is running in development mode"
+        docker-compose build --no-cache
+        docker-compose up -d
+        docker-compose logs -f
         ;;
 
     push)
@@ -59,7 +68,7 @@ case $CMD in
 
     *)
 
-        echo "usages: $0 [build|push|pull|run|make-release|promote|down]"
+        echo "usages: $0 [dev|build|push|pull|run|make-release|promote|down]"
         exit 1
         ;;
 
