@@ -1,9 +1,8 @@
 const config = {
-  // env: process.env.NODE_ENV || "production",
-  env: "staging",
+  env: process.env.NODE_ENV || "production",
   mongo: {
-    host: process.env.MONGO_HOST || "mongodb://mongo/bhetghat",
-    port: process.env.MONGO_PORT || "3005",
+    host: process.env.MONGO_HOST || "mongodb://mongo:27017/bhetghat",
+    port: process.env.MONGO_PORT || "27017",
   },
   jwt_secret: process.env.JWT_SECRET || "supersecret",
   socket_url: ["production", "staging"].includes(process.env.NODE_ENV)
