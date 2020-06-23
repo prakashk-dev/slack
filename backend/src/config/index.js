@@ -11,7 +11,11 @@ const {
 
 const config = {
   env: NODE_ENV,
-  mongoUrl: `mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?authSource=admin`,
+  mongo: {
+    url: `mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?authSource=admin`,
+    user: MONGO_USERNAME,
+    pass: MONGO_PASSWORD,
+  },
   jwt_secret: JWT_SECRET,
   socket_url: SOCKET_URL,
 };

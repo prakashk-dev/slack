@@ -8,12 +8,14 @@ const options = {
   connectTimeoutMS: 10000,
   useCreateIndex: true,
   useFindAndModify: false,
+  user: config.mongo.user,
+  pass: config.mongo.pass,
   server: { socketOptions: { keepAlive: 1 } },
 };
 
 const connect = async () =>
   mongoose
-    .connect(config.mongoUrl, options)
+    .connect(config.mongo.url, options)
     .catch((err) => console.log(err.message));
 
 export default connect;
