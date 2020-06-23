@@ -1,6 +1,7 @@
 #backend
 backend/version
 backend/static
+backend/.env
 
 # frontend
 frontend/dist
