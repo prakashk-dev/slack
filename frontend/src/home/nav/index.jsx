@@ -5,11 +5,10 @@ import "./nav.scss";
 const Navigation = () => {
   return (
     <div className="main-nav">
-      <img src="/assets/globe.gif" alt="globe" className="globe" />
-      <div className="logo" onClick={() => navigate("/")}>
-        BHETGHAT LOGO HERE
+      <div className="logo">
+        <img src="/assets/logo.png" alt="Bhet-Ghat Logo" />
       </div>
-      <img src="/assets/nepali_flag.gif" alt="flag" />
+      <div className="slogan">Start your new network here</div>
     </div>
   );
 };

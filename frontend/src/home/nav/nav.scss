@@ -2,18 +2,25 @@
 
 .main-nav {
   display: grid;
-  grid-template-columns: 60px 1fr 60px;
+  grid-template-columns: 120px 1fr;
   align-items: center;
   justify-items: center;
-  background-color: $background_color;
-  color: $color;
+  box-shadow: 0px 2px 4px 0px #ccc;
+  font-size: 1.5em;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+
+  .slogan {
+    color: #2a2a2a;
+  }
+
+  .sign-in-message {
+    font-size: 0.8em;
+    font-weight: normal;
+    padding-right: 12px;
+  }
 
   img {
-    width: 60px;
-    height: 60px;
+    width: 80px;
   }
 
-  .globe {
-    border-radius: 50%;
-  }
 }

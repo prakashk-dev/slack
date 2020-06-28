@@ -5,4 +5,3 @@ COPY package*.json ./
 RUN npm i -q
 
 COPY . .
-CMD ["npm", "run", "dev"]

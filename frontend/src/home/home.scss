@@ -6,31 +6,15 @@
   height: 100%;
 
   .body {
-    width: 450px;
-    height: 475px;
     display: grid;
-    padding: 15px 25px;
-    border-radius: 12px;
-    justify-self: center;
-    align-self: center;
-    grid-template-rows: 120px auto;
-    box-shadow: 0px 4px 12px 4px $box_shadow;
+    background: #4b6cb7;
+    background: -webkit-linear-gradient(to right, #4b6cb7, #182848);
+    background: linear-gradient(to right, #4b6cb7, #182848);
 
-    .heading {
-      text-align: center;
+  }
 
-      .title {
-        font-size: 24px;
-      }
-
-      p {
-        margin-bottom: 8px;
-      }
-
-      hr {
-        width: 40%;
-      }
-    }
+  .body>div {
+    height: 100%;
   }
 }
 
@@ -42,16 +26,6 @@ screen and (max-height: 555px) {
       width: 100%;
       border-radius: 0px;
       box-shadow: 0px 0px 4px 2px $box_shadow inset;
-
-      .heading {
-        .title {
-          font-size: 20px;
-        }
-
-        p {
-          margin: 4px;
-        }
-      }
     }
   }
 }

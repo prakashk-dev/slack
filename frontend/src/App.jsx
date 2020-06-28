@@ -13,6 +13,8 @@ import Chat from "src/chat";
 // import GroupMessage from "src/chat/message";
 import { AppContext } from "src/context";
 import Home from "src/home";
+import Login from "src/home/login";
+import Signup from "src/home/signup";
 import UserMessage from "src/chat/user";
 import GroupMessage from "src/chat/group";
 import RoomMessage from "src/chat/room";
@@ -105,7 +107,10 @@ const Root = () => {
         <div className="env-bar">Environment: Staging</div>
       )}
       <Router>
-        <Home path="/" />
+        <Home path="/">
+          <Login path="login" />
+          <Signup path="signup" />
+        </Home>
         <Chat path="chat">
           <UserMessage path="u/:username" />
           <GroupMessage path="g/:groupId" />

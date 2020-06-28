@@ -5,9 +5,9 @@ import { Form, Input, Button } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import moment from "moment";
 
-import "./form.scss";
+import "./login.scss";
 const PIN = /[0-9]/;
-const HomeForm = () => {
+const LoginForm = () => {
   const { saveOrAuthenticateUser, state } = useContext(AppContext);
 
   const [form] = Form.useForm();
@@ -102,10 +102,10 @@ const HomeForm = () => {
     },
   ];
 
-  const usernameValidationRules = [
+  const emailValidationRules = [
     {
       required: true,
-      message: "Username is requird",
+      message: "Email is requird",
     },
   ];
 
@@ -137,41 +137,60 @@ const HomeForm = () => {
   };
 
   return (
-    <div className="form">
-      <Form {...formConfig}>
-        <InfoBar />
-        <Form.Item
-          label="Username"
-          name="username"
-          rules={usernameValidationRules}
-        >
-          <Input
-            prefix={<UserOutlined className="site-form-item-icon" />}
-            type="text"
-            name="username"
-            id="Username"
-            onBlur={checkUsername}
-            onChange={() => setMessage(null)}
-            placeholder="Choose a username or enter your last one"
-          />
-        </Form.Item>
-        <Form.Item label="PIN" name="pin" rules={pinValidationRules}>
-          <Input.Password
-            prefix={<LockOutlined className="site-form-item-icon" />}
-            type="password"
-            name="pin"
-            maxLength="4"
-            inputMode="numeric"
-            id="PIN"
-            placeholder="Choose your 4 digits pin"
-          />
-        </Form.Item>
-        <Form.Item>
-          <Button {...submitLayout}>Lets Chat</Button>
-        </Form.Item>
-      </Form>
+    <div className="signin-container">
+      <div className="form">
+        <Form {...formConfig}>
+          <InfoBar />
+          <Form.Item label="Email" name="email" rules={emailValidationRules}>
+            <Input
+              prefix={<UserOutlined className="site-form-item-icon" />}
+              type="text"
+              name="email"
+              id="email"
+              onChange={() => setMessage(null)}
+              placeholder="Enter your email address"
+            />
+          </Form.Item>
+          <Form.Item label="Password" name="pin" rules={pinValidationRules}>
+            <Input.Password
+              prefix={<LockOutlined className="site-form-item-icon" />}
+              type="password"
+              name="pin"
+              maxLength="4"
+              inputMode="numeric"
+              id="PIN"
+              placeholder="Create your password"
+            />
+          </Form.Item>
+          <p>
+            <a> Forgot Password </a>
+          </p>
+          <Form.Item className="action-button">
+            <Button {...submitLayout}>Sign In</Button>
+          </Form.Item>
+
+          <div className="sign-in">
+            <p>Don't have an account ?</p>
+            <a onClick={() => navigate("/signup")}>Sing Up</a>
+          </div>
+        </Form>
+      </div>
+      <div className="info">
+        <div className="app-slogan">
+          <h1>Welcome to Bhet-Ghat</h1>
+          <p>1. New Way to Collaborate</p>
+          <p>2. New Way to Collaborate</p>
+          <p>3. New Way to Collaborate</p>
+        </div>
+        <div className="get-started">
+          <h2>Easy to start</h2>
+          <p>1. Sign Up</p>
+          <p>2. Select a room to explore</p>
+          <p>3. Select a room to explore</p>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default HomeForm;
+export default LoginForm;

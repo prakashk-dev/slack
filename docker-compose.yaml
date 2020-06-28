@@ -26,7 +26,7 @@ services:
             - ./backend:/usr/app
             - /usr/app/node_modules
         ports:
-            - "3001:5000"
+            - 3001:8080
         env_file: .env
         environment:
             - MONGO_HOST=mongo
@@ -39,6 +39,7 @@ services:
             - mongo:mongo
         depends_on: 
             - mongo
+        command: /usr/app/docker/wait-for.sh $MONGO_HOST:$MONGO_PORT -- npm run dev
     mongo:
         image: "mongo:4.2"
         env_file: .env

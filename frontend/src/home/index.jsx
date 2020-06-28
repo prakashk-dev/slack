@@ -1,25 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Navigation from "./nav";
-import UserForm from "./form/";
 
 import "./home.scss";
-import { AppContext } from "src/context";
+import { navigate } from "@reach/router";
 
-const Home = () => {
-  const { state } = useContext(AppContext);
-  const { style } = state;
+const Home = ({ children }) => {
+  useEffect(() => {
+    navigate("/signup");
+  }, []);
   return (
     <div className="home">
       <Navigation></Navigation>
-      <div className="body">
-        <div className="heading">
-          <p className="title">Welcome to BhetGhat</p>
-          मिलनको हाम्रो चौतारी
-          <p>Tell us about yourself</p>
-          <hr />
-        </div>
-        <UserForm></UserForm>
-      </div>
+      <div className="body">{children}</div>
     </div>
   );
 };
