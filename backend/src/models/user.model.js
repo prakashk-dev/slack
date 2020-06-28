@@ -9,10 +9,7 @@ const UserSchema = new Schema({
     type: String,
     unique: true,
   },
-  pin: {
-    type: String,
-    select: false,
-  },
+  full_name: String,
   password: {
     type: String,
     select: false,
@@ -83,17 +80,16 @@ const UserSchema = new Schema({
 // })
 UserSchema.pre("save", function (next) {
   let user = this;
-  if (this.isModified("pin") || this.isNew) {
+  if (this.isModified("password") || this.isNew) {
     bcrypt.genSalt(10, function (err, salt) {
       if (err) {
         return next(err);
       }
-      const convertToString = user.pin.toString();
-      bcrypt.hash(convertToString, salt, function (err, hash) {
+      bcrypt.hash(user.password, salt, function (err, hash) {
         if (err) {
           return next(err);
         }
-        user.pin = hash;
+        user.password = hash;
         next();
       });
     });
@@ -102,8 +98,8 @@ UserSchema.pre("save", function (next) {
   }
 });
 
-UserSchema.methods.comparePassword = function (pin, cb) {
-  bcrypt.compare(pin.toString(), this.pin, function (err, isMatch) {
+UserSchema.methods.comparePassword = function (password, cb) {
+  bcrypt.compare(password, this.password, function (err, isMatch) {
     if (err) {
       return cb(err);
     }
