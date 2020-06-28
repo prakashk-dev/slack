@@ -139,13 +139,6 @@ const HomeForm = () => {
   return (
     <div className="signup-container">
       <div className="form-container">
-        <div className="heading">
-          Sign up with Email
-          <p>
-            Sign up with <a href="">facebook</a> instead.
-          </p>
-          <hr />
-        </div>
         <div className="form">
           <Form {...formConfig}>
             <InfoBar />
