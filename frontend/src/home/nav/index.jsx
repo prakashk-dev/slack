@@ -8,7 +8,20 @@ const Navigation = () => {
       <div className="logo">
         <img src="/assets/logo.png" alt="Bhet-Ghat Logo" />
       </div>
-      <div className="slogan">Start your new network here</div>
+      <div className="slogan">
+        <li>
+          <span className="bullet"></span>
+          Explore
+        </li>
+        <li>
+          <span className="bullet"></span>
+          Join
+        </li>
+        <li>
+          <span className="bullet"></span>
+          Share
+        </li>
+      </div>
     </div>
   );
 };

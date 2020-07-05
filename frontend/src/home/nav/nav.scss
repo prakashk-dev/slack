@@ -11,6 +11,26 @@
 
   .slogan {
     color: #2a2a2a;
+    display: flex;
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-column-gap: 20px;
+    font-size: 0.8em;
+
+    li {
+      list-style: none;
+    }
+
+    span.bullet {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #1890ff;
+      display: inline-block;
+      margin-right: 6px;
+      opacity: 0.8;
+    }
+
   }
 
   .sign-in-message {
