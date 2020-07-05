@@ -2,17 +2,23 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 import bcrypt from "bcryptjs";
 import moment from "moment";
-import { logger } from "../helpers";
+import { isEmail } from "validator";
 
 const UserSchema = new Schema({
   username: {
     type: String,
     unique: true,
   },
+  email: {
+    type: String,
+    unique: true,
+    validate: [isEmail, "Invalid Email."],
+  },
   full_name: String,
   password: {
     type: String,
     select: false,
+    minlength: 6,
   },
   roles: [],
   gender: {
