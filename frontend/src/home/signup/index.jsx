@@ -4,11 +4,12 @@ import { AppContext } from "src/context";
 import { Form, Input, Button } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import moment from "moment";
+import { isEmail } from "validator";
 
 import "./signup.scss";
 const PIN = /[0-9]/;
 const HomeForm = () => {
-  const { saveOrAuthenticateUser, state } = useContext(AppContext);
+  const { signup, state } = useContext(AppContext);
 
   const [form] = Form.useForm();
   const [httpError, setHttpError] = useState(null);
@@ -67,7 +68,7 @@ const HomeForm = () => {
   };
 
   const handleSubmit = async (values) => {
-    saveOrAuthenticateUser(values, (err, user) => {
+    signup(values, (err, user) => {
       if (err) {
         setHttpError(err);
         return;
@@ -88,16 +89,16 @@ const HomeForm = () => {
     });
   };
 
-  const pinValidationRules = [
+  const passwordValidationRule = [
     {
       required: true,
-      message: "PIN is required",
+      message: "Password is required",
     },
     {
       validator(_, value) {
-        return !value || !isNaN(value)
-          ? Promise.resolve()
-          : Promise.reject("Only digits are allowed for PIN");
+        return value && value.length < 6
+          ? Promise.reject("Password must be at least 6 characters long.")
+          : Promise.resolve();
       },
     },
   ];
@@ -106,6 +107,13 @@ const HomeForm = () => {
     {
       required: true,
       message: "Email is requird",
+    },
+    {
+      validator(_, value) {
+        return value && !isEmail(value)
+          ? Promise.reject("Please type a valid email address.")
+          : Promise.resolve();
+      },
     },
   ];
 
@@ -161,14 +169,16 @@ const HomeForm = () => {
               placeholder="Enter your email address"
             />
           </Form.Item>
-          <Form.Item label="Password" name="pin" rules={pinValidationRules}>
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={passwordValidationRule}
+          >
             <Input.Password
               prefix={<LockOutlined className="site-form-item-icon" />}
               type="password"
-              name="pin"
-              maxLength="4"
-              inputMode="numeric"
-              id="PIN"
+              name="password"
+              id="Password"
               placeholder="Create your password"
             />
           </Form.Item>

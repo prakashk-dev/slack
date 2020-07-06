@@ -2,6 +2,51 @@ import User from "../models/user.model";
 import { createCookie, createToken, logger } from "../helpers";
 import { sendOnlineStatus } from "../controllers/user.controller";
 
+const getRandomInteger = (min = 1, max = 9999) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+// refactor this function so that I can write a test for it
+// So Prakash Kandel will return
+// 1. prakashk or prakashkandel or prakashkandel1234
+const getUniqueUsername = async (user) => {
+  const { email, full_name } = user;
+  let randomNumber = getRandomInteger();
+  let count = 1;
+
+  const createUserName = (suffix = randomNumber) => {
+    if (full_name) {
+      if (count < 3) {
+        if (count === 1) {
+          let fullName = full_name.split(/\s+/);
+          if (fullName.length === 1) {
+            return fullName[0];
+          } else {
+            return fullName[0] + fullName[1].charAt(0);
+          }
+        } else {
+          return full_name.split(/\s+/).join("");
+        }
+      } else {
+        return `${full_name.split(/\s+/).join("")}${suffix}`;
+      }
+    } else {
+      return `${email.split("@")[0]}${suffix}`;
+    }
+  };
+  const isUnique = async (uname = createUserName()) => {
+    count++;
+    const username = new RegExp("^" + uname + "$", "i");
+    let user = await User.findOne({ username: { $regex: username } }).exec();
+    if (!user) {
+      return uname.toLowerCase();
+    } else {
+      const nextUsername = createUserName(getRandomInteger());
+      return isUnique(nextUsername);
+    }
+  };
+  return isUnique();
+};
+
 async function loginOrRegisterUser(req, res) {
   if (!req.body.email || !req.body.password) {
     return res.status(422).json({
@@ -133,7 +178,7 @@ const login = async (req, res) => {
 const signup = async (req, res) => {
   if (!req.body.email || !req.body.password) {
     return res.status(422).json({
-      error: "email or password missing",
+      error: "Email or Password missing",
     });
   }
   const email = new RegExp("^" + req.body.email + "$", "i");
@@ -144,12 +189,16 @@ const signup = async (req, res) => {
         error: `User already exists with email: ${req.body.email}`,
       });
     } else {
-      const { email, password } = req.body;
+      const { email, password, full_name } = req.body;
+      const username = await getUniqueUsername(req.body);
+      console.log("Username", username);
+
       let user = await User.create({
         email,
         password,
         status: "online",
-        full_name: req.body.full_name,
+        username,
+        full_name: full_name,
       });
       // set cookie to the frontend
       // also include email and hashed password so that when we decode the token

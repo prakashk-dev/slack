@@ -9,6 +9,9 @@ import axios from "axios";
 const USER_AUTHENTICATING = "USER_AUTHENTICATING";
 const USER_AUTHENTICATING_ERROR = "USER_AUTHENTICATING_ERROR";
 const USER_AUTHENTICATING_SUCCESS = "USER_AUTHENTICATING_SUCCESS";
+const USER_SIGNING = "USER_SIGNING";
+const USER_SIGNUP_ERROR = "USER_SIGNUP_ERROR";
+const USER_SIGNUP_SUCCESS = "USER_SIGNUP_SUCCESS";
 const UPDATE_ONLINE_STATUS = "UPDATE_ONLINE_STATUS";
 
 const USER_ROOM_FETCHING = "USER_ROOM_FETCHING";
@@ -111,17 +114,20 @@ export const appReducer = (state, { type, payload }) => {
         socket: payload,
       };
     case USER_AUTHENTICATING:
+    case USER_SIGNING:
       return {
         ...state,
         user: { ...state.user, loading: true, error: null },
         config: { ...state.config, loading: true, error: null },
       };
     case USER_AUTHENTICATING_ERROR:
+    case USER_SIGNUP_ERROR:
       return {
         ...state,
         user: { ...state.user, loading: false, error: payload },
       };
     case USER_AUTHENTICATING_SUCCESS:
+    case USER_SIGNUP_SUCCESS:
       return {
         ...state,
         user: {
@@ -389,11 +395,11 @@ export const AppProvider = ({ children }) => {
       payload: socket,
     });
   };
-  const saveOrAuthenticateUser = async (user, callback) => {
+  const login = async (user, callback) => {
     dispatch({ type: USER_AUTHENTICATING });
 
     try {
-      const res = await axios.post("/api/auth", user);
+      const res = await axios.post("/api/auth/login", user);
       if (res.data.error) {
         callback(res.data.error);
         return dispatch({
@@ -414,6 +420,39 @@ export const AppProvider = ({ children }) => {
       return dispatch({
         type: USER_AUTHENTICATING_ERROR,
         payload: err.message,
+      });
+    }
+  };
+
+  const signup = async (user, callback) => {
+    dispatch({ type: USER_SIGNING });
+
+    try {
+      const res = await axios.post("/api/auth/signup", user);
+      if (res.data.error) {
+        callback(res.data.error);
+        return dispatch({
+          type: USER_SIGNUP_ERROR,
+          payload: res.data.error,
+        });
+      }
+      callback(null, res.data.user);
+      return dispatch({
+        type: USER_SIGNUP_SUCCESS,
+        payload: {
+          user: res.data.user,
+          socket: decodeToken(res.data.token).socket,
+        },
+      });
+    } catch (err) {
+      const error =
+        err.response && err.response.data
+          ? err.response.data.error
+          : err.message;
+      callback(error);
+      return dispatch({
+        type: USER_SIGNUP_ERROR,
+        payload: error,
       });
     }
   };
@@ -820,7 +859,8 @@ export const AppProvider = ({ children }) => {
 
   const value = {
     state,
-    saveOrAuthenticateUser,
+    login,
+    signup,
     isAuthenticated,
     isAuthorised,
     logout,
