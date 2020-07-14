@@ -1,18 +1,18 @@
 import React, { useState, useContext, useEffect } from "react";
-import { navigate, Redirect } from "@reach/router";
+import { navigate } from "@reach/router";
 import { AppContext } from "src/context";
 import { Form, Input, Button } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import moment from "moment";
+import { isEmail } from "validator";
 
 import "./login.scss";
-const PIN = /[0-9]/;
+
 const LoginForm = () => {
-  const { saveOrAuthenticateUser, state } = useContext(AppContext);
+  const { login, state } = useContext(AppContext);
 
   const [form] = Form.useForm();
   const [httpError, setHttpError] = useState(null);
-  const [message, setMessage] = useState(null);
   const [submitLayout, setSubmitLayout] = useState({
     block: true,
     type: "primary",
@@ -67,8 +67,10 @@ const LoginForm = () => {
   };
 
   const handleSubmit = async (values) => {
-    saveOrAuthenticateUser(values, (err, user) => {
+    setSubmitLayout({ ...submitLayout, loading: true });
+    login(values, (err, user) => {
       if (err) {
+        setSubmitLayout({ ...submitLayout, loading: false });
         setHttpError(err);
         return;
       }
@@ -88,39 +90,29 @@ const LoginForm = () => {
     });
   };
 
-  const pinValidationRules = [
-    {
-      required: true,
-      message: "PIN is required",
-    },
+  const requiredValidation = (entity) => {
+    return [
+      {
+        required: true,
+        message: `${entity} is required`,
+      },
+    ];
+  };
+
+  const emailValidationRules = [
+    ...requiredValidation("Email"),
     {
       validator(_, value) {
-        return !value || !isNaN(value)
-          ? Promise.resolve()
-          : Promise.reject("Only digits are allowed for PIN");
+        return value && !isEmail(value)
+          ? Promise.reject("Please type a valid email address.")
+          : Promise.resolve();
       },
     },
   ];
 
-  const emailValidationRules = [
-    {
-      required: true,
-      message: "Email is requird",
-    },
-  ];
-
-  const checkUsername = () => {
-    const username = form.getFieldValue("username");
-    username.length && setMessage(`Welcome Back, ${username}`);
-  };
-
-  const InfoBar = () => {
-    return (
-      <div className={httpError ? "error" : message ? "info" : ""}>
-        {httpError || message}
-      </div>
-    );
-  };
+  const InfoBar = () => (
+    <div className={httpError ? "error" : ""}>{httpError}</div>
+  );
 
   const handleSubmitError = (error) => {
     console.log("Error:", error);
@@ -146,19 +138,18 @@ const LoginForm = () => {
             type="text"
             name="email"
             id="email"
-            onChange={() => setMessage(null)}
-            placeholder="Enter your email address"
           />
         </Form.Item>
-        <Form.Item label="Password" name="pin" rules={pinValidationRules}>
+        <Form.Item
+          label="Password"
+          name="password"
+          rules={requiredValidation("Password")}
+        >
           <Input.Password
             prefix={<LockOutlined className="site-form-item-icon" />}
             type="password"
-            name="pin"
-            maxLength="4"
-            inputMode="numeric"
-            id="PIN"
-            placeholder="Create your password"
+            name="password"
+            id="password"
           />
         </Form.Item>
         <p>

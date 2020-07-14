@@ -29,9 +29,15 @@
 
   form {
     display: grid;
-    grid-row-gap: 5px;
+    row-gap: 5px;
     grid-template-rows: 25px 90px 90px 90px 70px 60px;
     height: 100%;
+
+    .name {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 5px;
+    }
 
     .error {
       color: firebrick;

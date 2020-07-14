@@ -9,30 +9,13 @@ const getRandomInteger = (min = 1, max = 9999) => {
 // So Prakash Kandel will return
 // 1. prakashk or prakashkandel or prakashkandel1234
 const getUniqueUsername = async (user) => {
-  const { email, full_name } = user;
-  let randomNumber = getRandomInteger();
+  const { first_name, last_name } = user;
   let count = 1;
 
-  const createUserName = (suffix = randomNumber) => {
-    if (full_name) {
-      if (count < 3) {
-        if (count === 1) {
-          let fullName = full_name.split(/\s+/);
-          if (fullName.length === 1) {
-            return fullName[0];
-          } else {
-            return fullName[0] + fullName[1].charAt(0);
-          }
-        } else {
-          return full_name.split(/\s+/).join("");
-        }
-      } else {
-        return `${full_name.split(/\s+/).join("")}${suffix}`;
-      }
-    } else {
-      return `${email.split("@")[0]}${suffix}`;
-    }
+  const createUserName = () => {
+    return `${first_name}${last_name}${getRandomInteger()}`;
   };
+
   const isUnique = async (uname = createUserName()) => {
     count++;
     const username = new RegExp("^" + uname + "$", "i");
@@ -40,7 +23,7 @@ const getUniqueUsername = async (user) => {
     if (!user) {
       return uname.toLowerCase();
     } else {
-      const nextUsername = createUserName(getRandomInteger());
+      const nextUsername = createUserName();
       return isUnique(nextUsername);
     }
   };
@@ -189,7 +172,7 @@ const signup = async (req, res) => {
         error: `User already exists with email: ${req.body.email}`,
       });
     } else {
-      const { email, password, full_name } = req.body;
+      const { email, password, first_name, last_name } = req.body;
       const username = await getUniqueUsername(req.body);
       console.log("Username", username);
 
@@ -198,7 +181,8 @@ const signup = async (req, res) => {
         password,
         status: "online",
         username,
-        full_name: full_name,
+        first_name,
+        last_name,
       });
       // set cookie to the frontend
       // also include email and hashed password so that when we decode the token

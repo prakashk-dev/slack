@@ -105,7 +105,7 @@ const Sidebar = () => {
         {style.layout === "desktop" ? (
           style.showSidebar ? (
             <Fragment>
-              {user.data.username}
+              {user.data.first_name}
               <Avatar size={40} icon={<UserOutlined />} alt="" />
               <Dropdown overlay={profile} trigger={["click", "hover"]}>
                 <a
@@ -129,7 +129,7 @@ const Sidebar = () => {
               style={{ fontSize: "1.5em" }}
               onClick={() => toggleSidebar({ showSidebar: !style.showSidebar })}
             />
-            {user.data.username}
+            {user.data.first_name}
             <Avatar size={40} icon={<UserOutlined />} alt="" />
             <Dropdown overlay={profile} trigger={["hover", "click"]}>
               <a
