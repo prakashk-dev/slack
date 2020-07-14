@@ -254,7 +254,6 @@ const Message = ({ receiver, onReceiver }) => {
 
   const handleCommentClick = (reaction) => {
     const { type, message } = reaction;
-    console.log("Reaction", reaction);
     switch (type) {
       case "thread":
         toggleSidebar({ showThread: true });

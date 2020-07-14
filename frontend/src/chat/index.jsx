@@ -21,7 +21,7 @@ const Chat = ({ children }) => {
       <Content>{children}</Content>
     </Layout>
   ) : (
-    <Redirect to="/" noThrow />
+    <Redirect to="/login" noThrow />
   );
 };
 

@@ -72,7 +72,6 @@ const Root = () => {
     setDevice(device);
 
     if (Cookies.get("token")) {
-      console.log("Yup");
       fetchAuthUser();
     }
   }, []);
@@ -86,11 +85,9 @@ const Root = () => {
   useEffect(() => {
     !state.config.data.SOCKET_URL && fetchConfig();
     if (state.config.data.SOCKET_URL) {
-      console.log("Global");
       toggleGlobals({ loading: false });
     }
-  }, [state.config.data.SOCKET_URL]);
-
+  }, [state.config.data]);
   useEffect(() => {
     const socket = io.connect(state.config.data.SOCKET_URL);
     initialiseSocket(socket);
@@ -107,9 +104,9 @@ const Root = () => {
       console.log("Reconnecting");
     });
   };
-  // if token found, user.loading is alreay true, wait for that to be resolved
+  // if token found, wait for user.loading
   // or wait for the config to be fetched
-  if (state.globals.loading || state.user.loading) {
+  if (state.globals.loading || (Cookies.get("token") && state.user.loading)) {
     return <Loading />;
   }
   return (

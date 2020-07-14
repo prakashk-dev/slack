@@ -44,7 +44,6 @@ const Infobar = ({ entity }) => {
     </div>
   );
   const toggleSelectKeys = () => {
-    console.log("openKeys", openKeys);
     setOpenKeys(openKeys.length ? [] : ["users"]);
   };
 

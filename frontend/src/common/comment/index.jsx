@@ -151,8 +151,6 @@ const Comment = ({ by, message, handleClick, reply, user, ...props }) => {
       <p>View Profile</p>
     </div>
   );
-  console.log("user", user);
-  console.log("message.sender", message.sender);
   const Config =
     by === "other"
       ? {

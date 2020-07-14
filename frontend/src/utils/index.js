@@ -16,7 +16,6 @@ export const preserveState = (key, state) => {
     const data = retrieveState();
     if (state) {
       const newData = data ? { ...data, [key]: state } : { [key]: state };
-      console.log(newData);
       sessionStorage.setItem(KEY, JSON.stringify(newData));
     }
   } catch (error) {

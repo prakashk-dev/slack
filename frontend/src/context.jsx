@@ -8,7 +8,7 @@ import axios from "axios";
 (() => {
   axios.interceptors.response.use(
     (res) => {
-      return res.data;
+      return res ? res.data : undefined;
     },
     (err) => {
       return Promise.reject(err);
@@ -95,8 +95,7 @@ const INIT_STATE = DEFAULT_STATE;
 
 // Reducer
 export const appReducer = (state, { type, payload }) => {
-  console.log({ type, payload });
-  // console.log("state:", state);
+  // console.log({ type, payload, state });
   switch (type) {
     case SET_SOCKET:
       return {
@@ -126,7 +125,7 @@ export const appReducer = (state, { type, payload }) => {
           data: payload.user,
         },
         config: {
-          data: { SOCKET_URL: payload.socket },
+          data: { ...state.config.data, SOCKET_URL: payload.socket },
           loading: false,
           error: null,
         },
@@ -152,7 +151,7 @@ export const appReducer = (state, { type, payload }) => {
         ...state,
         config: {
           ...state.config,
-          data: payload,
+          data: { ...state.config.data, ...payload },
         },
       };
     case ROOM_FETCHING:
@@ -333,8 +332,10 @@ export const appReducer = (state, { type, payload }) => {
         config: {
           ...state.config,
         },
+        globals: { loading: false, error: null },
         socket: state.socket,
       };
+      return defaultState;
     case SMALL_SCREEN_LAYOUT:
       return {
         ...state,

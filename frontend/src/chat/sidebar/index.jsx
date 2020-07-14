@@ -23,7 +23,7 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigate("/login");
   };
 
   useEffect(() => {
