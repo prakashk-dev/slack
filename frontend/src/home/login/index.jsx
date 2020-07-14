@@ -19,25 +19,6 @@ const LoginForm = () => {
     htmlType: "submit",
   });
 
-  useEffect(() => {
-    if (state.user.data) {
-      const { data: user } = state.user;
-      const isReturningUser =
-        (user.rooms && user.rooms.length) ||
-        (user.friends && user.friends.length) ||
-        (user.groups && user.groups.length);
-      if (isReturningUser) {
-        // join user to all the rooms and blah blah blah
-        const rg = [
-          ...user.rooms.map((room) => room.room.id),
-          ...user.groups.map((group) => group.group.id),
-        ];
-        state.socket.emit("joinUserToAllRoomsAndGroups", rg);
-        navigate(getLastActiveUrl(user));
-      }
-    }
-  }, [state.user.data]);
-
   const getLastActiveUrl = (user) => {
     const { rooms, groups, friends } = user;
     let compareArrays = [rooms[0], groups[0], friends[0]];

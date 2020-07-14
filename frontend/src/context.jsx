@@ -4,6 +4,17 @@ import Cookies from "js-cookie";
 import jwt from "jsonwebtoken";
 
 import axios from "axios";
+// http interceptor for axios, move this to somewhere
+(() => {
+  axios.interceptors.response.use(
+    (res) => {
+      return res.data;
+    },
+    (err) => {
+      return Promise.reject(err);
+    }
+  );
+})();
 
 // Define constacts action verbs
 const USER_AUTHENTICATING = "USER_AUTHENTICATING";
@@ -55,6 +66,8 @@ const LOGOUT = "LOGOUT";
 const SET_SOCKET = "SET_SOCKET";
 const FETCH_CONFIG_SUCCESS = " FETCH_CONFIG_SUCCESS";
 
+const TOGGLE_GLOBALS = "TOGGLE_GLOBALS";
+
 const DEFAULT_STATE = {
   user: { data: null, error: null, loading: false },
   messages: [],
@@ -73,32 +86,9 @@ const DEFAULT_STATE = {
     device: "desktop",
     layout: "desktop",
   },
+  // initially loading is true, after fetching required configs or user this will be false
   globals: { loading: true, error: null },
   socket: null,
-};
-// Initial state of the application
-export const initialState = () => {
-  const token = Cookies.get("token");
-  if (token) {
-    // try to verify that token
-    const decoded = jwt.decode(token);
-    if (decoded) {
-      return {
-        ...DEFAULT_STATE,
-        config: {
-          ...DEFAULT_STATE.config,
-          data: {
-            ...DEFAULT_STATE.config.data,
-            SOCKET_URL: decoded.socket,
-          },
-        },
-      };
-    } else {
-      Cookies.remove("token");
-    }
-  }
-
-  return DEFAULT_STATE;
 };
 
 const INIT_STATE = DEFAULT_STATE;
@@ -381,6 +371,11 @@ export const appReducer = (state, { type, payload }) => {
         ...state,
         style: { ...state.style, ...payload },
       };
+    case TOGGLE_GLOBALS:
+      return {
+        ...state,
+        globals: { ...state.globals, ...payload },
+      };
     default:
       return INIT_STATE;
   }
@@ -400,19 +395,19 @@ export const AppProvider = ({ children }) => {
 
     try {
       const res = await axios.post("/api/auth/login", user);
-      if (res.data.error) {
-        callback(res.data.error);
+      if (res.error) {
+        callback(res.error);
         return dispatch({
           type: USER_AUTHENTICATING_ERROR,
-          payload: res.data.error,
+          payload: res.error,
         });
       }
-      callback(null, res.data.user);
+      callback(null, res.user);
       return dispatch({
         type: USER_AUTHENTICATING_SUCCESS,
         payload: {
-          user: res.data.user,
-          socket: decodeToken(res.data.token).socket,
+          user: res.user,
+          socket: decodeToken(res.token).socket,
         },
       });
     } catch (err) {
@@ -429,19 +424,19 @@ export const AppProvider = ({ children }) => {
 
     try {
       const res = await axios.post("/api/auth/signup", user);
-      if (res.data.error) {
-        callback(res.data.error);
+      if (res.error) {
+        callback(res.error);
         return dispatch({
           type: USER_SIGNUP_ERROR,
-          payload: res.data.error,
+          payload: res.error,
         });
       }
-      callback(null, res.data.user);
+      callback(null, res.user);
       return dispatch({
         type: USER_SIGNUP_SUCCESS,
         payload: {
-          user: res.data.user,
-          socket: decodeToken(res.data.token).socket,
+          user: res.user,
+          socket: decodeToken(res.token).socket,
         },
       });
     } catch (err) {
@@ -472,13 +467,13 @@ export const AppProvider = ({ children }) => {
       const res = await axios.put(
         `/api/groups/${groupId}?user_id=${decoded.id}`
       );
-      if (res.data.error) {
+      if (res.error) {
         return dispatch({
           type: GROUP_FETCHING_ERROR,
-          payload: res.data.error,
+          payload: res.error,
         });
       }
-      const group = res.data;
+      const group = res;
       return dispatch({
         type: GROUP_FETCHING_SUCCESS,
         payload: group,
@@ -498,13 +493,13 @@ export const AppProvider = ({ children }) => {
         cancelToken: source.token,
       });
       if (!axios.isCancel()) {
-        if (res.data.error) {
+        if (res.error) {
           return dispatch({
             type: ROOM_FETCHING_ERROR,
-            payload: res.data.error,
+            payload: res.error,
           });
         }
-        const payload = res.data;
+        const payload = res;
         return dispatch({
           type: ROOM_FETCHING_SUCCESS,
           payload,
@@ -527,13 +522,13 @@ export const AppProvider = ({ children }) => {
         { cancelToken: source.token }
       );
       if (!axios.isCancel()) {
-        if (res.data.error) {
+        if (res.error) {
           return dispatch({
             type: USER_ROOM_FETCHING_ERROR,
-            payload: res.data.error,
+            payload: res.error,
           });
         }
-        const payload = res.data;
+        const payload = res;
         return dispatch({
           type: USER_ROOM_FETCHING_SUCCESS,
           payload,
@@ -552,7 +547,7 @@ export const AppProvider = ({ children }) => {
     const res = await axios.get("/api/config");
     return dispatch({
       type: FETCH_CONFIG_SUCCESS,
-      payload: res.data,
+      payload: res,
     });
   };
 
@@ -562,7 +557,7 @@ export const AppProvider = ({ children }) => {
     if (decoded) {
       try {
         const res = await axios.get(`/api/users/${decoded.id}`);
-        if (res.data.error) {
+        if (res.error) {
           if (res.status === 401) {
             // cookies expired
             return dispatch({
@@ -571,10 +566,10 @@ export const AppProvider = ({ children }) => {
           }
           return dispatch({
             type: USER_FETCHING_ERROR,
-            payload: res.data.error,
+            payload: res.error,
           });
         }
-        const user = res.data;
+        const user = res;
         return dispatch({
           type: USER_FETCHING_SUCCESS,
           payload: user,
@@ -597,13 +592,13 @@ export const AppProvider = ({ children }) => {
 
     try {
       const res = await axios.get(`/api/rooms`);
-      if (res.data.error) {
+      if (res.error) {
         return dispatch({
           type: ROOMS_FETCHING_ERROR,
-          payload: res.data.error,
+          payload: res.error,
         });
       }
-      const rooms = res.data;
+      const rooms = res;
       return dispatch({
         type: ROOMS_FETCH_SUCCESS,
         payload: rooms,
@@ -636,15 +631,15 @@ export const AppProvider = ({ children }) => {
         { cancelToken: source.token }
       );
       if (!axios.isCancel()) {
-        if (res.data.error) {
+        if (res.error) {
           return dispatch({
             type: FRIEND_FETCHING_ERROR,
-            payload: res.data.error,
+            payload: res.error,
           });
         }
         return dispatch({
           type: FRIEND_FETCHING_SUCCESS,
-          payload: res.data,
+          payload: res,
         });
       }
     } catch (err) {
@@ -661,13 +656,13 @@ export const AppProvider = ({ children }) => {
 
     try {
       const res = await axios.get(`/api/groups`);
-      if (res.data.error) {
+      if (res.error) {
         return dispatch({
           type: ROOMS_FETCHING_ERROR,
-          payload: res.data.error,
+          payload: res.error,
         });
       }
-      const groups = res.data;
+      const groups = res;
       return dispatch({
         type: ROOMS_FETCH_SUCCESS,
         payload: groups,
@@ -694,7 +689,7 @@ export const AppProvider = ({ children }) => {
       const res = await axios.patch(`/api/users/${data.id}/notification`, data);
       return dispatch({
         type,
-        payload: res.data.notification,
+        payload: res.notification,
       });
     } catch (err) {
       console.error(err);
@@ -710,7 +705,7 @@ export const AppProvider = ({ children }) => {
       }
       return dispatch({
         type: SAVE_MESSAGE_SUCCESS,
-        payload: res.data,
+        payload: res,
       });
     } catch (err) {
       console.log("Something went wrong while posting a message", err);
@@ -729,7 +724,7 @@ export const AppProvider = ({ children }) => {
       }
       return dispatch({
         type: UPDATE_MESSAGE_SUCCESS,
-        payload: res.data,
+        payload: res,
       });
     } catch (err) {
       console.log("Something went wrong while posting a message", err);
@@ -826,6 +821,12 @@ export const AppProvider = ({ children }) => {
     });
   };
 
+  const toggleGlobals = (payload) => {
+    return dispatch({
+      type: TOGGLE_GLOBALS,
+      payload,
+    });
+  };
   const favouriteClick = async (payload) => {
     try {
       const res = await axios.patch(
@@ -834,7 +835,7 @@ export const AppProvider = ({ children }) => {
       );
       return dispatch({
         type: TOGGLE_ROOM_FAVOURITE,
-        payload: res.data,
+        payload: res,
       });
     } catch (err) {
       console.log("Error", err);
@@ -885,6 +886,7 @@ export const AppProvider = ({ children }) => {
     sendMessage,
     receiveUpdatedMessage,
     deleteMessage,
+    toggleGlobals,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

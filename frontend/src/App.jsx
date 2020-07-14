@@ -19,6 +19,7 @@ import UserMessage from "src/chat/user";
 import GroupMessage from "src/chat/group";
 import RoomMessage from "src/chat/room";
 import Loading from "src/common/loading";
+import Cookies from "js-cookie";
 
 import "antd/dist/antd.css";
 import "./style.scss";
@@ -48,6 +49,7 @@ const Root = () => {
     fetchAuthUser,
     fetchConfig,
     setDevice,
+    toggleGlobals,
   } = useContext(AppContext);
 
   useEffect(() => {
@@ -68,6 +70,11 @@ const Root = () => {
     };
     const device = isMobile() ? "mobile" : "desktop";
     setDevice(device);
+
+    if (Cookies.get("token")) {
+      console.log("Yup");
+      fetchAuthUser();
+    }
   }, []);
 
   useEffect(() => {
@@ -78,8 +85,11 @@ const Root = () => {
 
   useEffect(() => {
     !state.config.data.SOCKET_URL && fetchConfig();
-    !state.user.data && fetchAuthUser();
-  }, [state.config.data.SOCKET_URL, state.user.data]);
+    if (state.config.data.SOCKET_URL) {
+      console.log("Global");
+      toggleGlobals({ loading: false });
+    }
+  }, [state.config.data.SOCKET_URL]);
 
   useEffect(() => {
     const socket = io.connect(state.config.data.SOCKET_URL);
@@ -97,8 +107,9 @@ const Root = () => {
       console.log("Reconnecting");
     });
   };
-
-  if (state.loading) {
+  // if token found, user.loading is alreay true, wait for that to be resolved
+  // or wait for the config to be fetched
+  if (state.globals.loading || state.user.loading) {
     return <Loading />;
   }
   return (
