@@ -110,10 +110,8 @@ const Root = () => {
     return <Loading />;
   }
   return (
+    <>
     <div className="app">
-      {state.config.data.env === "staging" && (
-        <div className="env-bar">Environment: Staging</div>
-      )}
       <Router>
         <Home path="/">
           <Login path="login" />
@@ -127,6 +125,10 @@ const Root = () => {
         <Home path="*" />
       </Router>
     </div>
+      {state.config.data.env === "staging" && (
+        <div className="env-bar">Environment: Staging</div>
+      )}
+    </>
   );
 };
 

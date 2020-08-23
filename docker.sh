@@ -51,8 +51,8 @@ case $CMD in
         ;;
 
     make-release)
-        git tag -a "$1" -m "Tagging (staging) release $1"
-        git push origin --tags
+        # git tag -a "$1" -m "Tagging (staging) release $1"
+        # git push origin --tags
         build-container
         promote-image master staging
         push-image staging

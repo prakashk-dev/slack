@@ -93,8 +93,11 @@ const DEFAULT_STATE = {
 
 const INIT_STATE = DEFAULT_STATE;
 
+const AppContext = createContext(INIT_STATE);
+
+
 // Reducer
-export const appReducer = (state, { type, payload }) => {
+const appReducer = (state, { type, payload }) => {
   // console.log({ type, payload, state });
   switch (type) {
     case SET_SOCKET:
@@ -382,7 +385,7 @@ export const appReducer = (state, { type, payload }) => {
   }
 };
 
-export const AppProvider = ({ children }) => {
+const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, INIT_STATE);
   // Actions
   const initialiseSocket = async (socket) => {
@@ -891,4 +894,5 @@ export const AppProvider = ({ children }) => {
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
-export const AppContext = createContext(INIT_STATE);
+
+export { appReducer, AppProvider, AppContext };
