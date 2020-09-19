@@ -9,6 +9,18 @@ const { Sider } = Layout;
 const { SubMenu } = Menu;
 import { UserOutlined, MoreOutlined } from "@ant-design/icons";
 
+const isMe = (user, username) => {
+  const loggedInUser = user && user.username;
+  return loggedInUser === username;
+};
+
+const getModifiedUsers = (loggedInUser, users) => {
+  const index = users.findIndex(user => user.username === loggedInUser.username);
+  users.splice(index, 1);
+  users.push(loggedInUser);
+  return users;
+}
+
 const Infobar = ({ entity }) => {
   const { state, toggleSidebar } = useContext(AppContext);
   const { style } = state;
@@ -25,13 +37,9 @@ const Infobar = ({ entity }) => {
     }
   }, [style.showInfobar]);
 
-  const isMe = (username) => {
-    const loggedInUser = state.user.data && state.user.data.username;
-    return loggedInUser === username;
-  };
 
   const handleMenuItemClick = (username) => {
-    if (isMe(username)) return;
+    if (isMe(state.user.data, username)) return;
     style.layout === "mobile" &&
       toggleSidebar({ showInfobar: !style.showInfobar });
     navigate(`/chat/u/${username}`);
@@ -43,6 +51,7 @@ const Infobar = ({ entity }) => {
       <p>View Profile</p>
     </div>
   );
+
   const toggleSelectKeys = () => {
     setOpenKeys(openKeys.length ? [] : ["users"]);
   };
@@ -53,6 +62,7 @@ const Infobar = ({ entity }) => {
       toggleSidebar({ showInfobar: false });
     }
   };
+
   useEffect(() => {
     if (style.layout === "mobile" && style.showInfobar) {
       document.addEventListener("click", handleOutsideClick, false);
@@ -91,7 +101,7 @@ const Infobar = ({ entity }) => {
         <SubMenu key="users" icon={<UserOutlined />} title="Users">
           {users ? (
             users.length ? (
-              users.map((usr) => {
+              getModifiedUsers(state.user.data, users).map((usr, index) => {
                 return (
                   <div
                     className="menu-item"
@@ -114,9 +124,10 @@ const Infobar = ({ entity }) => {
                         <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
                       }
                     >
-                      {isMe(usr.username) ? "Me" : usr.username}
+                      {isMe(state.user.data, usr.username) ? "Me" : usr.username}
+                      {}
                     </Menu.Item>
-                    {moreVisible[usr.id] && !isMe(usr.username) && (
+                    {moreVisible[usr.id] && !isMe(state.user.data, usr.username) && (
                       <Popover
                         trigger="click"
                         content={() => more(usr.username)}
