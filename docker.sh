@@ -33,7 +33,7 @@ case $CMD in
 
     dev)
         echo "Application is running in development mode"
-        docker-compose build --no-cache
+        docker-compose build
         docker-compose up -d
         docker-compose logs -f
         ;;
