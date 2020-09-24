@@ -22,8 +22,9 @@ const Sidebar = () => {
   const [selectedKey, setSelectedKey] = useState("");
 
   const handleLogout = () => {
-    logout();
-    navigate("/login");
+    logout().then(() => {
+      navigate("/login");
+    })
   };
 
   useEffect(() => {

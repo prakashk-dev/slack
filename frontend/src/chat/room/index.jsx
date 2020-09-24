@@ -17,7 +17,9 @@ const Room = ({ roomId }) => {
     toggleSidebar({ showThread: false });
 
     return () => source.cancel();
+    
   }, [roomId, state.rooms]);
+
   return state.room.data ? (
     <Message receiver={state.room.data} onReceiver="room" />
   ) : null;

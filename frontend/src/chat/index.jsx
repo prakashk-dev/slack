@@ -9,7 +9,7 @@ import { Redirect } from "@reach/router";
 const { Content } = Layout;
 
 const Chat = ({ children }) => {
-  const { isAuthenticated, fetchRooms } = useContext(AppContext);
+  const { isAuthenticated, fetchRooms, state } = useContext(AppContext);
 
   useEffect(() => {
     fetchRooms();

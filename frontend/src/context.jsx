@@ -69,16 +69,20 @@ const FETCH_CONFIG_SUCCESS = " FETCH_CONFIG_SUCCESS";
 const TOGGLE_GLOBALS = "TOGGLE_GLOBALS";
 
 const DEFAULT_STATE = {
-  user: { data: null, error: null, loading: false },
+  user: { 
+    data: null,
+    error: null,
+    loading: true,
+  },
   messages: [],
   config: {
     data: { SOCKET_URL: null, env: "development" },
     error: null,
-    loading: false,
+    loading: true,
   },
-  room: { data: null, error: null, loading: false },
-  friend: { data: null, error: null, loading: false },
-  rooms: { data: [], error: null, loading: false },
+  room: { data: null, error: null, loading: true },
+  friend: { data: null, error: null, loading: true },
+  rooms: { data: [], error: null, loading: true },
   style: {
     showSidebar: true,
     showInfobar: false,
@@ -104,6 +108,7 @@ const appReducer = (state, { type, payload }) => {
       return {
         ...state,
         socket: payload,
+
       };
     case USER_AUTHENTICATING:
     case USER_SIGNING:
@@ -154,6 +159,7 @@ const appReducer = (state, { type, payload }) => {
         ...state,
         config: {
           ...state.config,
+          loading: false,
           data: { ...state.config.data, ...payload },
         },
       };
@@ -183,6 +189,7 @@ const appReducer = (state, { type, payload }) => {
         room: { data: payload.room, loading: false, error: null },
         user: {
           ...state.user,
+          loading: false,
           data:
             payload.room.name === "Bhetghat" ? state.user.data : payload.user,
         },
@@ -338,7 +345,6 @@ const appReducer = (state, { type, payload }) => {
         globals: { loading: false, error: null },
         socket: state.socket,
       };
-      return defaultState;
     case SMALL_SCREEN_LAYOUT:
       return {
         ...state,
@@ -762,13 +768,14 @@ const AppProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    // let the user quickly logout from the frontend
     try {
       await axios.patch(`/api/users/${state.user.data.id}`, {
         status: "offline",
       });
       return dispatch({
         type: LOGOUT,
-      });
+      })
     } catch (err) {
       console.log("Error logging out user");
     }

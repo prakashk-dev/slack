@@ -3,45 +3,13 @@ import { AppContext } from "src/context";
 import moment from "moment";
 
 import Navigation from "./nav";
+import Loading from "src/common/loading";
 
 import "./home.scss";
 import { navigate } from "@reach/router";
 
 const Home = ({ children, location }) => {
   const { isAuthenticated, state } = useContext(AppContext);
-
-  // this is required while user try to access login page while logged in
-  useEffect(() => {
-    if (isAuthenticated()) {
-      const { data: user } = state.user;
-      const isReturningUser =
-        (user.rooms && user.rooms.length) ||
-        (user.friends && user.friends.length) ||
-        (user.groups && user.groups.length);
-      if (isReturningUser) {
-        // join user to all the rooms and blah blah blah
-        const roomsAndGroups = [
-          ...user.rooms.map(({ room }) => room.id),
-          ...user.groups.map(({ group }) => group.id),
-        ];
-        const payload = {
-          roomsAndGroups,
-          id: user.id,
-        };
-        state.socket.emit("joinUserToAllRoomsAndGroups", payload, (DATA) => {
-          console.log("What is data looks like", DATA);
-          navigate(getLastActiveUrl(user));
-        });
-      } else {
-        state.socket.emit("registerUsersSocket", user.id, () => {
-          navigate(`/chat/r/welcome`);
-        });
-      }
-    } else {
-      console.log("Path name", location);
-      location.pathname !== "/login" && navigate("/signup");
-    }
-  }, []);
 
   const getLastActiveUrl = (user) => {
     const { rooms, groups, friends } = user;
@@ -70,11 +38,38 @@ const Home = ({ children, location }) => {
       (friend && friend.username) || (room && room.id) || (group && group.id);
     return `/chat/${sub}/${id}`;
   };
-  console.log("Home page");
+
+  if (isAuthenticated()) {
+    const { data: user } = state.user;
+    const isReturningUser =
+      (user.rooms && user.rooms.length) ||
+      (user.friends && user.friends.length) ||
+      (user.groups && user.groups.length);
+    if (isReturningUser) {
+      // join user to all the rooms and blah blah blah
+      const roomsAndGroups = [
+        ...user.rooms.map(({ room }) => room.id),
+        ...user.groups.map(({ group }) => group.id),
+      ];
+      const payload = {
+        roomsAndGroups,
+        id: user.id,
+      };
+      state.socket.emit("joinUserToAllRoomsAndGroups", payload, (DATA) => {
+        navigate(getLastActiveUrl(user));
+      });
+    } else {
+      state.socket.emit("registerUsersSocket", user.id, () => {
+        navigate(`/chat/r/welcome`);
+      });
+    }
+    // return until callback function is called by socket
+    return <Loading />;
+  } 
+
   return (
     <div className="home">
       <Navigation></Navigation>
-
       <div className="body">
         <div className="left-body">
           <img

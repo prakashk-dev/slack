@@ -95,6 +95,7 @@ const Message = ({ receiver, onReceiver }) => {
       setNotification(null);
     }
   }, [receiver, notification]);
+  
   useEffect(() => {
     if (receiver.messages && receiver.messages.length) {
       // here update that notifaction to be zero
@@ -120,12 +121,14 @@ const Message = ({ receiver, onReceiver }) => {
       socket.emit("typing", {
         sender: sender.username,
         receiver: receiver.id,
+        onReceiver,
         active: true,
       });
     } else {
       socket.emit("typing", {
         sender: sender.username,
         receiver: receiver.id,
+        onReceiver,
         active: false,
       });
       setTyping(null);
@@ -133,7 +136,6 @@ const Message = ({ receiver, onReceiver }) => {
   }, [message]);
 
   const updateMessages = (msg) => {
-    // console.log("Message coming from server", msg);
     receivedMessage(msg);
     // the other room is receiving message, at this point user has already joined that room to receive the message
     setNotification(msg);

@@ -1,9 +1,9 @@
-import { logger, formatMessage } from "../helpers";
+
 import {
   saveMessage,
   saveThreadMessage,
 } from "../controllers/message.controller";
-import { setSocket, getSocket, setIO } from "./data";
+import { setSocket, getSocket, setIO, getIO } from "./data";
 
 function welcomeMessage(socket) {
   try {
@@ -31,7 +31,6 @@ function updateUserList(socket, username, room) {
 
 function onJoin(socket, { username, room, onReceiver, id }) {
   try {
-    setSocket(id, socket);
     if (onReceiver !== "user") {
       const exists = Object.keys(socket.rooms).includes(room);
       if (!exists) {
@@ -48,13 +47,17 @@ function onJoin(socket, { username, room, onReceiver, id }) {
   }
 }
 
-async function onMessage(io, socket, msg) {
+async function onMessage(socket, msg) {
   try {
+    const IO = getIO();
     const message = await saveMessage(msg);
-    if (msg.onReceiver === "user") {
-      const socketId = getSocket(msg.receiver).id;
-      io.to(socketId).emit("messages", message);
-    } else {
+    if (msg.onReceiver === "user") {          // send private message
+      const socket = getSocket(msg.receiver);
+      if(socket){                             // if user if offline, socket is undefined
+        const socketId = socket.id;
+        IO.to(socketId).emit("messages", message);
+      }
+    } else {                      // post message to rooms 
       socket.to(msg.receiver).emit("messages", message);
     }
   } catch (err) {
@@ -62,7 +65,7 @@ async function onMessage(io, socket, msg) {
   }
 }
 
-async function onThreadMessage(io, socket, msg) {
+async function onThreadMessage(socket, msg) {
   try {
     const message = await saveThreadMessage(msg);
     socket.to(msg.reply.receiver).emit("message", message);
@@ -73,9 +76,9 @@ async function onThreadMessage(io, socket, msg) {
 
 function onTyping(socket, msg) {
   try {
-    const { active, sender } = msg;
+    const { active, sender, onReceiver, receiver } = msg;
     const message = active ? `<b>${sender}</b> is typing ...` : null;
-    socket.to(msg.receiver).emit("typing", { ...msg, message });
+    socket.to(receiver).emit("typing", { ...msg, message });
   } catch (err) {
     console.log(err);
   }
@@ -93,10 +96,14 @@ function onChat(socket, msg) {
   socket.emit("chat", msg);
 }
 
-function joinUserToAllRoomsAndGroups(socket, roomsAndGroups) {
-  roomsAndGroups.forEach((rg) => {
-    socket.join(rg);
-  });
+// this function is called when user sign in
+// or signin user refresh or visits the chat page
+function joinUserToAllRoomsAndGroups(args) {
+  const { socket, payload, callback } = args;
+  const { roomsAndGroups, id } = payload;
+  setSocket(id, socket);
+  roomsAndGroups.forEach((id) => socket.join(id));
+  if(callback) callback();
 }
 
 const handleConnection = (io, socket) => {
@@ -105,12 +112,17 @@ const handleConnection = (io, socket) => {
 
   socket.on("chat", (msg) => onChat(socket, msg));
   socket.on("typing", (msg) => onTyping(socket, msg));
-  socket.on("message", (msg) => onMessage(io, socket, msg));
-  socket.on("thread", (msg) => onThreadMessage(io, socket, msg));
+  socket.on("message", (msg) => onMessage(socket, msg));
+  socket.on("thread", (msg) => onThreadMessage(socket, msg));
   socket.on("join", (msg) => onJoin(socket, msg));
-  socket.on("joinUserToAllRoomsAndGroups", (msg) =>
-    joinUserToAllRoomsAndGroups(socket, msg)
+  socket.on("joinUserToAllRoomsAndGroups", (payload, callback) =>
+    joinUserToAllRoomsAndGroups({socket, payload, callback})
   );
+  // this event fires when user sign up
+  socket.on("registerUsersSocket", (uuid, callback) => {
+    setSocket(uuid, socket);
+    callback()
+  })
   socket.on("error", onError);
   socket.on("disconnect", onDisconnect);
 };
