@@ -6,8 +6,9 @@ import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { isEmail } from "validator";
 
 import "./signup.scss";
+
 const HomeForm = () => {
-  const { signup } = useContext(AppContext);
+  const { signup, state } = useContext(AppContext);
 
   const [form] = Form.useForm();
   const [httpError, setHttpError] = useState(null);
@@ -25,7 +26,11 @@ const HomeForm = () => {
         setSubmitLayout({ ...submitLayout, loading: false });
         return;
       }
-      navigate(`/chat/r/welcome`);
+      // if successfully signed up, join socket
+      const { socket } = state;
+      socket.emit("registerUsersSocket", user.id, () => {
+        navigate(`/chat/r/welcome`);
+      });
     });
   };
 
@@ -134,7 +139,9 @@ const HomeForm = () => {
           </Form.Item>
           <div className="sign-in">
             <p>Already have an account ?</p>
-            <a onClick={() => navigate("/login")}>Sing In</a>
+            <b>
+              <a onClick={() => navigate("/login")}>Sing In</a>
+            </b>
           </div>
         </Form>
       </div>

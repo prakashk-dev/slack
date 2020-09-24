@@ -20,16 +20,25 @@ const Home = ({ children, location }) => {
         (user.groups && user.groups.length);
       if (isReturningUser) {
         // join user to all the rooms and blah blah blah
-        const rg = [
-          ...user.rooms.map((room) => room.room.id),
-          ...user.groups.map((group) => group.group.id),
+        const roomsAndGroups = [
+          ...user.rooms.map(({ room }) => room.id),
+          ...user.groups.map(({ group }) => group.id),
         ];
-        state.socket.emit("joinUserToAllRoomsAndGroups", rg);
-        navigate(getLastActiveUrl(user));
+        const payload = {
+          roomsAndGroups,
+          id: user.id,
+        };
+        state.socket.emit("joinUserToAllRoomsAndGroups", payload, (DATA) => {
+          console.log("What is data looks like", DATA);
+          navigate(getLastActiveUrl(user));
+        });
       } else {
-        navigate("/chat/r/welcome");
+        state.socket.emit("registerUsersSocket", user.id, () => {
+          navigate(`/chat/r/welcome`);
+        });
       }
     } else {
+      console.log("Path name", location);
       location.pathname !== "/login" && navigate("/signup");
     }
   }, []);
@@ -61,11 +70,20 @@ const Home = ({ children, location }) => {
       (friend && friend.username) || (room && room.id) || (group && group.id);
     return `/chat/${sub}/${id}`;
   };
-
+  console.log("Home page");
   return (
     <div className="home">
       <Navigation></Navigation>
-      <div className="body">{children}</div>
+
+      <div className="body">
+        <div className="left-body">
+          <img
+            src="assets/logo.png"
+            alt="Logo"
+          />
+        </div>
+        <div className="right-body">{children}</div>
+      </div>
     </div>
   );
 };

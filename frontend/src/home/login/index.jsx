@@ -55,18 +55,28 @@ const LoginForm = () => {
         setHttpError(err);
         return;
       }
-      const isReturningUser =
-        user.rooms.length || user.friends.length || user.groups.length;
+      const { rooms, friends, groups } = user;
+      // if user did browse any room before of had chat with any user,
+      // we want to land them on their last active url
+      const isReturningUser = rooms.length || friends.length || groups.length;
       if (isReturningUser) {
-        // join user to all the rooms and blah blah blah
-        const rg = [
-          ...user.rooms.map((room) => room.room.id),
-          ...user.groups.map((group) => group.group.id),
+        // join user to all the rooms and groups
+        const roomsAndGroups = [
+          ...rooms.map(({ room }) => room.id),
+          ...groups.map(({ group }) => group.id),
         ];
-        state.socket.emit("joinUserToAllRoomsAndGroups", rg);
-        navigate(getLastActiveUrl(user));
+        const payload = {
+          roomsAndGroups,
+          id: user.id,
+        };
+        state.socket.emit("joinUserToAllRoomsAndGroups", payload, () => {
+          navigate(getLastActiveUrl(user));
+        });
       } else {
-        navigate(`/chat/r/welcome`);
+        // if user just logged in and logout before without browsing any room or friend or group
+        state.socket.emit("registerUsersSocket", user.id, () => {
+          navigate(`/chat/r/welcome`);
+        });
       }
     });
   };

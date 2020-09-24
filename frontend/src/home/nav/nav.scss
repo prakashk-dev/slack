@@ -2,9 +2,9 @@
 
 .main-nav {
   display: grid;
-  grid-template-columns: 120px 1fr;
   align-items: center;
-  justify-items: center;
+  justify-items: left;
+  padding-left: 100px;
   box-shadow: 0px 2px 4px 0px #ccc;
   font-size: 1.5em;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
@@ -15,20 +15,20 @@
     display: grid;
     grid-template-columns: auto auto auto;
     grid-column-gap: 20px;
-    font-size: 0.8em;
+    font-family: cursive;
+    font-weight: bolder;
 
     li {
       list-style: none;
     }
 
     span.bullet {
-      width: 8px;
-      height: 8px;
+      width: 4px;
+      height: 4px;
       border-radius: 50%;
       background-color: #1890ff;
       display: inline-block;
       margin-right: 6px;
-      opacity: 0.8;
     }
 
   }
@@ -43,4 +43,12 @@
     width: 50px;
   }
 
+}
+
+@media screen and (max-width: 450px),
+screen and (max-height: 555px) {
+  .main-nav {
+    justify-items: center;
+    padding-left:0px;
+  }
 }
