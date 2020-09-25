@@ -17,6 +17,11 @@
         align-self: center;
       }
     }
+    .right-body > div {
+      display: grid;
+      justify-items: center;
+      align-items: center;
+    }
   }
 
   .body>.right-body>div {
@@ -42,11 +47,6 @@ screen and (max-height: 555px) {
      grid-template-columns: 1fr;
      .left-body {
        display: none;
-     }
-     .right-body {
-      //  display: grid;
-      //  justify-items: center;
-      //  align-items: center;
      }
     }
   }
