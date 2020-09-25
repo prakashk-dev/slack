@@ -106,6 +106,7 @@ const Root = () => {
     });
   };
 
+  // if token is found, wait for user to resolved and stocket
   if (Cookies.get("token") && (state.user.loading || !state.socket)) {
     return <Loading />;
   } 

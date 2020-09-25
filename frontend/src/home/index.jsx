@@ -43,7 +43,6 @@ const Home = ({ children, location }) => {
     const { data: user } = state.user;
     const isReturningUser =
       (user.rooms && user.rooms.length) ||
-      (user.friends && user.friends.length) ||
       (user.groups && user.groups.length);
     if (isReturningUser) {
       // join user to all the rooms and blah blah blah

@@ -58,8 +58,7 @@ const LoginForm = () => {
       const { rooms, friends, groups } = user;
       // if user did browse any room before of had chat with any user,
       // we want to land them on their last active url
-      const isReturningUser = rooms.length || friends.length || groups.length;
-      if (isReturningUser) {
+      if (rooms.length || groups.length) {
         // join user to all the rooms and groups
         const roomsAndGroups = [
           ...rooms.map(({ room }) => room.id),
