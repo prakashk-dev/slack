@@ -1,10 +1,10 @@
 #!/bin/bash
 
-PROJECT_NAME=${PROJECT_NAME:-bhetghat}
+PROJECT_NAME=${PROJECT_NAME:-network}
 DOCKER_REPO=${DOCKER_REPO:-docker.prakashk.com}
 
 build-container() {
-    echo ${PROJECT_NAME}/bhetghat revision $( git describe --tags ) built $( date ) > backend/version
+    echo ${PROJECT_NAME}/network revision $( git describe --tags ) built $( date ) > backend/version
     echo From $( git show -s --format=%H ) on $( git log -1 --format=%cd --date=local ) >> backend/version
     docker-compose -f docker-compose.prod.yaml build --no-cache
 

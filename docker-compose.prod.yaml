@@ -5,7 +5,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
-    image: docker.prakashk.com/bhetghat/backend:master
+    image: docker.prakashk.com/network/backend:master
     environment:
       - NODE_ENV=production
 
@@ -13,7 +13,7 @@ services:
     build:
         context: ./frontend
         dockerfile: Dockerfile.prod
-    image: docker.prakashk.com/bhetghat/frontend:master
+    image: docker.prakashk.com/network/frontend:master
     environment:
         - NODE_ENV=production
 
