@@ -1,7 +1,6 @@
-import { Message, User } from "../models";
+import { Message } from "../models";
 import moment from "moment";
-import { logger } from "../helpers";
-import { getSocket, getIO } from "../socket/data";
+import { emitMessage, emitThreadMessage } from "../socket/helpers";
 
 const getAll = async (_, res) => {
   try {
@@ -11,6 +10,7 @@ const getAll = async (_, res) => {
     return res.json({ error: err.message });
   }
 };
+
 // /api/messages/users/:uuid?uuid={user_ui}
 const getByUsers = async (req, res) => {
   const { user_id: senderId } = req.params;
@@ -33,18 +33,6 @@ const getByUsers = async (req, res) => {
   }
 };
 
-// const saveMessage = async (data) => {
-//   let message = await Message.create({
-//     ...data,
-//     created_at: moment.utc().format(),
-//   });
-//   const msg = await Message.findOne({ _id: message._id })
-//     .populate("receiver")
-//     .populate("sender")
-//     .exec();
-//   return msg;
-// };
-
 const saveMessage = async (req, res) => {
   // create a function that handles if a message is valid or not
 
@@ -57,24 +45,7 @@ const saveMessage = async (req, res) => {
     .populate("sender")
     .populate("reply.sender")
     .exec();
-  // if it is a private message
-  if (msg.onReceiver === "user") {
-    const socket = getSocket(msg.receiver.id);
-    if(socket) {
-      const socketId = socket.id;
-      const IO = getIO();
-      IO.to(socketId).emit("messages", msg);
-    } else {
-      console.log("User is offline", msg.receiver.username);
-    }
-  } else {
-    const socket = getSocket(msg.sender.id);
-    if(socket){
-      socket.to(msg.receiver.id).emit("messages", msg);
-    } else {
-      console.log("Socket not found for user", msg.sender.username)
-    }
-  }
+  emitMessage(msg);
   return res.json(msg);
 };
 
@@ -122,8 +93,7 @@ const updateMessageById = async (req, res) => {
       .populate("sender")
       .populate("reply.sender")
       .exec();
-    const socket = getSocket(sender);
-    socket.to(message.receiver.id).emit("message", message);
+    emitThreadMessage({ sender, message});
     return res.json(message);
   } else {
     return res.json({ message: "Successfully updated message" });
@@ -154,7 +124,6 @@ export {
   getAll,
   deleteAll,
   saveThreadMessage,
-  // _saveMessage,
   updateMessageById,
   deleteMessageById,
 };

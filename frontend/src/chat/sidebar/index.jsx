@@ -15,13 +15,14 @@ import {
 
 const Sidebar = () => {
   const {
-    state: { user, rooms, style, room, friend },
+    state: { user, rooms, style, room, friend, socket },
     logout,
     toggleSidebar,
   } = useContext(AppContext);
   const [selectedKey, setSelectedKey] = useState("");
 
   const handleLogout = () => {
+    socket.emit("logout", { uuid: user.data.uuid });
     logout().then(() => {
       navigate("/login");
     })

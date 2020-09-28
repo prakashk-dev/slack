@@ -7,7 +7,7 @@ import { isEmail } from "validator";
 
 import "./signup.scss";
 
-const HomeForm = () => {
+const SignupForm = () => {
   const { signup, state } = useContext(AppContext);
 
   const [form] = Form.useForm();
@@ -149,4 +149,4 @@ const HomeForm = () => {
   );
 };
 
-export default HomeForm;
+export default SignupForm;

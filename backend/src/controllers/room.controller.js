@@ -43,29 +43,6 @@ function getRecent(req, res) {
     });
 }
 
-// async function findById(req, res) {
-//   if (!req.params.id) {
-//     return res.json({ error: "Room id is required" });
-//   }
-//   if (req.params.id === "welcome") {
-//     return res.json({ name: "Bhet Ghat", users: [] });
-//   }
-
-//   try {
-//     const group = await Room.findOne({ _id: req.params.id })
-//       .populate("users", "username")
-//       .populate("messages.from", "username")
-//       .populate("messages.to", "name")
-//       .exec();
-//     return res.json(group);
-//   } catch (e) {
-//     console.log(e.message);
-//     return res.json({
-//       error: `Room not found with id: ${req.params.id}`,
-//     });
-//   }
-// }
-
 async function getUsers(req, res) {
   if (!req.params.id) {
     return res.json({ error: "id required" });

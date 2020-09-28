@@ -5,7 +5,6 @@ import axios from "axios";
 
 const User = ({ username }) => {
   const { state, fetchUserChatInfo } = useContext(AppContext);
-
   useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();

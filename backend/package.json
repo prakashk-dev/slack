@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "babel src --out-dir dist --ignore 'src/**/*.spec.js'",
-    "dev": "nodemon -L  --exec babel-node src/server.js",
+    "dev": "nodemon -L --inspect=0.0.0.0 src/server.js --exec babel-node",
     "prod": "pm2-runtime start dist/server.js"
   },
   "keywords": [],

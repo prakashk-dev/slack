@@ -13,6 +13,7 @@ services:
           - 3000:3000
         environment:
           - NODE_ENV=development
+          - SOCKET_URL=http://localhost:3001
         links:
             - backend:backend
         depends_on:
@@ -27,6 +28,7 @@ services:
             - /usr/app/node_modules
         ports:
             - 3001:8080
+            - 9229:9229 # inspect port
         env_file: .env
         environment:
             - MONGO_HOST=mongo
@@ -43,8 +45,6 @@ services:
     mongo:
         image: "mongo:4.2"
         env_file: .env
-        ports:
-            - 3002:27017
         environment:
             - MONGO_INITDB_ROOT_USERNAME=$MONGO_USERNAME
             - MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASSWORD

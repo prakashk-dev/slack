@@ -54,6 +54,9 @@ const config = {
       inject: true,
       template: resolveRoot("public", "index.html"),
     }),
+    new webpack.DefinePlugin({
+      "process.env": JSON.stringify(process.env)
+    })
   ],
 };
 

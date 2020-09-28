@@ -1,9 +1,11 @@
-
 import {
   saveMessage,
   saveThreadMessage,
 } from "../controllers/message.controller";
-import { setSocket, getSocket, setIO, getIO } from "./data";
+
+import { _updateOneById } from "../controllers/user.controller";
+import { getLastActiveUrl, emitOnlineStatus } from './helpers';
+import { setSocket, getSocket, setIO, getIO, removeSocket } from "./data";
 
 function welcomeMessage(socket) {
   try {
@@ -77,15 +79,35 @@ async function onThreadMessage(socket, msg) {
 function onTyping(socket, msg) {
   try {
     const { active, sender, onReceiver, receiver } = msg;
-    const message = active ? `<b>${sender}</b> is typing ...` : null;
-    socket.to(receiver).emit("typing", { ...msg, message });
+    if(onReceiver === "user"){
+      const socket = getSocket(receiver);
+      if(socket){
+        const IO = getIO();
+        const socketId = socket.id;
+        const message = active ? `<b>${sender}</b> is typing ...` : null;
+        IO.to(socketId).emit("typing", { ...msg, message });
+      }
+    } else {
+      const message = active ? `<b>${sender}</b> is typing ...` : null;
+      socket.to(receiver).emit("typing", { ...msg, message });
+    }
   } catch (err) {
     console.log(err);
   }
 }
 
-function onDisconnect(socket) {
-  console.log("Disconnected:", socket);
+async function onDisconnect(reason, socket) {
+  removeSocket(socket);
+  const user = await _updateOneById(socket.uuid, { status: "offline" });
+  if(user && !user.error) {
+    emitOnlineStatus(user);
+  }
+  console.log("Disconnected:", reason);
+}
+
+
+function onUserLogout(uuid) {
+  removeSocket({ uuid });
 }
 
 function onError(error) {
@@ -96,35 +118,32 @@ function onChat(socket, msg) {
   socket.emit("chat", msg);
 }
 
-// this function is called when user sign in
-// or signin user refresh or visits the chat page
-function joinUserToAllRoomsAndGroups(args) {
-  const { socket, payload, callback } = args;
-  const { roomsAndGroups, id } = payload;
-  setSocket(id, socket);
-  roomsAndGroups.forEach((id) => socket.join(id));
-  if(callback) callback();
+function handleUserRegistration(socket, user, callback){
+  setSocket(user, socket);
+  const { rooms, groups } = user;
+  if(rooms.length || groups.length) {
+    const roomsAndGroups = [
+      ...rooms.map(({ room }) => room.id),
+      ...groups.map(({ group }) => group.id),
+    ];
+    roomsAndGroups.forEach(id => socket.join(id));
+  }
+  callback && callback(getLastActiveUrl(user))
 }
 
 const handleConnection = (io, socket) => {
   // everytime new user joins update the global io as well
   setIO(io);
-
+  console.log("connected")
   socket.on("chat", (msg) => onChat(socket, msg));
   socket.on("typing", (msg) => onTyping(socket, msg));
   socket.on("message", (msg) => onMessage(socket, msg));
   socket.on("thread", (msg) => onThreadMessage(socket, msg));
   socket.on("join", (msg) => onJoin(socket, msg));
-  socket.on("joinUserToAllRoomsAndGroups", (payload, callback) =>
-    joinUserToAllRoomsAndGroups({socket, payload, callback})
-  );
-  // this event fires when user sign up
-  socket.on("registerUsersSocket", (uuid, callback) => {
-    setSocket(uuid, socket);
-    callback()
-  })
+  socket.on("registerUserForSocket", (user, callback) => handleUserRegistration(socket, user, callback))
   socket.on("error", onError);
-  socket.on("disconnect", onDisconnect);
+  socket.on("disconnect", (reason) => onDisconnect(reason, socket));
+  socket.on("logout", (uuid) => onUserLogout(uuid));
 };
 
 module.exports = (io) =>

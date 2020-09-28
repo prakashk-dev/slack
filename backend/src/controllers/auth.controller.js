@@ -1,6 +1,6 @@
 import User from "../models/user.model";
 import { createCookie, createToken, logger } from "../helpers";
-import { sendOnlineStatus } from "../controllers/user.controller";
+import { emitOnlineStatus } from "../socket/helpers";
 
 const getRandomInteger = (min = 1, max = 9999) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -58,7 +58,7 @@ const login = async (req, res) => {
               });
             }
             // if user has friends, send socket info as online
-            sendOnlineStatus(user);
+            emitOnlineStatus(user);
             // don't send these fields to client
             user = user.toJSON();
             delete user.password;

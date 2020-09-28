@@ -41,40 +41,32 @@ const useWindowSize = () => {
   return size;
 };
 
-const publicStates = ["/signup", "/login"];
 
 const Root = () => {
   const [width, height] = useWindowSize();
+  const Joined = useRef(false);
   const {
     state,
     changeLayout,
     initialiseSocket,
     fetchAuthUser,
-    fetchConfig,
     setDevice,
-    toggleGlobals,
   } = useContext(AppContext);
+
 
   useEffect(() => {
     const device = isMobile() ? "mobile" : "desktop";
+    const socket = handleSocketConnection();
     setDevice(device);
-
-    // if token found, validate token
-
-    // if valid token
-    // 1. register for sockets
-    // 2. Join user to rooms and groups
-
-    // if not valid
-    // Redirect them to login page
 
     if (Cookies.get("token")) {
       fetchAuthUser();
     } else {
-      publicStates.includes(location.pathname)
-        ? navigate(location.pathname)
-        : navigate("/signup");
+      const publicStates = ["/login", "/signup"];
+      navigate(publicStates.includes(location.pathname) ? location.pathname : "/signup");
     }
+    console.log("Should have a user", state.user)
+    return () => socket.disconnect();
   }, []);
 
   useEffect(() => {
@@ -84,23 +76,44 @@ const Root = () => {
   }, [state.style.device, width, height]);
 
   useEffect(() => {
-    const { SOCKET_URL } = state.config.data;
-    if (SOCKET_URL) {
-      toggleGlobals({ loading: false });
-      const socket = io.connect(SOCKET_URL);
-      initialiseSocket(socket);
-      logger(socket);
-
-      return () => socket.disconnect();
-    } else {
-      fetchConfig();
+    const { socket, user } = state;
+    // if socket changes, make sure to change joined.current = false
+    if(!socket && Joined.current){
+      Joined.current = false;
     }
-  }, [state.config.data]);
+    // do not join everytime user data changed, this should be only one time event
+    if(socket && user.data && !Joined.current){
+      Joined.current = true;
+      socket.emit("registerUserForSocket", user.data, (config) => {
+        const { sub, id } = config;
+        navigate(`/chat/${sub}/${id}`);
+      });
+    }
+  }, [state.socket, state.user.data])
+
+
+  const handleSocketConnection = () => {
+    const { SOCKET_URL } = state.config.data;
+    const socket = io.connect(SOCKET_URL);
+    logger(socket);
+    return socket;
+  }
 
   const logger = (socket) => {
-    socket.on("connect", () => console.log("Connected"));
-    socket.on("disconnect", (reason) => console.log("Disconnected: ", reason));
-    socket.on("error", (error) => console.log("Errors:", error));
+    socket.on("connect", () => {
+      initialiseSocket(socket);
+      console.log("Connected")
+    });
+    socket.on("disconnect", (reason) => {
+      initialiseSocket(null);
+      console.log("Disconnected: ", reason);
+    });
+
+    socket.on("error", (error) => {
+      initialiseSocket(null);
+      console.log("Errors:", error);
+    });
+
     socket.on("reconnect_attempt", () => {
       console.log("Reconnecting");
     });
@@ -109,7 +122,7 @@ const Root = () => {
   // if token is found, wait for user to resolved and stocket
   if (Cookies.get("token") && (state.user.loading || !state.socket)) {
     return <Loading />;
-  } 
+  }
 
   return (
     <>

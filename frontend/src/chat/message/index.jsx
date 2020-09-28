@@ -47,7 +47,7 @@ const Message = ({ receiver, onReceiver }) => {
   } = useContext(AppContext);
   const divRef = useRef(null);
   const inputRef = useRef(null);
-  const [typing, setTyping] = useState(null);
+  const [typingMessage, setTypingMessage] = useState(null);
   const [file, setFile] = useState(null);
   const { user, socket, style, messages } = state;
   const [notification, setNotification] = useState(null);
@@ -131,7 +131,7 @@ const Message = ({ receiver, onReceiver }) => {
         onReceiver,
         active: false,
       });
-      setTyping(null);
+      setTypingMessage(null);
     }
   }, [message]);
 
@@ -143,7 +143,8 @@ const Message = ({ receiver, onReceiver }) => {
   };
 
   const handleTypingEvent = (msg) => {
-    setTyping(msg);
+    const showMessage = onReceiver === "user" ? msg.sender === receiver.username : msg.receiver === receiver.id;
+    showMessage && setTypingMessage(msg.message);
   };
 
   const scrollToButton = () => {
@@ -397,10 +398,7 @@ const Message = ({ receiver, onReceiver }) => {
                 <div
                   className="typing"
                   dangerouslySetInnerHTML={{
-                    __html:
-                      typing && typing.receiver === receiver.id
-                        ? typing.message
-                        : null,
+                    __html: typingMessage
                   }}
                 ></div>
               </div>
