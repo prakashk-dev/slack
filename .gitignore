@@ -5,6 +5,7 @@ backend/.env
 
 # frontend
 frontend/dist
+frontend/.env
 frontend/.cache
 frontend/.parcel/cache
 frontend/public/js
@@ -12,6 +13,7 @@ frontend/public/js
 
 #root
 .env
+.env.prod
 .env.test
 *.DS_Store
 */node_modules

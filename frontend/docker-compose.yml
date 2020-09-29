@@ -1,25 +1,12 @@
-version: "3.4"
+version: "3.7"
 
 services:
-  development:
-    build: .
-    image: frontend_development
-    container_name: frontend_development
-    volumes:
-      - .:/usr/app
-      - /usr/app/node_modules # do not override container node_modules by host node_modules
-    ports:
-      - 3000:3000
-    environment:
-      - NODE_ENV=development
-
-  production:
+  frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.prod
-    image: frontend_production
-    container_name: frontend_production
-    ports:
-      - 4000:80
-    environment:
-      - NODE_ENV=production
+        context: .
+        target: production
+        # for production, these should be available as args as webpack can not access these variable after prod build
+        args:
+            - SOCKET_URL=$SOCKET_URL
+    image: docker.prakashk.com/network/frontend:master
+    env_file: .env

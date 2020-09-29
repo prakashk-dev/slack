@@ -1,9 +1,10 @@
-version: "3.4"
+version: "3.7"
 
 services:
     frontend:
         build:
             context: ./frontend
+            target: development
         image: frontend_dev
         container_name: frontend_dev
         volumes:
@@ -18,9 +19,11 @@ services:
             - backend:backend
         depends_on:
             - backend
+
     backend:
         build:
             context:  ./backend
+            target: development
         image: backend_dev
         container_name: backend_dev
         volumes:
@@ -30,18 +33,12 @@ services:
             - 3001:8080
             - 9229:9229 # inspect port
         env_file: .env
-        environment:
-            - MONGO_HOST=mongo
-            - MONGO_PORT=$MONGO_PORT
-            - MONGO_USERNAME=$MONGO_USERNAME
-            - MONGO_PASSWORD=$MONGO_PASSWORD
-            - MONGO_DB=$MONGO_DB
-            - FORCE_COLOR=1
         links:
-            - mongo:mongo
+            - mongo
         depends_on: 
             - mongo
         command: /usr/app/docker/wait-for.sh $MONGO_HOST:$MONGO_PORT -- npm run dev
+
     mongo:
         image: "mongo:4.2"
         env_file: .env

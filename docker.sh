@@ -6,7 +6,15 @@ DOCKER_REPO=${DOCKER_REPO:-docker.prakashk.com}
 build-container() {
     echo ${PROJECT_NAME}/network revision $( git describe --tags ) built $( date ) > backend/version
     echo From $( git show -s --format=%H ) on $( git log -1 --format=%cd --date=local ) >> backend/version
-    docker-compose -f docker-compose.prod.yaml build --no-cache
+    
+    echo "building backend containers"
+    pushd backend;
+    docker-compose build --no-cache;
+    popd
+    echo "building frontend containers"
+    pushd frontend;
+    docker-compose build --no-cache
+    popd
 
 }
 # Promote one tag to another
@@ -40,14 +48,6 @@ case $CMD in
 
     push)
         push-image "$1"
-        ;;
-
-    pull)
-        docker-compose  -f docker-compose.prod.yaml  pull
-        ;;
-
-    run)
-        docker-compose  -f docker-compose.prod.yaml  up -d
         ;;
 
     make-release)
