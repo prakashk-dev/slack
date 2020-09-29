@@ -63,7 +63,7 @@ const DEFAULT_STATE = {
   },
   messages: [],
   config: {
-    data: { SOCKET_URL: process.env.SOCKET_URL, env: process.env.NODE_ENV },
+    data: { SOCKET_URL: APP_CONFIG.SOCKET_URL, env: APP_CONFIG.NODE_ENV },
     error: null,
     loading: true,
   },

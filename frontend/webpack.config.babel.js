@@ -4,30 +4,28 @@ import path from "path";
 import webpack from "webpack";
 import merge from "webpack-merge";
 import HtmlWebpackPlugin from "html-webpack-plugin";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import TerserWebpackPlugin from "terser-webpack-plugin";
+import OptimizeCssAssetsPlugin from "optimize-css-assets-webpack-plugin";
 
 const resolveRoot = (...args) => path.join(__dirname, ...args);
 const resolveSrc = () => resolveRoot("src");
-const isDev = process.env.NODE_ENV || "development";
+const env = process.env.NODE_ENV || "production";
 
 const config = {
   entry: resolveSrc(),
-  output: {
-    path: resolveRoot("public"),
-    filename: "js/bundle-[hash].js",
-    publicPath: "/",
-  },
   module: {
     rules: [
       {
         test: /\.jsx?$/,
         include: resolveSrc(),
-        exclude: resolveRoot("node_modules"),
+        exclude: /node_modules/,
         use: "babel-loader",
       },
       {
         test: /\.s[ac]ss$/,
         include: resolveSrc(),
-        exclude: resolveRoot("node_modules"),
+        exclude: /node_modules/,
         use: ["style-loader", "css-loader", "sass-loader"],
       },
       {
@@ -43,7 +41,7 @@ const config = {
 
   resolve: {
     modules: ["node_modules", resolveSrc()],
-    extensions: [".js", ".jsx", ".json", ".css", "./scss"],
+    extensions: [".js", ".jsx", ".json", ".css", ".scss"],
     alias: {
       "react-dom": "@hot-loader/react-dom", // this is for a hook support, replace with fast-refresh once webpack supports it
       src: resolveSrc(),
@@ -55,12 +53,20 @@ const config = {
       template: resolveRoot("public", "index.html"),
     }),
     new webpack.DefinePlugin({
-      "process.env": JSON.stringify(process.env)
+      APP_CONFIG: JSON.stringify({
+        SOCKET_URL: process.env.SOCKET_URL,
+        NODE_ENV: process.env.NODE_ENV
+      })
     })
   ],
 };
 
 const dev = merge(config, {
+  output: {
+    path: resolveRoot("public"),
+    filename: "js/[name].[hash].js",
+    publicPath: "/",
+  },
   devtool: "cheap-module-inline-source-map",
   mode: "development",
   devServer: {
@@ -78,14 +84,57 @@ const dev = merge(config, {
     overlay: true,
   },
   plugins: [new webpack.HotModuleReplacementPlugin()],
+  // separate vendor bundle to a separate file
+  optimization: {
+    splitChunks: {
+      chunks: "all"
+    }
+  }
 });
 
 const prod = merge(config, {
-  devtool: "source-map",
+  devtool: "nosources-source-map",
   mode: "production",
+  output: {
+    publicPath: resolveRoot("public"),
+    filename: "js/[name].[contentHash:8].min.js",
+    publicPath: "/"
+  },
+  module:{
+    rules: [{
+        test: /\.s[ac]ss$/,
+        include: resolveSrc(),
+        exclude: /node_modules/,
+        use: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"],
+      }],
+  },
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: "css/[name].[contentHash:8].min.css"
+    }),
+  ],
+  optimization: {
+    minimize: true,
+    runtimeChunk: "single",
+    moduleIds: "hashed",
+    splitChunks: {
+      chunks: "all"
+    },
+    minimizer: [
+      new TerserWebpackPlugin({
+        terserOptions: {
+          output: {
+            comments: false
+          }
+        },
+        sourceMap: true,
+        parallel: true,
+        extractComments: false
+      }),
+      new OptimizeCssAssetsPlugin()
+    ]
+  }
 });
 
-console.log("Application is running on port 3000");
-console.log(`Env: ${process.env.NODE_ENV}`);
 
-export default isDev ? dev : prod;
+export default env === "development" ? dev : prod;

@@ -65,7 +65,6 @@ const Root = () => {
       const publicStates = ["/login", "/signup"];
       navigate(publicStates.includes(location.pathname) ? location.pathname : "/signup");
     }
-    console.log("Should have a user", state.user)
     return () => socket.disconnect();
   }, []);
 
